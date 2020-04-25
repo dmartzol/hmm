@@ -28,17 +28,27 @@ CREATE TABLE accounts (
     id BIGSERIAL PRIMARY KEY,
     first_name VARCHAR NOT NULL,
     last_name VARCHAR NOT NULL,
-    suffix VARCHAR DEFAULT NULL,
-    dob TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    dob date NOT NULL,
     gender VARCHAR(1) DEFAULT NULL,
-    phone_number_id BIGINT,
     role_id BIGINT REFERENCES roles (id),
     active BOOLEAN NOT NULL DEFAULT TRUE,
     email CITEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
+    phone_number VARCHAR(20) UNIQUE DEFAULT NULL,
+    passhash TEXT NOT NULL,
     failed_login_attempts INT DEFAULT 0,
     door_code VARCHAR DEFAULT NULL,
     external_payment_customer_id INT DEFAULT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE confirmation_codes (
+    id BIGSERIAL PRIMARY KEY,
+    "type" NUMERIC NOT NULL, -- email or phone number
+    account_id BIGINT REFERENCES accounts (id) NOT NULL,
+    confirmed_at TIMESTAMP DEFAULT NULL,
+    confirmation_code VARCHAR NOT NULL,
+    code_expiration_date TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -70,14 +80,6 @@ CREATE TABLE sessions (
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
     expiration_date TIMESTAMP NOT NULL,
     token VARCHAR UNIQUE NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE phone_numbers (
-    id BIGSERIAL PRIMARY KEY,
-    account_id BIGINT REFERENCES accounts (id) NOT NULL,
-    phone VARCHAR(20) NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// DB represents the database
 type DB struct {
 	*sqlx.DB
 }
@@ -27,8 +28,8 @@ const (
 // Row represents a database row
 type Row struct {
 	ID        int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 func init() {
@@ -116,4 +117,20 @@ func (db *DB) AccountWithCredentials(email, allegedPassword string) (*Account, e
 		return nil, err
 	}
 	return &a, nil
+}
+
+// CreateAccount creates a new account in the db
+func (db *DB) CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*Account, error) {
+	tx, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	var a Account
+	sqlQuery := `insert into accounts (first_name, last_name, dob, gender, phone_number, email, passhash) values ($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8))) returning *`
+	err = tx.Get(&a, sqlQuery, first, last, dob, gender, phone, email, password)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return &a, tx.Commit()
 }

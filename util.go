@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"os"
 	"strconv"
@@ -27,4 +28,21 @@ func GetEnvInt(key string, fallback int) int {
 		return fallback
 	}
 	return p
+}
+
+func NewNullString(s *string) sql.NullString {
+	if s == nil {
+		return sql.NullString{}
+	}
+	if len(*s) == 0 {
+		return sql.NullString{}
+	}
+	return sql.NullString{String: *s, Valid: true}
+}
+
+func NewNullInt(i *int64) sql.NullInt64 {
+	if i == nil {
+		return sql.NullInt64{}
+	}
+	return sql.NullInt64{Int64: *i, Valid: true}
 }
