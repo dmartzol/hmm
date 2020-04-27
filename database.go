@@ -111,7 +111,7 @@ func (db *DB) EmailExists(email string) (bool, error) {
 // AccountWithCredentials returns an account if the email and password provided match an (email,password) pair in the db
 func (db *DB) AccountWithCredentials(email, allegedPassword string) (*Account, error) {
 	var a Account
-	sqlQuery := `select * from accounts a where a.email = $1 and a.password = crypt($2, a.password))`
+	sqlQuery := `select * from accounts a where a.email = $1 and a.passhash = crypt($2, a.passhash)`
 	err := db.Get(&a, sqlQuery, email, allegedPassword)
 	if err != nil {
 		return nil, err

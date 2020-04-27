@@ -7,3 +7,4 @@
 - [ ] use PasswordStrength() to check password strength: https://github.com/nbutton23/zxcvbn-go
 https://stackoverflow.com/questions/48345922/reference-password-validation
 - [ ] https://ux.stackexchange.com/questions/110321/what-would-be-best-layout-for-registration-form-containing-14-input-fields
+- [ ] Forgot password message: "If the account exists, an email will be sent with recovery details."

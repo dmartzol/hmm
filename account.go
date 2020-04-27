@@ -77,30 +77,42 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("ReadAll: %+v", err)
+		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	var info registerRequest
 	err = json.Unmarshal(body, &info)
 	if err != nil {
-		log.Printf("Unmarshal: %+v", err)
+		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	exists, err := db.EmailExists(info.Email)
+	if err != nil {
+		log.Printf("%+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if exists {
+		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
+		err = fmt.Errorf("email '%s' already registered", info.Email)
+		log.Printf("%+v", err)
+		http.Error(w, fmt.Sprintf("email '%s' alrady exists", info.Email), http.StatusConflict)
 		return
 	}
 	err = info.validate()
 	if err != nil {
-		log.Printf("validate: %+v", err)
+		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 	parsedDOB, err := time.Parse(layoutISO, info.DOB)
 	if err != nil {
-		log.Printf("time.Parse %s: %+v", info.DOB, err)
+		log.Printf("%s: %+v", info.DOB, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
 	a, err := db.CreateAccount(
 		info.FirstName,
 		info.LastName,
@@ -111,12 +123,31 @@ func register(w http.ResponseWriter, r *http.Request) {
 		info.PhoneNumber,
 	)
 	if err != nil {
-		log.Printf("CreateAccount: %+v", err)
+		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+
+	// create session and cookie
+	s, err := db.CreateSession(a.ID, time.Now().Add(time.Minute*SessionLimit), uuid.New().String())
+	if err != nil {
+		log.Printf("%+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	cookie, err := r.Cookie("session")
+	if err != nil {
+		log.Printf("Cookie: %+v", err)
+		cookie = &http.Cookie{
+			Name:  "session",
+			Value: s.Token,
+		}
+		http.SetCookie(w, cookie)
+	}
+
 	// Create email confirmation code and send email
-	json.NewEncoder(w).Encode(a)
+
+	json.NewEncoder(w).Encode(s)
 }
 
 type loginCredentials struct {
@@ -132,14 +163,14 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("ReadAll: %+v", err)
+		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	var credentials loginCredentials
 	err = json.Unmarshal(body, &credentials)
 	if err != nil {
-		log.Printf("Unmarshal: %+v", err)
+		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -147,8 +178,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 	// fetching account with credentials(errors reurned should be purposedly broad)
 	registered, err := db.EmailExists(credentials.Email)
 	if err != nil {
-		log.Printf("EmailExists: %+v", err)
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		log.Printf("%+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	if !registered {
@@ -158,16 +189,16 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 	a, err := db.AccountWithCredentials(credentials.Email, credentials.Password)
 	if err != nil {
-		log.Printf("AccountWithCredentials: %+v", err)
+		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
 	credentials.Password = ""
 
 	// create session and cookie
-	s, err := db.CreateSession(a.ID, time.Now().Add(time.Minute*5), uuid.New().String())
+	s, err := db.CreateSession(a.ID, time.Now().Add(time.Minute*SessionLimit), uuid.New().String())
 	if err != nil {
-		log.Printf("CreateSession: %+v", err)
+		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
