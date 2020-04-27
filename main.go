@@ -55,6 +55,7 @@ func main() {
 	// accounts
 	r.Post("/account", register)
 
+	log.Print("ListenAndServe")
 	log.Fatal(http.ListenAndServe("localhost:8080", r))
 
 }

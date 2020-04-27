@@ -77,13 +77,13 @@ func dbConfig() databaseConfig {
 
 // SessionFromToken fetches a session from a given token
 func (db *DB) SessionFromToken(token string) (*Session, error) {
-	var s *Session
+	var s Session
 	sqlQuery := `select * from sessions where token = $1`
-	err := db.Get(s, sqlQuery, token)
+	err := db.Get(&s, sqlQuery, token)
 	if err != nil {
 		return nil, err
 	}
-	return s, nil
+	return &s, nil
 }
 
 // CreateSession creates a new session

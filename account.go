@@ -129,7 +129,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create session and cookie
-	s, err := db.CreateSession(a.ID, time.Now().Add(time.Minute*SessionLimit), uuid.New().String())
+	s, err := db.CreateSession(a.ID, time.Now().UTC().Add(time.Minute*SessionLimit), uuid.New().String())
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -196,7 +196,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	credentials.Password = ""
 
 	// create session and cookie
-	s, err := db.CreateSession(a.ID, time.Now().Add(time.Minute*SessionLimit), uuid.New().String())
+	s, err := db.CreateSession(a.ID, time.Now().UTC().Add(time.Minute*SessionLimit), uuid.New().String())
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -223,7 +223,7 @@ func alreadyLoggedIn(r *http.Request) bool {
 	if err != nil {
 		return false
 	}
-	if s.ExpirationDate.Before(time.Now()) {
+	if s.ExpirationDate.Before(time.Now().UTC()) {
 		return false
 	}
 	return true
