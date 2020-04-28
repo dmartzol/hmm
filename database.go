@@ -75,11 +75,11 @@ func dbConfig() databaseConfig {
 	return config
 }
 
-// SessionFromToken fetches a session from a given token
-func (db *DB) SessionFromToken(token string) (*Session, error) {
+// SessionFromIdentifier fetches a session from a given its identifier
+func (db *DB) SessionFromIdentifier(identifier string) (*Session, error) {
 	var s Session
-	sqlQuery := `select * from sessions where token = $1`
-	err := db.Get(&s, sqlQuery, token)
+	sqlQuery := `select * from sessions where session_id = $1`
+	err := db.Get(&s, sqlQuery, identifier)
 	if err != nil {
 		return nil, err
 	}
@@ -87,14 +87,27 @@ func (db *DB) SessionFromToken(token string) (*Session, error) {
 }
 
 // CreateSession creates a new session
-func (db *DB) CreateSession(accountID int64, expiry time.Time, token string) (*Session, error) {
+func (db *DB) CreateSession(accountID int64) (*Session, error) {
 	var s Session
-	sqlQuery := `insert into sessions (account_id, expiration_date, token) values ($1, $2, $3) returning *`
-	err := db.Get(&s, sqlQuery, accountID, expiry, token)
+	sqlQuery := `insert into sessions (account_id) values ($1) returning *`
+	err := db.Get(&s, sqlQuery, accountID)
 	if err != nil {
 		return nil, err
 	}
 	return &s, nil
+}
+
+// UpdateSession sets the current timestamp
+func (db *DB) UpdateSession(identifier string) (*Session, error) {
+	tx, err := db.Beginx()
+	var s Session
+	sqlQuery := `update sessions set last_activity=default where session_id = $1 returning *`
+	err = tx.Get(&s, sqlQuery, identifier)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return &s, tx.Commit()
 }
 
 // EmailExists returns true if the provided email exists in the db

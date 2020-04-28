@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 // Account represents a user account
@@ -129,21 +127,19 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create session and cookie
-	s, err := db.CreateSession(a.ID, time.Now().UTC().Add(time.Minute*SessionLimit), uuid.New().String())
+	s, err := db.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		log.Printf("Cookie: %+v", err)
-		cookie = &http.Cookie{
-			Name:  "session",
-			Value: s.Token,
-		}
-		http.SetCookie(w, cookie)
+
+	cookie := &http.Cookie{
+		Name:   "session",
+		Value:  s.SessionIdentifier,
+		MaxAge: sessionLength,
 	}
+	http.SetCookie(w, cookie)
 
 	// Create email confirmation code and send email
 
@@ -196,21 +192,18 @@ func login(w http.ResponseWriter, r *http.Request) {
 	credentials.Password = ""
 
 	// create session and cookie
-	s, err := db.CreateSession(a.ID, time.Now().UTC().Add(time.Minute*SessionLimit), uuid.New().String())
+	s, err := db.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		log.Printf("Cookie: %+v", err)
-		cookie = &http.Cookie{
-			Name:  "session",
-			Value: s.Token,
-		}
-		http.SetCookie(w, cookie)
+	cookie := &http.Cookie{
+		Name:   "session",
+		Value:  s.SessionIdentifier,
+		MaxAge: sessionLength,
 	}
+	http.SetCookie(w, cookie)
 	json.NewEncoder(w).Encode(s)
 }
 
@@ -219,11 +212,8 @@ func alreadyLoggedIn(r *http.Request) bool {
 	if err != nil {
 		return false
 	}
-	s, err := db.SessionFromToken(c.Value)
+	_, err = db.UpdateSession(c.Value)
 	if err != nil {
-		return false
-	}
-	if s.ExpirationDate.Before(time.Now().UTC()) {
 		return false
 	}
 	return true
