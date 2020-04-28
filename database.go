@@ -78,8 +78,8 @@ func dbConfig() databaseConfig {
 // SessionFromIdentifier fetches a session from a given its identifier
 func (db *DB) SessionFromIdentifier(identifier string) (*Session, error) {
 	var s Session
-	sqlQuery := `select * from sessions where session_id = $1`
-	err := db.Get(&s, sqlQuery, identifier)
+	sqlStatement := `select * from sessions where session_id = $1`
+	err := db.Get(&s, sqlStatement, identifier)
 	if err != nil {
 		return nil, err
 	}
@@ -89,20 +89,53 @@ func (db *DB) SessionFromIdentifier(identifier string) (*Session, error) {
 // CreateSession creates a new session
 func (db *DB) CreateSession(accountID int64) (*Session, error) {
 	var s Session
-	sqlQuery := `insert into sessions (account_id) values ($1) returning *`
-	err := db.Get(&s, sqlQuery, accountID)
+	sqlStatement := `insert into sessions (account_id) values ($1) returning *`
+	err := db.Get(&s, sqlStatement, accountID)
 	if err != nil {
 		return nil, err
 	}
 	return &s, nil
 }
 
+// DeleteSession deletes the session with the given identifier
+func (db *DB) DeleteSession(identifier string) error {
+	sqlStatement := `delete from sessions where session_id = $1`
+	res, err := db.Exec(sqlStatement, identifier)
+	if err != nil {
+		return err
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count != 1 {
+		return fmt.Errorf("%d rows affected by DeleteSession", count)
+	}
+	fmt.Println(count)
+	return nil
+}
+
+// CleanSessionsOlderThan deletes all sessions older than age(in seconds) and returns the number of rows affected
+func (db *DB) CleanSessionsOlderThan(age time.Duration) (int64, error) {
+	t := time.Now().Add(-age * time.Second)
+	sqlStatement := `delete from sessions where last_activity < $1`
+	res, err := db.Exec(sqlStatement, t)
+	if err != nil {
+		return -1, err
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return -1, err
+	}
+	return count, nil
+}
+
 // UpdateSession sets the current timestamp
 func (db *DB) UpdateSession(identifier string) (*Session, error) {
 	tx, err := db.Beginx()
 	var s Session
-	sqlQuery := `update sessions set last_activity=default where session_id = $1 returning *`
-	err = tx.Get(&s, sqlQuery, identifier)
+	sqlStatement := `update sessions set last_activity=default where session_id = $1 returning *`
+	err = tx.Get(&s, sqlStatement, identifier)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -113,8 +146,8 @@ func (db *DB) UpdateSession(identifier string) (*Session, error) {
 // EmailExists returns true if the provided email exists in the db
 func (db *DB) EmailExists(email string) (bool, error) {
 	var exists bool
-	sqlQuery := `select exists(select 1 from accounts a where a.email = $1)`
-	err := db.Get(&exists, sqlQuery, email)
+	sqlStatement := `select exists(select 1 from accounts a where a.email = $1)`
+	err := db.Get(&exists, sqlStatement, email)
 	if err != nil {
 		return false, err
 	}
@@ -124,8 +157,8 @@ func (db *DB) EmailExists(email string) (bool, error) {
 // AccountWithCredentials returns an account if the email and password provided match an (email,password) pair in the db
 func (db *DB) AccountWithCredentials(email, allegedPassword string) (*Account, error) {
 	var a Account
-	sqlQuery := `select * from accounts a where a.email = $1 and a.passhash = crypt($2, a.passhash)`
-	err := db.Get(&a, sqlQuery, email, allegedPassword)
+	sqlStatement := `select * from accounts a where a.email = $1 and a.passhash = crypt($2, a.passhash)`
+	err := db.Get(&a, sqlStatement, email, allegedPassword)
 	if err != nil {
 		return nil, err
 	}
@@ -139,8 +172,8 @@ func (db *DB) CreateAccount(first, last, email, password string, dob time.Time, 
 		return nil, err
 	}
 	var a Account
-	sqlQuery := `insert into accounts (first_name, last_name, dob, gender, phone_number, email, passhash) values ($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8))) returning *`
-	err = tx.Get(&a, sqlQuery, first, last, dob, gender, phone, email, password)
+	sqlStatement := `insert into accounts (first_name, last_name, dob, gender, phone_number, email, passhash) values ($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8))) returning *`
+	err = tx.Get(&a, sqlStatement, first, last, dob, gender, phone, email, password)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
