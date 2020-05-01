@@ -76,11 +76,9 @@ func authMiddleware(next http.Handler) http.Handler {
 		}
 		c, err := r.Cookie(hackerSpaceCookieName)
 		if err != nil {
-			if err == http.ErrNoCookie {
-				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-				return
+			if err != http.ErrNoCookie {
+				log.Printf("cookie: %+v", err)
 			}
-			log.Printf("cookie: %+v", err)
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
