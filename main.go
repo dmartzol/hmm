@@ -5,12 +5,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/gorilla/mux"
 )
 
 const (
-	apiVersion = "0.0.1"
+	apiVersion            = "0.0.1"
+	hackerSpaceCookieName = "HackerSpace-Cookie"
 )
 
 const (
@@ -40,22 +41,55 @@ func index(w http.ResponseWriter, r *http.Request) {
 func main() {
 	log.SetFlags(LstdFlags)
 
-	r := chi.NewRouter()
+	r := mux.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(authMiddleware)
 
-	r.Get("/", index)
-	r.Get("/version", version)
+	r.HandleFunc("/", index).Methods("GET")
+	r.HandleFunc("/version", version).Methods("GET")
 
 	// sessions
 	// see: https://stackoverflow.com/questions/7140074/restfully-design-login-or-register-resources
-	r.Post("/session", login)
-	r.Delete("/session", logout)
+	r.HandleFunc("/sessions", login).Methods("POST")
+	r.HandleFunc("/sessions/{id}", logout).Methods("DELETE")
 
 	// accounts
-	r.Post("/account", register)
+	r.HandleFunc("/accounts", register).Methods("POST")
+	r.HandleFunc("/accounts/{id}", getAccount).Methods("GET")
 
-	log.Print("ListenAndServe")
+	log.Print("listening and serving")
 	log.Fatal(http.ListenAndServe("localhost:8080", r))
+}
 
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ss := map[string]string{
+			"/version":  "GET",
+			"/sessions": "POST",
+			"/accounts": "POST",
+		}
+		method, in := ss[r.RequestURI]
+		if in && method == r.Method {
+			next.ServeHTTP(w, r)
+			return
+		}
+		c, err := r.Cookie(hackerSpaceCookieName)
+		if err != nil {
+			if err == http.ErrNoCookie {
+				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				return
+			}
+			log.Printf("cookie: %+v", err)
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		_, err = db.UpdateSession(c.Value)
+		if err != nil {
+			log.Printf("UpdateSession: %+v", err)
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

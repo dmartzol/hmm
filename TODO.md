@@ -1,6 +1,5 @@
 # TODO
 
-- [ ] Check if I'm using reserved words in Postgresql or using quotations for not reserved words
 - [ ] Error wrapping
 - [ ] Add Row fields in query db table
 - [ ] validate emails with https://github.com/badoux/checkmail/blob/master/checkmail.go
@@ -11,3 +10,5 @@ https://stackoverflow.com/questions/48345922/reference-password-validation
 - [ ] sessions: https://stackoverflow.com/questions/21680359/postgresql-create-access-token-on-insert/21684011#21684011
 - [ ] job than runs CleanSessionsOlderThan() every week?
 - [ ] do not return sensitive info (session structures, account structs, etc)
+- [ ] Parameters: https://stackoverflow.com/questions/4024271/rest-api-best-practices-where-to-put-parameters
+- [ ] excluding from middleware: https://stackoverflow.com/questions/47957988/middleware-on-a-specific-route

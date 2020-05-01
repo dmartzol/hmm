@@ -27,10 +27,6 @@ type loginCredentials struct {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	if alreadyLoggedIn(r) {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -74,7 +70,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cookie := &http.Cookie{
-		Name:   "session",
+		Name:   hackerSpaceCookieName,
 		Value:  s.SessionIdentifier,
 		MaxAge: sessionLength,
 	}
@@ -82,20 +78,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(s)
 }
 
-func alreadyLoggedIn(r *http.Request) bool {
-	c, err := r.Cookie("session")
-	if err != nil {
-		return false
-	}
-	_, err = db.UpdateSession(c.Value)
-	if err != nil {
-		return false
-	}
-	return true
-}
-
 func logout(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("session")
+	c, err := r.Cookie(hackerSpaceCookieName)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -108,7 +92,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c = &http.Cookie{
-		Name:   "session",
+		Name:   hackerSpaceCookieName,
 		Value:  "",
 		MaxAge: -1,
 	}

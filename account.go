@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 // Account represents a user account
@@ -69,10 +71,6 @@ func validEmail(email string) bool {
 }
 
 func register(w http.ResponseWriter, r *http.Request) {
-	if alreadyLoggedIn(r) {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("%+v", err)
@@ -144,4 +142,16 @@ func register(w http.ResponseWriter, r *http.Request) {
 	// Create email confirmation code and send email
 
 	json.NewEncoder(w).Encode(s)
+}
+
+func getAccount(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, ok := params["id"]
+	if !ok {
+		err := fmt.Errorf("param 'id' not found")
+		log.Printf("%+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("%+v", id)
 }
