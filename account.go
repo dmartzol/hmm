@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -146,12 +147,21 @@ func register(w http.ResponseWriter, r *http.Request) {
 
 func getAccount(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id, ok := params["id"]
+	idString, ok := params["id"]
 	if !ok {
-		err := fmt.Errorf("param 'id' not found")
-		log.Printf("%+v", err)
+		http.Error(w, "parameter 'id' not found", http.StatusBadRequest)
+		return
+	}
+	id, err := strconv.ParseInt(idString, 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
+		return
+	}
+	a, err := db.Account(id)
+	if err != nil {
+		log.Printf("Account: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("%+v", id)
+	json.NewEncoder(w).Encode(a)
 }

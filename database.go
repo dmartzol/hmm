@@ -154,6 +154,17 @@ func (db *DB) EmailExists(email string) (bool, error) {
 	return exists, nil
 }
 
+// Account fetches an account by id
+func (db *DB) Account(id int64) (*Account, error) {
+	var a Account
+	sqlStatement := `select * from accounts a where a.id = $1`
+	err := db.Get(&a, sqlStatement, id)
+	if err != nil {
+		return nil, err
+	}
+	return &a, nil
+}
+
 // AccountWithCredentials returns an account if the email and password provided match an (email,password) pair in the db
 func (db *DB) AccountWithCredentials(email, allegedPassword string) (*Account, error) {
 	var a Account
