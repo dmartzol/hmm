@@ -1,1 +1,1 @@
-# Fictional managing system for a Hackerspace
+# Fictional account managing system for a Hackerspace/Makerspace
