@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -17,7 +16,7 @@ const (
 type Session struct {
 	Row
 	AccountID         int64     `db:"account_id"`
-	LastActivity      time.Time `db:"last_activity"`
+	LastActivityTime  time.Time `db:"last_activity_time"`
 	SessionIdentifier string    `db:"session_id"`
 }
 
@@ -27,17 +26,10 @@ type loginCredentials struct {
 }
 
 func createSession(w http.ResponseWriter, r *http.Request) {
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
 	var credentials loginCredentials
-	err = json.Unmarshal(body, &credentials)
+	err := Unmarshal(r, &credentials)
 	if err != nil {
-		log.Printf("%+v", err)
+		log.Printf("Unmarshal: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -97,5 +89,5 @@ func deleteSession(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	}
 	http.SetCookie(w, c)
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	HTTPRespond(w, "Session deleted.", http.StatusOK)
 }

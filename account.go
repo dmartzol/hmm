@@ -16,16 +16,16 @@ import (
 // Account represents a user account
 type Account struct {
 	Row
-	FirstName           string `db:"first_name"`
-	LastName            string `db:"last_name"`
-	DOB                 time.Time
-	Gender              *string
-	Active              bool
-	FailedLoginAttempts int64   `db:"failed_login_attempts"`
-	DoorCode            *string `db:"door_code"`
-	PassHash            string
-	Email               string
-	PhoneNumber         *string `db:"phone_number"`
+	FirstName         string `db:"first_name"`
+	LastName          string `db:"last_name"`
+	DOB               time.Time
+	Gender            *string
+	Active            bool
+	FailedLoginsCount int64   `db:"failed_logins_count"`
+	DoorCode          *string `db:"door_code"`
+	PassHash          string
+	Email             string
+	PhoneNumber       *string `db:"phone_number"`
 
 	RoleID                    *int64 `db:"role_id"`
 	EmailID                   int64  `db:"email_id"`

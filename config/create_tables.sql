@@ -2,11 +2,11 @@
 \c hackerspace
 SET client_min_messages TO WARNING;
 
--- Trigger update updated_at column
-CREATE OR REPLACE FUNCTION update_updated_at_column()
+-- Trigger update update_time column
+CREATE OR REPLACE FUNCTION update_update_time_column()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = now();
+    NEW.update_time = now();
     return NEW;
 END;
 $$ LANGUAGE 'plpgsql';
@@ -21,8 +21,8 @@ CREATE TABLE roles (
     id BIGSERIAL PRIMARY KEY,
     "type" NUMERIC NOT NULL,
     "name" TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE accounts (
@@ -36,53 +36,53 @@ CREATE TABLE accounts (
     email CITEXT NOT NULL UNIQUE,
     phone_number VARCHAR(20) UNIQUE DEFAULT NULL,
     passhash TEXT NOT NULL,
-    failed_login_attempts INT DEFAULT 0,
+    failed_logins_count INT DEFAULT 0,
     door_code VARCHAR DEFAULT NULL,
     external_payment_customer_id INT DEFAULT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE confirmation_codes (
     id BIGSERIAL PRIMARY KEY,
     "type" NUMERIC NOT NULL, -- email or phone number
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
-    confirmed_at TIMESTAMP DEFAULT NULL,
-    confirmation_code VARCHAR NOT NULL,
-    code_expiration_date TIMESTAMP NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    code VARCHAR NOT NULL,
+    confirm_time TIMESTAMP DEFAULT NULL,
+    expire_time TIMESTAMP NOT NULL,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE account_events (
     id BIGSERIAL PRIMARY KEY,
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
     "type" NUMERIC NOT NULL,
-    notes VARCHAR,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    note VARCHAR,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE addresses (
     id BIGSERIAL PRIMARY KEY,
-    account_id BIGINT REFERENCES accounts (id) NOT NULL,
+    account_id BIGINT REFERENCES accounts (id) UNIQUE NOT NULL,
     country VARCHAR(20) NOT NULL,
     city VARCHAR(20) NOT NULL,
     state_code VARCHAR(2) NOT NULL,
     street VARCHAR(80) NOT NULL,
     -- zip
     "type" INT NOT NULL, -- type address and type billing address
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE sessions (
     id BIGSERIAL PRIMARY KEY,
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
-    last_activity TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_activity_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     session_id UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE equipment (
@@ -90,8 +90,8 @@ CREATE TABLE equipment (
     "type" INT NOT NULL,
     "description" text,
     active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE authorizations (
@@ -100,19 +100,19 @@ CREATE TABLE authorizations (
     controller_id BIGINT REFERENCES equipment (id),
     "type" INT NOT NULL,
     "description" text,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE account_authorizations (
     id BIGSERIAL PRIMARY KEY,
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
     authorization_id BIGINT REFERENCES authorizations (id) NOT NULL,
-    efective TIMESTAMP,
-    expires TIMESTAMP,
+    efective_time TIMESTAMP,
+    expire_time TIMESTAMP,
     active BOOLEAN NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 COMMIT;

@@ -15,3 +15,4 @@ https://stackoverflow.com/questions/48345922/reference-password-validation
 - [ ] Reset password: https://stackoverflow.com/questions/3077229/restful-password-reset
 - [ ] Testing: https://semaphoreci.com/community/tutorials/building-and-testing-a-rest-api-in-go-with-gorilla-mux-and-postgresql
 - [ ] w.WriteHeader(http.StatusAccepted) for all
+- [ ] Better name for external ID's like: external_payment_customer_id

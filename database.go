@@ -27,9 +27,9 @@ const (
 
 // Row represents a database row
 type Row struct {
-	ID        int64
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID         int64
+	CreateTime time.Time `db:"create_time"`
+	UpdateTime time.Time `db:"update_time"`
 }
 
 func init() {
@@ -118,7 +118,7 @@ func (db *DB) DeleteSession(identifier string) error {
 // CleanSessionsOlderThan deletes all sessions older than age(in seconds) and returns the number of rows affected
 func (db *DB) CleanSessionsOlderThan(age time.Duration) (int64, error) {
 	t := time.Now().Add(-age * time.Second)
-	sqlStatement := `delete from sessions where last_activity < $1`
+	sqlStatement := `delete from sessions where last_activity_time < $1`
 	res, err := db.Exec(sqlStatement, t)
 	if err != nil {
 		return -1, err
@@ -134,7 +134,7 @@ func (db *DB) CleanSessionsOlderThan(age time.Duration) (int64, error) {
 func (db *DB) UpdateSession(identifier string) (*Session, error) {
 	tx, err := db.Beginx()
 	var s Session
-	sqlStatement := `update sessions set last_activity=default where session_id = $1 returning *`
+	sqlStatement := `update sessions set last_activity_time=default where session_id = $1 returning *`
 	err = tx.Get(&s, sqlStatement, identifier)
 	if err != nil {
 		tx.Rollback()

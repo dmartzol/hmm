@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	apiVersion            = "0.0.1"
+	apiVersionNumber      = "0.0.1"
 	hackerSpaceCookieName = "HackerSpace-Cookie"
 )
 
@@ -31,13 +31,14 @@ type loginRequest struct {
 }
 
 func version(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "version %s", apiVersion)
+	fmt.Fprintf(w, "version %s", apiVersionNumber)
 }
 
 func main() {
 	log.SetFlags(LstdFlags)
 
 	r := mux.NewRouter()
+	r = r.PathPrefix("/v1").Subrouter()
 	r.Use(
 		middleware.Logger,
 		middleware.Recoverer,
@@ -49,12 +50,12 @@ func main() {
 	// sessions
 	// see: https://stackoverflow.com/questions/7140074/restfully-design-login-or-register-resources
 	r.HandleFunc("/sessions", createSession).Methods("POST")
-	r.HandleFunc("/sessions/{id}", deleteSession).Methods("DELETE")
+	r.HandleFunc("/sessions", deleteSession).Methods("DELETE")
 
 	// accounts
 	r.HandleFunc("/accounts", createAccount).Methods("POST")
 	r.HandleFunc("/accounts/{id}", getAccount).Methods("GET")
-	r.HandleFunc("/accounts/{id}/confirm-email", getAccount).Methods("POST")
+	r.HandleFunc("/accounts/{id}/confirm-email", confirmEmail).Methods("POST")
 	r.HandleFunc("/accounts/password", resetPassword).Methods("POST")
 
 	log.Print("listening and serving")
@@ -64,9 +65,9 @@ func main() {
 func authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ss := map[string]string{
-			"/version":  "GET",
-			"/sessions": "POST",
-			"/accounts": "POST",
+			"/v1/version":  "GET",
+			"/v1/sessions": "POST",
+			"/v1/accounts": "POST",
 		}
 		method, in := ss[r.RequestURI]
 		if in && method == r.Method {
