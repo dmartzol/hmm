@@ -10,7 +10,7 @@ import (
 
 const (
 	// sessionLength represents the duration(in minutes) a session will be valid for
-	sessionLength = 120
+	sessionLength = 3600
 )
 
 // Session represents an account session
@@ -26,7 +26,7 @@ type loginCredentials struct {
 	Password string
 }
 
-func login(w http.ResponseWriter, r *http.Request) {
+func createSession(w http.ResponseWriter, r *http.Request) {
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -78,7 +78,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(s)
 }
 
-func logout(w http.ResponseWriter, r *http.Request) {
+func deleteSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hackerSpaceCookieName)
 	if err != nil {
 		log.Printf("%+v", err)

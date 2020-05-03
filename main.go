@@ -42,21 +42,25 @@ func main() {
 	log.SetFlags(LstdFlags)
 
 	r := mux.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(authMiddleware)
+	r.Use(
+		middleware.Logger,
+		middleware.Recoverer,
+		authMiddleware,
+	)
 
 	r.HandleFunc("/", index).Methods("GET")
 	r.HandleFunc("/version", version).Methods("GET")
 
 	// sessions
 	// see: https://stackoverflow.com/questions/7140074/restfully-design-login-or-register-resources
-	r.HandleFunc("/sessions", login).Methods("POST")
-	r.HandleFunc("/sessions/{id}", logout).Methods("DELETE")
+	r.HandleFunc("/sessions", createSession).Methods("POST")
+	r.HandleFunc("/sessions/{id}", deleteSession).Methods("DELETE")
 
 	// accounts
-	r.HandleFunc("/accounts", register).Methods("POST")
+	r.HandleFunc("/accounts", createAccount).Methods("POST")
 	r.HandleFunc("/accounts/{id}", getAccount).Methods("GET")
+	r.HandleFunc("/accounts/{id}/confirm-email", getAccount).Methods("POST")
+	r.HandleFunc("/accounts/password", resetPassword).Methods("POST")
 
 	log.Print("listening and serving")
 	log.Fatal(http.ListenAndServe("localhost:8080", r))

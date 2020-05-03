@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -71,21 +70,15 @@ func validEmail(email string) bool {
 	return true
 }
 
-func register(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+func createAccount(w http.ResponseWriter, r *http.Request) {
+	var req registerRequest
+	err := Unmarshal(r, &req)
 	if err != nil {
-		log.Printf("%+v", err)
+		log.Printf("JSON: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	var info registerRequest
-	err = json.Unmarshal(body, &info)
-	if err != nil {
-		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	exists, err := db.EmailExists(info.Email)
+	exists, err := db.EmailExists(req.Email)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -93,31 +86,31 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 	if exists {
 		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
-		err = fmt.Errorf("email '%s' already registered", info.Email)
+		err = fmt.Errorf("email '%s' already registered", req.Email)
 		log.Printf("%+v", err)
-		http.Error(w, fmt.Sprintf("email '%s' alrady exists", info.Email), http.StatusConflict)
+		http.Error(w, fmt.Sprintf("email '%s' alrady exists", req.Email), http.StatusConflict)
 		return
 	}
-	err = info.validate()
+	err = req.validate()
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	parsedDOB, err := time.Parse(layoutISO, info.DOB)
+	parsedDOB, err := time.Parse(layoutISO, req.DOB)
 	if err != nil {
-		log.Printf("%s: %+v", info.DOB, err)
+		log.Printf("%s: %+v", req.DOB, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	a, err := db.CreateAccount(
-		info.FirstName,
-		info.LastName,
-		info.Email,
-		info.Password,
+		req.FirstName,
+		req.LastName,
+		req.Email,
+		req.Password,
 		parsedDOB,
-		info.Gender,
-		info.PhoneNumber,
+		req.Gender,
+		req.PhoneNumber,
 	)
 	if err != nil {
 		log.Printf("%+v", err)
@@ -140,7 +133,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 
-	// Create email confirmation code and send email
+	// TODO: Create email confirmation code and send it
 
 	json.NewEncoder(w).Encode(s)
 }
@@ -164,4 +157,37 @@ func getAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	json.NewEncoder(w).Encode(a)
+}
+
+type resetPasswordRequest struct {
+	Email string
+}
+
+func resetPassword(w http.ResponseWriter, r *http.Request) {
+	var req resetPasswordRequest
+	err := Unmarshal(r, &req)
+	if err != nil {
+		log.Printf("JSON: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	// TODO: send email with link to reset password
+	HTTPRespond(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
+}
+
+type confirmEmailRequest struct {
+	ConfirmationCode string
+}
+
+func confirmEmail(w http.ResponseWriter, r *http.Request) {
+	var req confirmEmailRequest
+	err := Unmarshal(r, &req)
+	if err != nil {
+		log.Printf("JSON: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Email has been confirmed.")
 }
