@@ -171,6 +171,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	// TODO: create confirmation code in db
 	// TODO: send email with link to reset password
 	HTTPRespond(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
 }

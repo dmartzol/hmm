@@ -30,7 +30,7 @@ CREATE TABLE accounts (
     first_name VARCHAR NOT NULL,
     last_name VARCHAR NOT NULL,
     dob date NOT NULL,
-    gender VARCHAR(1) DEFAULT NULL,
+    gender VARCHAR(30) DEFAULT NULL,
     role_id BIGINT REFERENCES roles (id),
     active BOOLEAN NOT NULL DEFAULT TRUE,
     email CITEXT NOT NULL UNIQUE,
@@ -108,9 +108,9 @@ CREATE TABLE account_authorizations (
     id BIGSERIAL PRIMARY KEY,
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
     authorization_id BIGINT REFERENCES authorizations (id) NOT NULL,
+    active BOOLEAN NOT NULL,
     efective_time TIMESTAMP,
     expire_time TIMESTAMP,
-    active BOOLEAN NOT NULL,
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
