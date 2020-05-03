@@ -34,10 +34,6 @@ func version(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "version %s", apiVersion)
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Home")
-}
-
 func main() {
 	log.SetFlags(LstdFlags)
 
@@ -48,7 +44,6 @@ func main() {
 		authMiddleware,
 	)
 
-	r.HandleFunc("/", index).Methods("GET")
 	r.HandleFunc("/version", version).Methods("GET")
 
 	// sessions
