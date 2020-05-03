@@ -134,7 +134,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{
-		Name:   "session",
+		Name:   hackerSpaceCookieName,
 		Value:  s.SessionIdentifier,
 		MaxAge: sessionLength,
 	}
