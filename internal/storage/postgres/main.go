@@ -15,7 +15,7 @@ type DB struct {
 	*sqlx.DB
 }
 
-var db *DB
+// var db *DB
 
 const (
 	dbport = "DBPORT"

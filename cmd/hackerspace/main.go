@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var db *DB
+
 const (
 	apiVersionNumber      = "0.0.1"
 	hackerSpaceCookieName = "HackerSpace-Cookie"
