@@ -8,12 +8,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dmartzol/hackerspace/internal/models"
+	"github.com/dmartzol/hackerspace/pkg/httpresponse"
+	"github.com/dmartzol/hackerspace/pkg/timeutils"
 	"github.com/gorilla/mux"
 )
 
 func createAccount(w http.ResponseWriter, r *http.Request) {
-	var req models.registerRequest
-	err := response.Unmarshal(r, &req)
+	var req models.RegisterRequest
+	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -32,13 +35,13 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("email '%s' alrady exists", req.Email), http.StatusConflict)
 		return
 	}
-	err = req.validate()
+	err = req.Validate()
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	parsedDOB, err := time.Parse(time.layoutISO, req.DOB)
+	parsedDOB, err := time.Parse(timeutils.LayoutISO, req.DOB)
 	if err != nil {
 		log.Printf("%s: %+v", req.DOB, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -70,7 +73,7 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:   hackerSpaceCookieName,
 		Value:  s.SessionIdentifier,
-		MaxAge: models.sessionLength,
+		MaxAge: sessionLength,
 	}
 	http.SetCookie(w, cookie)
 
@@ -101,8 +104,8 @@ func getAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func resetPassword(w http.ResponseWriter, r *http.Request) {
-	var req models.resetPasswordRequest
-	err := response.Unmarshal(r, &req)
+	var req models.ResetPasswordRequest
+	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -110,12 +113,12 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	// TODO: create confirmation code in db
 	// TODO: send email with link to reset password
-	response.HTTPRespond(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
+	httpresponse.Respond(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
 }
 
 func confirmEmail(w http.ResponseWriter, r *http.Request) {
-	var req models.confirmEmailRequest
-	err := response.Unmarshal(r, &req)
+	var req models.ConfirmEmailRequest
+	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

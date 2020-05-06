@@ -5,11 +5,13 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dmartzol/hackerspace/internal/storage/postgres"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 )
 
-var db *DB
+var db *postgres.DB
 
 const (
 	apiVersionNumber      = "0.0.1"
@@ -32,8 +34,20 @@ type loginRequest struct {
 	Password string
 }
 
-func version(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "version %s", apiVersionNumber)
+func init() {
+	dbConfig := postgres.DBConfig()
+
+	dataSourceName := "host=%s port=%d user=%s password=%s dbname=%s sslmode=disable"
+	dataSourceName = fmt.Sprintf(dataSourceName, dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name)
+	database, err := sqlx.Connect("postgres", dataSourceName)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = database.Ping()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	db = &postgres.DB{database}
 }
 
 func main() {

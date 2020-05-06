@@ -4,28 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/dmartzol/hackerspace/internal/models"
 	_ "github.com/lib/pq"
 )
 
-// DB represents the database
-type DB struct {
-	*sqlx.DB
-}
-
-var db *DB
-
-const (
-	dbport = "DBPORT"
-	dbuser = "PGUSER"
-	dbpass = "PGPASSWORD"
-	dbhost = "PGHOST"
-	dbname = "PGDATABASE"
-)
-
 // SessionFromIdentifier fetches a session from a given its identifier
-func (db *DB) SessionFromIdentifier(identifier string) (*Session, error) {
-	var s Session
+func (db *DB) SessionFromIdentifier(identifier string) (*models.Session, error) {
+	var s models.Session
 	sqlStatement := `select * from sessions where session_id = $1`
 	err := db.Get(&s, sqlStatement, identifier)
 	if err != nil {
@@ -35,8 +20,8 @@ func (db *DB) SessionFromIdentifier(identifier string) (*Session, error) {
 }
 
 // CreateSession creates a new session
-func (db *DB) CreateSession(accountID int64) (*Session, error) {
-	var s Session
+func (db *DB) CreateSession(accountID int64) (*models.Session, error) {
+	var s models.Session
 	sqlStatement := `insert into sessions (account_id) values ($1) returning *`
 	err := db.Get(&s, sqlStatement, accountID)
 	if err != nil {
@@ -79,9 +64,9 @@ func (db *DB) CleanSessionsOlderThan(age time.Duration) (int64, error) {
 }
 
 // UpdateSession sets the current timestamp
-func (db *DB) UpdateSession(identifier string) (*Session, error) {
+func (db *DB) UpdateSession(identifier string) (*models.Session, error) {
 	tx, err := db.Beginx()
-	var s Session
+	var s models.Session
 	sqlStatement := `update sessions set last_activity_time=default where session_id = $1 returning *`
 	err = tx.Get(&s, sqlStatement, identifier)
 	if err != nil {

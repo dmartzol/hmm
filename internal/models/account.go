@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/dmartzol/hackerspace/pkg/timeutils"
 )
 
 // Account represents a user account
@@ -27,7 +29,7 @@ type Account struct {
 	ExternalPaymentCustomerID *int64 `db:"external_payment_customer_id"`
 }
 
-type registerRequest struct {
+type RegisterRequest struct {
 	FirstName   string
 	LastName    string
 	DOB         string
@@ -37,7 +39,7 @@ type registerRequest struct {
 	Password    string
 }
 
-func (r registerRequest) validate() error {
+func (r RegisterRequest) Validate() error {
 	if r.FirstName == "" {
 		return errors.New("must provide first name")
 	}
@@ -47,7 +49,7 @@ func (r registerRequest) validate() error {
 	if len(r.Password) < 6 {
 		return errors.New("password too short")
 	}
-	_, err := time.Parse(layoutISO, r.DOB)
+	_, err := time.Parse(timeutils.LayoutISO, r.DOB)
 	if err != nil {
 		return fmt.Errorf("time.Parse %v: %w", r.DOB, err)
 	}
@@ -64,10 +66,10 @@ func validEmail(email string) bool {
 	return true
 }
 
-type resetPasswordRequest struct {
+type ResetPasswordRequest struct {
 	Email string
 }
 
-type confirmEmailRequest struct {
+type ConfirmEmailRequest struct {
 	ConfirmationCode string
 }

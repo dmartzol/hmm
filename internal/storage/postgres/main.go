@@ -1,10 +1,9 @@
 package postgres
 
 import (
-	"fmt"
-	"log"
 	"os"
 
+	"github.com/dmartzol/hackerspace/pkg/environment"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
@@ -14,8 +13,6 @@ type DB struct {
 	*sqlx.DB
 }
 
-// var db *DB
-
 const (
 	dbport = "DBPORT"
 	dbuser = "PGUSER"
@@ -24,31 +21,13 @@ const (
 	dbname = "PGDATABASE"
 )
 
-// Row represents a database row
-
-func init() {
-	dbConfig := dbConfig()
-
-	dataSourceName := "host=%s port=%d user=%s password=%s dbname=%s sslmode=disable"
-	dataSourceName = fmt.Sprintf(dataSourceName, dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name)
-	database, err := sqlx.Connect("postgres", dataSourceName)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	err = database.Ping()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	db = &DB{database}
-}
-
-type databaseConfig struct {
+type DatabaseConfig struct {
 	Name, User, Password, Host string
 	Port                       int
 }
 
-func dbConfig() databaseConfig {
-	config := databaseConfig{}
+func DBConfig() DatabaseConfig {
+	config := DatabaseConfig{}
 	name, ok := os.LookupEnv(dbname)
 	if !ok {
 		panic("PGDATABASE environment variable required but not set")
@@ -61,8 +40,8 @@ func dbConfig() databaseConfig {
 	if !ok {
 		panic("PGHOST environment variable required but not set")
 	}
-	config.Port = GetEnvInt(dbport, 5432)
-	config.Password = GetEnvString(dbpass, "")
+	config.Port = environment.GetEnvInt(dbport, 5432)
+	config.Password = environment.GetEnvString(dbpass, "")
 	config.Host = host
 	config.User = user
 	config.Name = name

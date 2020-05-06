@@ -4,11 +4,19 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/dmartzol/hackerspace/internal/models"
+	"github.com/dmartzol/hackerspace/pkg/httpresponse"
+)
+
+const (
+	// sessionLength represents the duration(in minutes) a session will be valid for
+	sessionLength = 3600
 )
 
 func createSession(w http.ResponseWriter, r *http.Request) {
-	var credentials loginCredentials
-	err := Unmarshal(r, &credentials)
+	var credentials models.LoginCredentials
+	err := httpresponse.Unmarshal(r, &credentials)
 	if err != nil {
 		log.Printf("Unmarshal: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -70,5 +78,5 @@ func deleteSession(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	}
 	http.SetCookie(w, c)
-	HTTPRespond(w, "Session deleted.", http.StatusOK)
+	httpresponse.Respond(w, "Session deleted.", http.StatusOK)
 }

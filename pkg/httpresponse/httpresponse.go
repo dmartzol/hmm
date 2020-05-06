@@ -1,4 +1,4 @@
-package response
+package httpresponse
 
 import (
 	"encoding/json"
@@ -22,7 +22,7 @@ func Unmarshal(r *http.Request, iface interface{}) error {
 	return nil
 }
 
-func HTTPRespond(w http.ResponseWriter, text string, code int) {
+func Respond(w http.ResponseWriter, text string, code int) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
