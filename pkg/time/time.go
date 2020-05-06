@@ -1,4 +1,4 @@
-package main
+package time
 
 const (
 	layoutISO        = "2006-01-02"

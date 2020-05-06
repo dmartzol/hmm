@@ -1,10 +1,9 @@
-package main
+package postgres
 
 import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -26,11 +25,6 @@ const (
 )
 
 // Row represents a database row
-type Row struct {
-	ID         int64
-	CreateTime time.Time `db:"create_time"`
-	UpdateTime time.Time `db:"update_time"`
-}
 
 func init() {
 	dbConfig := dbConfig()

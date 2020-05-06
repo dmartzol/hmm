@@ -12,8 +12,8 @@ import (
 )
 
 func createAccount(w http.ResponseWriter, r *http.Request) {
-	var req registerRequest
-	err := Unmarshal(r, &req)
+	var req models.registerRequest
+	err := response.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -38,7 +38,7 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	parsedDOB, err := time.Parse(layoutISO, req.DOB)
+	parsedDOB, err := time.Parse(time.layoutISO, req.DOB)
 	if err != nil {
 		log.Printf("%s: %+v", req.DOB, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -70,7 +70,7 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 	cookie := &http.Cookie{
 		Name:   hackerSpaceCookieName,
 		Value:  s.SessionIdentifier,
-		MaxAge: sessionLength,
+		MaxAge: models.sessionLength,
 	}
 	http.SetCookie(w, cookie)
 
@@ -101,8 +101,8 @@ func getAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func resetPassword(w http.ResponseWriter, r *http.Request) {
-	var req resetPasswordRequest
-	err := Unmarshal(r, &req)
+	var req models.resetPasswordRequest
+	err := response.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -110,12 +110,12 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	// TODO: create confirmation code in db
 	// TODO: send email with link to reset password
-	HTTPRespond(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
+	response.HTTPRespond(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
 }
 
 func confirmEmail(w http.ResponseWriter, r *http.Request) {
-	var req confirmEmailRequest
-	err := Unmarshal(r, &req)
+	var req models.confirmEmailRequest
+	err := response.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
