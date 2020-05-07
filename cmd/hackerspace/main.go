@@ -27,11 +27,7 @@ const (
 	LstdFlags     = Ldate | Ltime | Lshortfile // initial values for the standard logger
 )
 
-type storage interface {
-	EmailExists(email string) (bool, error)
-	Account(id int64) (*models.Account, error)
-	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
-	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error)
+type SessionStorage interface {
 	SessionFromIdentifier(identifier string) (*models.Session, error)
 	CreateSession(accountID int64) (*models.Session, error)
 	DeleteSession(identifier string) error
@@ -39,9 +35,17 @@ type storage interface {
 	UpdateSession(identifier string) (*models.Session, error)
 }
 
+type AccountStorage interface {
+	Account(id int64) (*models.Account, error)
+	EmailExists(email string) (bool, error)
+	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
+	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error)
+}
+
 // API represents something
 type API struct {
-	storage
+	AccountStorage
+	SessionStorage
 }
 
 func NewAPI() (*API, error) {
@@ -49,7 +53,7 @@ func NewAPI() (*API, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &API{db}, nil
+	return &API{db, db}, nil
 }
 
 func main() {
