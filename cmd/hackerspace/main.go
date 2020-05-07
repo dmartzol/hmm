@@ -36,12 +36,13 @@ type API struct {
 }
 
 func NewAPI() (*API, error) {
-	p := postgres.DB{}
-	db, err := p.PrepareDatabase()
+	var err error
+	db := &postgres.DB{}
+	_, err = db.PrepareDatabase()
 	if err != nil {
 		return nil, err
 	}
-	return &API{db}
+	return &API{db}, nil
 }
 
 func main() {
