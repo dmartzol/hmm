@@ -29,11 +29,6 @@ const (
 	LstdFlags     = Ldate | Ltime | Lshortfile // initial values for the standard logger
 )
 
-type loginRequest struct {
-	Email    string
-	Password string
-}
-
 func init() {
 	dbConfig := postgres.DBConfig()
 
