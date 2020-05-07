@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/dmartzol/hackerspace/internal/models"
 	"github.com/dmartzol/hackerspace/internal/storage/postgres"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
@@ -26,7 +28,15 @@ const (
 )
 
 type storage interface {
-	PrepareDatabase() error
+	EmailExists(email string) (bool, error)
+	Account(id int64) (*models.Account, error)
+	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
+	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error)
+	SessionFromIdentifier(identifier string) (*models.Session, error)
+	CreateSession(accountID int64) (*models.Session, error)
+	DeleteSession(identifier string) error
+	CleanSessionsOlderThan(age time.Duration) (int64, error)
+	UpdateSession(identifier string) (*models.Session, error)
 }
 
 // API represents something
@@ -35,8 +45,7 @@ type API struct {
 }
 
 func NewAPI() (*API, error) {
-	db := &postgres.DB{}
-	err := db.PrepareDatabase()
+	db, err := postgres.NewDB()
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +64,7 @@ func main() {
 	r.Use(
 		middleware.Logger,
 		middleware.Recoverer,
-		authMiddleware,
+		api.authMiddleware,
 	)
 
 	r.HandleFunc("/version", api.version).Methods("GET")
@@ -75,7 +84,7 @@ func main() {
 	log.Fatal(http.ListenAndServe("localhost:8080", r))
 }
 
-func authMiddleware(next http.Handler) http.Handler {
+func (api API) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ss := map[string]string{
 			"/v1/version":  "GET",
@@ -95,7 +104,7 @@ func authMiddleware(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
-		_, err = db.UpdateSession(c.Value)
+		_, err = api.UpdateSession(c.Value)
 		if err != nil {
 			log.Printf("UpdateSession: %+v", err)
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
