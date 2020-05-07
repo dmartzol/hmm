@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func createAccount(w http.ResponseWriter, r *http.Request) {
+func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
 	var req models.RegisterRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
@@ -22,7 +22,7 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	exists, err := db.EmailExists(req.Email)
+	exists, err := api.EmailExists(req.Email)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -47,7 +47,7 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	a, err := db.CreateAccount(
+	a, err := api.CreateAccount(
 		req.FirstName,
 		req.LastName,
 		req.Email,
@@ -63,7 +63,7 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create session and cookie
-	s, err := db.CreateSession(a.ID)
+	s, err := api.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -82,7 +82,7 @@ func createAccount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(s)
 }
 
-func getAccount(w http.ResponseWriter, r *http.Request) {
+func (api API) getAccount(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	idString, ok := params["id"]
 	if !ok {
@@ -94,7 +94,7 @@ func getAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
 		return
 	}
-	a, err := db.Account(id)
+	a, err := api.Account(id)
 	if err != nil {
 		log.Printf("Account: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -103,7 +103,7 @@ func getAccount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(a)
 }
 
-func resetPassword(w http.ResponseWriter, r *http.Request) {
+func (api API) resetPassword(w http.ResponseWriter, r *http.Request) {
 	var req models.ResetPasswordRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
@@ -116,7 +116,7 @@ func resetPassword(w http.ResponseWriter, r *http.Request) {
 	httpresponse.Respond(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
 }
 
-func confirmEmail(w http.ResponseWriter, r *http.Request) {
+func (api API) confirmEmail(w http.ResponseWriter, r *http.Request) {
 	var req models.ConfirmEmailRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {

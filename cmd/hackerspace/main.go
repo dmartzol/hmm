@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -10,8 +9,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 )
-
-var db *postgres.DB
 
 const (
 	apiVersionNumber      = "0.0.1"
@@ -29,24 +26,30 @@ const (
 	LstdFlags     = Ldate | Ltime | Lshortfile // initial values for the standard logger
 )
 
-func init() {
-	dbConfig := postgres.DBConfig()
+type storage interface {
+	PrepareDatabase() (*sqlx.DB, error)
+}
 
-	dataSourceName := "host=%s port=%d user=%s password=%s dbname=%s sslmode=disable"
-	dataSourceName = fmt.Sprintf(dataSourceName, dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name)
-	database, err := sqlx.Connect("postgres", dataSourceName)
+// API represents something
+type API struct {
+	storage
+}
+
+func NewAPI() (*API, error) {
+	p := postgres.DB{}
+	db, err := p.PrepareDatabase()
 	if err != nil {
-		log.Fatalf("error connecting to db: %+v", err)
+		return nil, err
 	}
-	err = database.Ping()
-	if err != nil {
-		log.Fatalf("error pinging db: %+v", err)
-	}
-	db = &postgres.DB{database}
+	return &API{db}
 }
 
 func main() {
 	log.SetFlags(LstdFlags)
+	api, err := NewAPI()
+	if err != nil {
+		log.Fatalf("error starting api: %+v", err)
+	}
 
 	r := mux.NewRouter()
 	r = r.PathPrefix("/v1").Subrouter()
@@ -56,18 +59,18 @@ func main() {
 		authMiddleware,
 	)
 
-	r.HandleFunc("/version", version).Methods("GET")
+	r.HandleFunc("/version", api.version).Methods("GET")
 
 	// sessions
 	// see: https://stackoverflow.com/questions/7140074/restfully-design-login-or-register-resources
-	r.HandleFunc("/sessions", createSession).Methods("POST")
-	r.HandleFunc("/sessions", deleteSession).Methods("DELETE")
+	r.HandleFunc("/sessions", api.createSession).Methods("POST")
+	r.HandleFunc("/sessions", api.deleteSession).Methods("DELETE")
 
 	// accounts
-	r.HandleFunc("/accounts", createAccount).Methods("POST")
-	r.HandleFunc("/accounts/{id}", getAccount).Methods("GET")
-	r.HandleFunc("/accounts/{id}/confirm-email", confirmEmail).Methods("POST")
-	r.HandleFunc("/accounts/password", resetPassword).Methods("POST")
+	r.HandleFunc("/accounts", api.createAccount).Methods("POST")
+	r.HandleFunc("/accounts/{id}", api.getAccount).Methods("GET")
+	r.HandleFunc("/accounts/{id}/confirm-email", api.confirmEmail).Methods("POST")
+	r.HandleFunc("/accounts/password", api.resetPassword).Methods("POST")
 
 	log.Print("listening and serving")
 	log.Fatal(http.ListenAndServe("localhost:8080", r))

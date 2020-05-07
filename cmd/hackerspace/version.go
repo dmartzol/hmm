@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func version(w http.ResponseWriter, r *http.Request) {
+func (api API) version(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "version %s", apiVersionNumber)
 }
