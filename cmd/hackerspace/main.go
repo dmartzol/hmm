@@ -41,11 +41,11 @@ func init() {
 	dataSourceName = fmt.Sprintf(dataSourceName, dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.Name)
 	database, err := sqlx.Connect("postgres", dataSourceName)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("error connecting to db: %+v", err)
 	}
 	err = database.Ping()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("error pinging db: %+v", err)
 	}
 	db = &postgres.DB{database}
 }
