@@ -28,19 +28,19 @@ type DatabaseConfig struct {
 	Port                       int
 }
 
-func (db *DB) PrepareDatabase() (*sqlx.DB, error) {
+func (db *DB) PrepareDatabase() error {
 	dbConfig := DatabaseConfig{}
 	name, ok := os.LookupEnv(dbname)
 	if !ok {
-		return nil, fmt.Errorf("PGDATABASE environment variable required but not set")
+		return fmt.Errorf("PGDATABASE environment variable required but not set")
 	}
 	user, ok := os.LookupEnv(dbuser)
 	if !ok {
-		return nil, fmt.Errorf("PGUSER environment variable required but not set")
+		return fmt.Errorf("PGUSER environment variable required but not set")
 	}
 	host, ok := os.LookupEnv(dbhost)
 	if !ok {
-		return nil, fmt.Errorf("PGHOST environment variable required but not set")
+		return fmt.Errorf("PGHOST environment variable required but not set")
 	}
 	dbConfig.Port = environment.GetEnvInt(dbport, 5432)
 	dbConfig.Password = environment.GetEnvString(dbpass, "")
@@ -53,12 +53,13 @@ func (db *DB) PrepareDatabase() (*sqlx.DB, error) {
 	database, err := sqlx.Connect("postgres", dataSourceName)
 	if err != nil {
 		log.Printf("error connecting to db: %+v", err)
-		return nil, err
+		return err
 	}
 	err = database.Ping()
 	if err != nil {
 		log.Printf("error pinging db: %+v", err)
-		return nil, err
+		return err
 	}
-	return database, nil
+	db = &DB{database}
+	return nil
 }

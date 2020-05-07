@@ -7,7 +7,6 @@ import (
 	"github.com/dmartzol/hackerspace/internal/storage/postgres"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
-	"github.com/jmoiron/sqlx"
 )
 
 const (
@@ -27,7 +26,7 @@ const (
 )
 
 type storage interface {
-	PrepareDatabase() (*sqlx.DB, error)
+	PrepareDatabase() error
 }
 
 // API represents something
@@ -36,9 +35,8 @@ type API struct {
 }
 
 func NewAPI() (*API, error) {
-	var err error
 	db := &postgres.DB{}
-	_, err = db.PrepareDatabase()
+	err := db.PrepareDatabase()
 	if err != nil {
 		return nil, err
 	}
