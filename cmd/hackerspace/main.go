@@ -37,7 +37,7 @@ type SessionStorage interface {
 
 type AccountStorage interface {
 	Account(id int64) (*models.Account, error)
-	EmailExists(email string) (bool, error)
+	AccountExists(email string) (bool, error)
 	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
 	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error)
 }

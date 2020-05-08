@@ -24,7 +24,7 @@ func (api API) createSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fetching account with credentials(errors reurned should be purposedly broad)
-	registered, err := api.EmailExists(credentials.Email)
+	registered, err := api.AccountExists(credentials.Email)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

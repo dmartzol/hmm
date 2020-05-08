@@ -7,8 +7,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// EmailExists returns true if the provided email exists in the db
-func (db *DB) EmailExists(email string) (bool, error) {
+// AccountExists returns true if the provided email exists in the db
+func (db *DB) AccountExists(email string) (bool, error) {
 	var exists bool
 	sqlStatement := `select exists(select 1 from accounts a where a.email = $1)`
 	err := db.Get(&exists, sqlStatement, email)

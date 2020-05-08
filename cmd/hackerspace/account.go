@@ -22,7 +22,7 @@ func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	exists, err := api.EmailExists(req.Email)
+	exists, err := api.AccountExists(req.Email)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
