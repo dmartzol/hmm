@@ -21,13 +21,18 @@ func (db *DB) SessionFromIdentifier(identifier string) (*models.Session, error) 
 
 // CreateSession creates a new session
 func (db *DB) CreateSession(accountID int64) (*models.Session, error) {
-	var s models.Session
-	sqlStatement := `insert into sessions (account_id) values ($1) returning *`
-	err := db.Get(&s, sqlStatement, accountID)
+	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
-	return &s, nil
+	var s models.Session
+	sqlStatement := `insert into sessions (account_id) values ($1) returning *`
+	err = tx.Get(&s, sqlStatement, accountID)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return &s, tx.Commit()
 }
 
 // DeleteSession deletes the session with the given identifier
@@ -66,6 +71,9 @@ func (db *DB) CleanSessionsOlderThan(age time.Duration) (int64, error) {
 // UpdateSession sets the current timestamp
 func (db *DB) UpdateSession(identifier string) (*models.Session, error) {
 	tx, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
 	var s models.Session
 	sqlStatement := `update sessions set last_activity_time=default where session_id = $1 returning *`
 	err = tx.Get(&s, sqlStatement, identifier)
