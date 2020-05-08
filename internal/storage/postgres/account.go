@@ -30,7 +30,7 @@ func (db *DB) Account(id int64) (*models.Account, error) {
 }
 
 // Accounts returns all accounts in the db
-func (db *DB) Accounts() ([]*models.Account, error) {
+func (db *DB) Accounts() (models.Accounts, error) {
 	var accs []*models.Account
 	sqlStatement := `select * from accounts a`
 	err := db.Select(&accs, sqlStatement)

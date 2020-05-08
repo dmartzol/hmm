@@ -9,6 +9,8 @@ import (
 	"github.com/dmartzol/hackerspace/pkg/timeutils"
 )
 
+type Accounts []*Account
+
 // Account represents a user account
 type Account struct {
 	Row
@@ -24,9 +26,47 @@ type Account struct {
 	PhoneNumber       *string `db:"phone_number"`
 
 	RoleID                    *int64 `db:"role_id"`
-	EmailID                   int64  `db:"email_id"`
-	PhoneNumberID             *int64 `db:"phone_number_id"`
 	ExternalPaymentCustomerID *int64 `db:"external_payment_customer_id"`
+}
+
+// AccountAPI should always be the object used to respond to any request
+type AccountAPI struct {
+	Row
+	FirstName, LastName, Email    string
+	DOB                           time.Time `json:"DateOfBird"`
+	Gender, DoorCode, PhoneNumber string    `json:"omitempty"`
+	Active                        bool
+	FailedLoginsCount             int64
+}
+
+func (a Account) API() AccountAPI {
+	r := AccountAPI{
+		Row:               a.Row,
+		FirstName:         a.FirstName,
+		LastName:          a.LastName,
+		DOB:               a.DOB,
+		Active:            a.Active,
+		FailedLoginsCount: a.FailedLoginsCount,
+		Email:             a.Email,
+	}
+	if a.DoorCode != nil {
+		r.DoorCode = *a.DoorCode
+	}
+	if a.PhoneNumber != nil {
+		r.PhoneNumber = *a.PhoneNumber
+	}
+	if a.Gender != nil {
+		r.Gender = *a.Gender
+	}
+	return r
+}
+
+func (accs Accounts) API() []AccountAPI {
+	l := []AccountAPI{}
+	for _, a := range accs {
+		l = append(l, a.API())
+	}
+	return l
 }
 
 type RegisterRequest struct {

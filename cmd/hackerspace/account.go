@@ -16,7 +16,7 @@ import (
 
 type accountStorage interface {
 	Account(id int64) (*models.Account, error)
-	Accounts() ([]*models.Account, error)
+	Accounts() (models.Accounts, error)
 	AccountExists(email string) (bool, error)
 	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
 	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error)
@@ -29,11 +29,10 @@ func (api API) getAccounts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(accs)
+	httpresponse.RespondJSON(w, accs.API())
 }
 
 func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
-	// TODO: permission check
 	var req models.RegisterRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
@@ -119,7 +118,7 @@ func (api API) getAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(a)
+	httpresponse.RespondJSON(w, a.API())
 }
 
 func (api API) resetPassword(w http.ResponseWriter, r *http.Request) {
@@ -132,7 +131,7 @@ func (api API) resetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	// TODO: create confirmation code in db
 	// TODO: send email with link to reset password
-	httpresponse.Respond(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
+	httpresponse.RespondText(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
 }
 
 func (api API) confirmEmail(w http.ResponseWriter, r *http.Request) {
@@ -143,6 +142,9 @@ func (api API) confirmEmail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+
+	// TODO: fetch query parameter with confirmation code
+	// TODO: check if code matches in db
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Email has been confirmed.")

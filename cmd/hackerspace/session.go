@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -65,7 +64,7 @@ func (api API) createSession(w http.ResponseWriter, r *http.Request) {
 		MaxAge: sessionLength,
 	}
 	http.SetCookie(w, cookie)
-	json.NewEncoder(w).Encode(s)
+	httpresponse.RespondText(w, "Successfully logged in", http.StatusOK)
 }
 
 func (api API) deleteSession(w http.ResponseWriter, r *http.Request) {
@@ -87,5 +86,5 @@ func (api API) deleteSession(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	}
 	http.SetCookie(w, c)
-	httpresponse.Respond(w, "Session deleted.", http.StatusOK)
+	httpresponse.RespondText(w, "Session deleted.", http.StatusOK)
 }
