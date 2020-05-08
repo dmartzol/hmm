@@ -35,7 +35,7 @@ type API struct {
 	storage
 }
 
-func NewAPI() (*API, error) {
+func newAPI() (*API, error) {
 	db, err := postgres.NewDB()
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func NewAPI() (*API, error) {
 
 func main() {
 	log.SetFlags(LstdFlags)
-	api, err := NewAPI()
+	api, err := newAPI()
 	if err != nil {
 		log.Fatalf("error starting api: %+v", err)
 	}
