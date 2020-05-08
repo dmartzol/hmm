@@ -14,6 +14,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type accountStorage interface {
+	Account(id int64) (*models.Account, error)
+	AccountExists(email string) (bool, error)
+	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
+	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error)
+}
+
 func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
 	var req models.RegisterRequest
 	err := httpresponse.Unmarshal(r, &req)

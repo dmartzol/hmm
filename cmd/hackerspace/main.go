@@ -3,9 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
 
-	"github.com/dmartzol/hackerspace/internal/models"
 	"github.com/dmartzol/hackerspace/internal/storage/postgres"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
@@ -27,25 +25,14 @@ const (
 	LstdFlags     = Ldate | Ltime | Lshortfile // initial values for the standard logger
 )
 
-type SessionStorage interface {
-	SessionFromIdentifier(identifier string) (*models.Session, error)
-	CreateSession(accountID int64) (*models.Session, error)
-	DeleteSession(identifier string) error
-	CleanSessionsOlderThan(age time.Duration) (int64, error)
-	UpdateSession(identifier string) (*models.Session, error)
-}
-
-type AccountStorage interface {
-	Account(id int64) (*models.Account, error)
-	AccountExists(email string) (bool, error)
-	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
-	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error)
+type storage interface {
+	sessionStorage
+	accountStorage
 }
 
 // API represents something
 type API struct {
-	AccountStorage
-	SessionStorage
+	storage
 }
 
 func NewAPI() (*API, error) {
@@ -53,7 +40,7 @@ func NewAPI() (*API, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &API{db, db}, nil
+	return &API{db}, nil
 }
 
 func main() {

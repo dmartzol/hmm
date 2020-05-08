@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/dmartzol/hackerspace/internal/models"
 	"github.com/dmartzol/hackerspace/pkg/httpresponse"
@@ -13,6 +14,14 @@ const (
 	// sessionLength represents the duration(in minutes) a session will be valid for
 	sessionLength = 3600
 )
+
+type sessionStorage interface {
+	SessionFromIdentifier(identifier string) (*models.Session, error)
+	CreateSession(accountID int64) (*models.Session, error)
+	DeleteSession(identifier string) error
+	CleanSessionsOlderThan(age time.Duration) (int64, error)
+	UpdateSession(identifier string) (*models.Session, error)
+}
 
 func (api API) createSession(w http.ResponseWriter, r *http.Request) {
 	var credentials models.LoginCredentials
