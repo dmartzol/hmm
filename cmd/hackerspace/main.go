@@ -68,6 +68,7 @@ func main() {
 	// accounts
 	r.HandleFunc("/accounts", api.createAccount).Methods("POST")
 	r.HandleFunc("/accounts/{id}", api.getAccount).Methods("GET")
+	r.HandleFunc("/accounts", api.getAccounts).Methods("GET")
 	r.HandleFunc("/accounts/{id}/confirm-email", api.confirmEmail).Methods("POST")
 	r.HandleFunc("/accounts/password", api.resetPassword).Methods("POST")
 

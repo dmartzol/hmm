@@ -29,6 +29,17 @@ func (db *DB) Account(id int64) (*models.Account, error) {
 	return &a, nil
 }
 
+// Accounts returns all accounts in the db
+func (db *DB) Accounts() ([]*models.Account, error) {
+	var accs []*models.Account
+	sqlStatement := `select * from accounts a`
+	err := db.Select(&accs, sqlStatement)
+	if err != nil {
+		return nil, err
+	}
+	return accs, nil
+}
+
 // AccountWithCredentials returns an account if the email and password provided match an (email,password) pair in the db
 func (db *DB) AccountWithCredentials(email, allegedPassword string) (*models.Account, error) {
 	var a models.Account

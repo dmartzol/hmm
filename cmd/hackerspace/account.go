@@ -16,12 +16,24 @@ import (
 
 type accountStorage interface {
 	Account(id int64) (*models.Account, error)
+	Accounts() ([]*models.Account, error)
 	AccountExists(email string) (bool, error)
 	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
 	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error)
 }
 
+func (api API) getAccounts(w http.ResponseWriter, r *http.Request) {
+	accs, err := api.Accounts()
+	if err != nil {
+		log.Printf("accounts: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(accs)
+}
+
 func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
+	// TODO: permission check
 	var req models.RegisterRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
