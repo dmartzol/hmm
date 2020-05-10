@@ -29,8 +29,8 @@ type Account struct {
 	ExternalPaymentCustomerID *int64 `db:"external_payment_customer_id"`
 }
 
-// AccountAPI should always be the object used to respond to any request
-type AccountAPI struct {
+// PublicAccount should always be the object used to respond to any request
+type PublicAccount struct {
 	Row
 	FirstName, LastName, Email    string
 	DOB                           time.Time `json:"DateOfBird"`
@@ -39,8 +39,8 @@ type AccountAPI struct {
 	FailedLoginsCount             int64
 }
 
-func (a Account) API() AccountAPI {
-	r := AccountAPI{
+func (a Account) Public() PublicAccount {
+	r := PublicAccount{
 		Row:               a.Row,
 		FirstName:         a.FirstName,
 		LastName:          a.LastName,
@@ -61,10 +61,10 @@ func (a Account) API() AccountAPI {
 	return r
 }
 
-func (accs Accounts) API() []AccountAPI {
-	l := []AccountAPI{}
+func (accs Accounts) Public() []PublicAccount {
+	l := []PublicAccount{}
 	for _, a := range accs {
-		l = append(l, a.API())
+		l = append(l, a.Public())
 	}
 	return l
 }

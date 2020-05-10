@@ -29,7 +29,7 @@ func (api API) getAccounts(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, accs.API())
+	httpresponse.RespondJSON(w, accs.Public())
 }
 
 func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +118,7 @@ func (api API) getAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, a.API())
+	httpresponse.RespondJSON(w, a.Public())
 }
 
 func (api API) resetPassword(w http.ResponseWriter, r *http.Request) {
