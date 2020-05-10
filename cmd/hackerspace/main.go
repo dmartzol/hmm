@@ -8,6 +8,7 @@ import (
 	"github.com/dmartzol/hackerspace/internal/storage/postgres"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
+	"golang.org/x/net/context"
 )
 
 const (
@@ -97,7 +98,7 @@ func (api API) authMiddleware(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
-		_, err = api.UpdateSession(c.Value)
+		s, err := api.UpdateSession(c.Value)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				log.Printf("UpdateSession: %+v", err)
@@ -108,6 +109,27 @@ func (api API) authMiddleware(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-		next.ServeHTTP(w, r)
+		a, err := api.Account(s.AccountID)
+		if err != nil {
+			log.Printf("Account: %+v", err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		// Setting up context
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, contextRequesterAccountIDKey, s.AccountID)
+		if a.RoleID != nil {
+			ctx = context.WithValue(ctx, contextRequesterRoleIDKey, *a.RoleID)
+		}
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+type contextRequesterAccountIDType struct{}
+type contextRequesterRoleIDType struct{}
+
+var (
+	contextRequesterAccountIDKey = &contextRequesterAccountIDType{}
+	contextRequesterRoleIDKey    = &contextRequesterRoleIDType{}
+)

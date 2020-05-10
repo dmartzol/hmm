@@ -31,7 +31,7 @@ CREATE TABLE accounts (
     last_name VARCHAR NOT NULL,
     dob date NOT NULL,
     gender VARCHAR(30) DEFAULT NULL,
-    role_id BIGINT REFERENCES roles (id),
+    role_id BIGINT REFERENCES roles (id) DEFAULT NULL,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     email CITEXT NOT NULL UNIQUE,
     phone_number VARCHAR(20) UNIQUE DEFAULT NULL,
