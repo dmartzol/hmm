@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 
@@ -78,12 +79,12 @@ func main() {
 
 func (api API) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ss := map[string]string{
+		publicRoutes := map[string]string{
 			"/v1/version":  "GET",
 			"/v1/sessions": "POST",
 			"/v1/accounts": "POST",
 		}
-		method, in := ss[r.RequestURI]
+		method, in := publicRoutes[r.RequestURI]
 		if in && method == r.Method {
 			next.ServeHTTP(w, r)
 			return
@@ -98,8 +99,13 @@ func (api API) authMiddleware(next http.Handler) http.Handler {
 		}
 		_, err = api.UpdateSession(c.Value)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				log.Printf("UpdateSession: %+v", err)
+				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				return
+			}
 			log.Printf("UpdateSession: %+v", err)
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 		next.ServeHTTP(w, r)

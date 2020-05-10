@@ -19,6 +19,7 @@ type sessionStorage interface {
 	CreateSession(accountID int64) (*models.Session, error)
 	DeleteSession(identifier string) error
 	CleanSessionsOlderThan(age time.Duration) (int64, error)
+	// UpdateSession updates a session in the db with the current timestamp
 	UpdateSession(identifier string) (*models.Session, error)
 }
 

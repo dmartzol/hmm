@@ -68,15 +68,15 @@ func (db *DB) CleanSessionsOlderThan(age time.Duration) (int64, error) {
 	return count, nil
 }
 
-// UpdateSession sets the current timestamp
-func (db *DB) UpdateSession(identifier string) (*models.Session, error) {
+// UpdateSession updates a session in the db with the current timestamp
+func (db *DB) UpdateSession(sessionToken string) (*models.Session, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
 	var s models.Session
 	sqlStatement := `update sessions set last_activity_time=default where session_id = $1 returning *`
-	err = tx.Get(&s, sqlStatement, identifier)
+	err = tx.Get(&s, sqlStatement, sessionToken)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
