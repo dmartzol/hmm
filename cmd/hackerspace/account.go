@@ -23,13 +23,55 @@ type accountStorage interface {
 }
 
 func (api API) getAccounts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	roleID := ctx.Value(contextRequesterRoleIDKey)
+	if roleID == nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	accs, err := api.Accounts()
 	if err != nil {
 		log.Printf("accounts: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, accs.Public())
+	httpresponse.RespondJSON(w, accs.Restrict(nil))
+}
+
+func (api API) getAccount(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	// fetching requester id
+	requesterID := ctx.Value(contextRequesterAccountIDKey)
+	if requesterID == nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+
+	// parsing parameters
+	params := mux.Vars(r)
+	idString, ok := params["id"]
+	if !ok {
+		http.Error(w, "parameter 'id' not found", http.StatusBadRequest)
+		return
+	}
+	requestedAccountID, err := strconv.ParseInt(idString, 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
+		return
+	}
+
+	// checking permissions
+	if requesterID != requestedAccountID {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	a, err := api.Account(requestedAccountID)
+	if err != nil {
+		log.Printf("Account: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	httpresponse.RespondJSON(w, a.Restrict(nil))
 }
 
 func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
@@ -98,27 +140,6 @@ func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
 	// TODO: Create email confirmation code and send it
 
 	json.NewEncoder(w).Encode(s)
-}
-
-func (api API) getAccount(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	idString, ok := params["id"]
-	if !ok {
-		http.Error(w, "parameter 'id' not found", http.StatusBadRequest)
-		return
-	}
-	id, err := strconv.ParseInt(idString, 10, 64)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
-		return
-	}
-	a, err := api.Account(id)
-	if err != nil {
-		log.Printf("Account: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	httpresponse.RespondJSON(w, a.Public())
 }
 
 func (api API) resetPassword(w http.ResponseWriter, r *http.Request) {

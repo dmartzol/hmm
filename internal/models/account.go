@@ -30,16 +30,21 @@ type Account struct {
 }
 
 // PublicAccount should always be the object used to respond to any request
+// see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
 type PublicAccount struct {
 	Row
-	FirstName, LastName, Email    string
-	DOB                           time.Time `json:"DateOfBird"`
-	Gender, DoorCode, PhoneNumber string    `json:"omitempty"`
-	Active                        bool
-	FailedLoginsCount             int64
+	FirstName, LastName, Email string
+	DOB                        time.Time `json:"DateOfBird"`
+	PhoneNumber                string    `json:",omitempty"`
+	DoorCode                   string    `json:",omitempty"`
+	Gender                     string    `json:",omitempty"`
+	Active                     bool
+	FailedLoginsCount          int64
 }
 
-func (a Account) Public() PublicAccount {
+// Restrict returns the struct reduced to those fields allowed by options
+// see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
+func (a Account) Restrict(options map[string]bool) PublicAccount {
 	r := PublicAccount{
 		Row:               a.Row,
 		FirstName:         a.FirstName,
@@ -49,10 +54,10 @@ func (a Account) Public() PublicAccount {
 		FailedLoginsCount: a.FailedLoginsCount,
 		Email:             a.Email,
 	}
-	if a.DoorCode != nil {
+	if a.DoorCode != nil && options["door_code"] {
 		r.DoorCode = *a.DoorCode
 	}
-	if a.PhoneNumber != nil {
+	if a.PhoneNumber != nil && options["phone_number"] {
 		r.PhoneNumber = *a.PhoneNumber
 	}
 	if a.Gender != nil {
@@ -61,10 +66,10 @@ func (a Account) Public() PublicAccount {
 	return r
 }
 
-func (accs Accounts) Public() []PublicAccount {
+func (accs Accounts) Restrict(options map[string]bool) []PublicAccount {
 	l := []PublicAccount{}
 	for _, a := range accs {
-		l = append(l, a.Public())
+		l = append(l, a.Restrict(options))
 	}
 	return l
 }

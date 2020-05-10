@@ -125,11 +125,3 @@ func (api API) authMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-
-type contextRequesterAccountIDType struct{}
-type contextRequesterRoleIDType struct{}
-
-var (
-	contextRequesterAccountIDKey = &contextRequesterAccountIDType{}
-	contextRequesterRoleIDKey    = &contextRequesterRoleIDType{}
-)
