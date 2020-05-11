@@ -137,7 +137,8 @@ func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 
-	// TODO: Create email confirmation code and send it
+	// TODO: Create email confirmation code and store in DB
+	// TODO: send code to email in db
 
 	json.NewEncoder(w).Encode(s)
 }

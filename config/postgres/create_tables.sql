@@ -25,13 +25,20 @@ CREATE TABLE roles (
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE role_permissions (
+    id BIGSERIAL PRIMARY KEY,
+    role_id BIGINT REFERENCES roles (id) NOT NULL,
+    permission BIGINT NOT NULL,
+    create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE accounts (
     id BIGSERIAL PRIMARY KEY,
     first_name VARCHAR NOT NULL,
     last_name VARCHAR NOT NULL,
     dob date NOT NULL,
     gender VARCHAR(30) DEFAULT NULL,
-    role_id BIGINT REFERENCES roles (id) DEFAULT NULL,
     active BOOLEAN NOT NULL DEFAULT TRUE,
     email CITEXT NOT NULL UNIQUE,
     phone_number VARCHAR(20) UNIQUE DEFAULT NULL,
@@ -39,13 +46,14 @@ CREATE TABLE accounts (
     failed_logins_count INT DEFAULT 0,
     door_code VARCHAR DEFAULT NULL,
     external_payment_customer_id INT DEFAULT NULL,
+    role_id BIGINT REFERENCES roles (id) DEFAULT NULL,
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE confirmation_codes (
     id BIGSERIAL PRIMARY KEY,
-    "type" NUMERIC NOT NULL, -- email or phone number
+    "type" NUMERIC NOT NULL, -- email, phone number or password reset
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
     code VARCHAR NOT NULL,
     confirm_time TIMESTAMP DEFAULT NULL,
