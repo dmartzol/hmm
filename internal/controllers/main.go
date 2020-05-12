@@ -1,4 +1,4 @@
-package handlers
+package controllers
 
 import (
 	"github.com/dmartzol/hackerspace/internal/storage/postgres"

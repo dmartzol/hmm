@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dmartzol/hackerspace/internal/handlers"
+	"github.com/dmartzol/hackerspace/internal/controllers"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
 )
@@ -22,7 +22,7 @@ const (
 
 func main() {
 	log.SetFlags(LstdFlags)
-	api, err := handlers.NewAPI()
+	api, err := controllers.NewAPI()
 	if err != nil {
 		log.Fatalf("error starting api: %+v", err)
 	}
