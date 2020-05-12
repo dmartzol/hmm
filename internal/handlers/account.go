@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -22,7 +22,7 @@ type accountStorage interface {
 	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error)
 }
 
-func (api API) getAccounts(w http.ResponseWriter, r *http.Request) {
+func (api API) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	roleID := ctx.Value(contextRequesterRoleIDKey)
 	if roleID == nil {
@@ -38,7 +38,7 @@ func (api API) getAccounts(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondJSON(w, accs.Restrict(nil))
 }
 
-func (api API) getAccount(w http.ResponseWriter, r *http.Request) {
+func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// fetching requester id
 	requesterID := ctx.Value(contextRequesterAccountIDKey)
@@ -74,7 +74,7 @@ func (api API) getAccount(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondJSON(w, a.Restrict(nil))
 }
 
-func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
+func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	var req models.RegisterRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
@@ -107,7 +107,7 @@ func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	a, err := api.CreateAccount(
+	a, err := api.storage.CreateAccount(
 		req.FirstName,
 		req.LastName,
 		req.Email,
@@ -123,7 +123,7 @@ func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create session and cookie
-	s, err := api.CreateSession(a.ID)
+	s, err := api.storage.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -143,7 +143,7 @@ func (api API) createAccount(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(s)
 }
 
-func (api API) resetPassword(w http.ResponseWriter, r *http.Request) {
+func (api API) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	var req models.ResetPasswordRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
@@ -156,7 +156,7 @@ func (api API) resetPassword(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondText(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
 }
 
-func (api API) confirmEmail(w http.ResponseWriter, r *http.Request) {
+func (api API) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	var req models.ConfirmEmailRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {

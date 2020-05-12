@@ -1,19 +1,12 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 
-	"github.com/dmartzol/hackerspace/internal/storage/postgres"
+	"github.com/dmartzol/hackerspace/internal/handlers"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
-	"golang.org/x/net/context"
-)
-
-const (
-	apiVersionNumber      = "0.0.1"
-	hackerSpaceCookieName = "HackerSpace-Cookie"
 )
 
 const (
@@ -27,27 +20,9 @@ const (
 	LstdFlags     = Ldate | Ltime | Lshortfile // initial values for the standard logger
 )
 
-type storage interface {
-	sessionStorage
-	accountStorage
-}
-
-// API represents something
-type API struct {
-	storage
-}
-
-func newAPI() (*API, error) {
-	db, err := postgres.NewDB()
-	if err != nil {
-		return nil, err
-	}
-	return &API{db}, nil
-}
-
 func main() {
 	log.SetFlags(LstdFlags)
-	api, err := newAPI()
+	api, err := handlers.NewAPI()
 	if err != nil {
 		log.Fatalf("error starting api: %+v", err)
 	}
@@ -57,71 +32,23 @@ func main() {
 	r.Use(
 		middleware.Logger,
 		middleware.Recoverer,
-		api.authMiddleware,
+		api.AuthMiddleware,
 	)
 
-	r.HandleFunc("/version", api.version).Methods("GET")
+	r.HandleFunc("/version", api.Version).Methods("GET")
 
 	// sessions
 	// see: https://stackoverflow.com/questions/7140074/restfully-design-login-or-register-resources
-	r.HandleFunc("/sessions", api.createSession).Methods("POST")
-	r.HandleFunc("/sessions", api.deleteSession).Methods("DELETE")
+	r.HandleFunc("/sessions", api.CreateSession).Methods("POST")
+	r.HandleFunc("/sessions", api.DeleteSession).Methods("DELETE")
 
 	// accounts
-	r.HandleFunc("/accounts", api.createAccount).Methods("POST")
-	r.HandleFunc("/accounts/{id}", api.getAccount).Methods("GET")
-	r.HandleFunc("/accounts", api.getAccounts).Methods("GET")
-	r.HandleFunc("/accounts/{id}/confirm-email", api.confirmEmail).Methods("POST")
-	r.HandleFunc("/accounts/password", api.resetPassword).Methods("POST")
+	r.HandleFunc("/accounts", api.CreateAccount).Methods("POST")
+	r.HandleFunc("/accounts/{id}", api.GetAccount).Methods("GET")
+	r.HandleFunc("/accounts", api.GetAccounts).Methods("GET")
+	r.HandleFunc("/accounts/{id}/confirm-email", api.ConfirmEmail).Methods("POST")
+	r.HandleFunc("/accounts/password", api.ResetPassword).Methods("POST")
 
 	log.Print("listening and serving")
 	log.Fatal(http.ListenAndServe("localhost:8080", r))
-}
-
-func (api API) authMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		publicRoutes := map[string]string{
-			"/v1/version":  "GET",
-			"/v1/sessions": "POST",
-			"/v1/accounts": "POST",
-		}
-		method, in := publicRoutes[r.RequestURI]
-		if in && method == r.Method {
-			next.ServeHTTP(w, r)
-			return
-		}
-		c, err := r.Cookie(hackerSpaceCookieName)
-		if err != nil {
-			if err != http.ErrNoCookie {
-				log.Printf("cookie: %+v", err)
-			}
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-			return
-		}
-		s, err := api.UpdateSession(c.Value)
-		if err != nil {
-			if err == sql.ErrNoRows {
-				log.Printf("UpdateSession: %+v", err)
-				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-				return
-			}
-			log.Printf("UpdateSession: %+v", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-		a, err := api.Account(s.AccountID)
-		if err != nil {
-			log.Printf("Account: %+v", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-
-		// Setting up context
-		ctx := r.Context()
-		ctx = context.WithValue(ctx, contextRequesterAccountIDKey, s.AccountID)
-		if a.RoleID != nil {
-			ctx = context.WithValue(ctx, contextRequesterRoleIDKey, *a.RoleID)
-		}
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
 }

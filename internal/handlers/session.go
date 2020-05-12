@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"log"
@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	// sessionLength represents the duration(in minutes) a session will be valid for
+	// sessionLength represents the duration(in seconds) a session will be valid for
 	sessionLength = 3600
 )
 
@@ -23,7 +23,7 @@ type sessionStorage interface {
 	UpdateSession(identifier string) (*models.Session, error)
 }
 
-func (api API) createSession(w http.ResponseWriter, r *http.Request) {
+func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	var credentials models.LoginCredentials
 	err := httpresponse.Unmarshal(r, &credentials)
 	if err != nil {
@@ -53,7 +53,7 @@ func (api API) createSession(w http.ResponseWriter, r *http.Request) {
 	credentials.Password = ""
 
 	// create session and cookie
-	s, err := api.CreateSession(a.ID)
+	s, err := api.storage.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -68,14 +68,14 @@ func (api API) createSession(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondText(w, "Successfully logged in", http.StatusOK)
 }
 
-func (api API) deleteSession(w http.ResponseWriter, r *http.Request) {
+func (api API) DeleteSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hackerSpaceCookieName)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	err = api.DeleteSession(c.Value)
+	err = api.storage.DeleteSession(c.Value)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
