@@ -29,9 +29,9 @@ type Account struct {
 	ExternalPaymentCustomerID *int64 `db:"external_payment_customer_id"`
 }
 
-// PublicAccount should always be the object used to respond to any request
+// AccountView is the restricted response body of Account
 // see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
-type PublicAccount struct {
+type AccountView struct {
 	Row
 	FirstName, LastName, Email string
 	DOB                        time.Time `json:"DateOfBird"`
@@ -42,10 +42,10 @@ type PublicAccount struct {
 	FailedLoginsCount          int64
 }
 
-// Restrict returns the struct reduced to those fields allowed by options
+// Restrict returns the Account struct restricted to those fields allowed in options
 // see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
-func (a Account) Restrict(options map[string]bool) PublicAccount {
-	r := PublicAccount{
+func (a Account) Restrict(options map[string]bool) AccountView {
+	r := AccountView{
 		Row:               a.Row,
 		FirstName:         a.FirstName,
 		LastName:          a.LastName,
@@ -66,8 +66,8 @@ func (a Account) Restrict(options map[string]bool) PublicAccount {
 	return r
 }
 
-func (accs Accounts) Restrict(options map[string]bool) []PublicAccount {
-	l := []PublicAccount{}
+func (accs Accounts) Restrict(options map[string]bool) []AccountView {
+	l := []AccountView{}
 	for _, a := range accs {
 		l = append(l, a.Restrict(options))
 	}
