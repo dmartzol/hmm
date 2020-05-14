@@ -1,9 +1,5 @@
 package controllers
 
-import (
-	"github.com/dmartzol/hackerspace/internal/storage/postgres"
-)
-
 const (
 	apiVersionNumber      = "0.0.1"
 	hackerSpaceCookieName = "HackerSpace-Cookie"
@@ -19,10 +15,6 @@ type API struct {
 	storage
 }
 
-func NewAPI() (*API, error) {
-	db, err := postgres.NewDB()
-	if err != nil {
-		return nil, err
-	}
+func NewAPI(db storage) (*API, error) {
 	return &API{db}, nil
 }

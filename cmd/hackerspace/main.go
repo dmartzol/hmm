@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dmartzol/hackerspace/internal/controllers"
+	"github.com/dmartzol/hackerspace/internal/storage/postgres"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
 )
@@ -22,7 +23,11 @@ const (
 
 func main() {
 	log.SetFlags(LstdFlags)
-	api, err := controllers.NewAPI()
+	db, err := postgres.NewDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	api, err := controllers.NewAPI(db)
 	if err != nil {
 		log.Fatalf("error starting api: %+v", err)
 	}
