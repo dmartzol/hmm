@@ -140,7 +140,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	// TODO: Create email confirmation code and store in DB
 	// TODO: send code to email in db
 
-	json.NewEncoder(w).Encode(s)
+	json.NewEncoder(w).Encode(a.Restrict(nil))
 }
 
 func (api API) ResetPassword(w http.ResponseWriter, r *http.Request) {
