@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -19,7 +18,8 @@ type accountStorage interface {
 	Accounts() (models.Accounts, error)
 	AccountExists(email string) (bool, error)
 	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
-	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error)
+	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error)
+	CreateConfirmationCode(accountID int64, t models.ConfirmationCodeType) (*models.ConfirmationCode, error)
 }
 
 func (api API) GetAccounts(w http.ResponseWriter, r *http.Request) {
@@ -107,7 +107,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	a, err := api.storage.CreateAccount(
+	a, _, err := api.storage.CreateAccount(
 		req.FirstName,
 		req.LastName,
 		req.Email,
@@ -137,10 +137,9 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 
-	// TODO: Create email confirmation code and store in DB
-	// TODO: send code to email in db
+	// TODO: send confirmation code by email
 
-	json.NewEncoder(w).Encode(a.Restrict(nil))
+	httpresponse.RespondJSON(w, a.Restrict(nil))
 }
 
 func (api API) ResetPassword(w http.ResponseWriter, r *http.Request) {

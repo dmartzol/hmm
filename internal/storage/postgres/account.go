@@ -51,18 +51,47 @@ func (db *DB) AccountWithCredentials(email, allegedPassword string) (*models.Acc
 	return &a, nil
 }
 
-// CreateAccount creates a new account in the db
-func (db *DB) CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error) {
+// CreateAccount creates a new account in the db and a confirmation code for the new registered email
+func (db *DB) CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error) {
 	tx, err := db.Beginx()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var a models.Account
 	sqlStatement := `insert into accounts (first_name, last_name, dob, gender, phone_number, email, passhash) values ($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8))) returning *`
 	err = tx.Get(&a, sqlStatement, first, last, dob, gender, phone, email, password)
 	if err != nil {
 		tx.Rollback()
+		return nil, nil, err
+	}
+	var cc models.ConfirmationCode
+	sqlStatement = `insert into confirmation_codes (type, account_id) values ($1, $2) returning *`
+	err = tx.Get(&cc, sqlStatement, models.ConfirmationCodeTypeEmail, a.ID)
+	if err != nil {
+		tx.Rollback()
+		return nil, nil, err
+	}
+	return &a, &cc, tx.Commit()
+}
+
+func (db *DB) CreateConfirmationCode(accountID int64, t models.ConfirmationCodeType) (*models.ConfirmationCode, error) {
+	tx, err := db.Beginx()
+	if err != nil {
 		return nil, err
 	}
-	return &a, tx.Commit()
+	var ecc models.ConfirmationCode
+	sqlStatement := `update confirmation_codes set expire_time = current_timestamp where confirm_time is null and type = $1 and account_id = $2 returning *`
+	err = tx.Select(&ecc, sqlStatement, t, accountID)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	var cc models.ConfirmationCode
+	sqlStatement = `insert into confirmation_codes (type, account_id) values ($1, $2) returning *`
+	err = tx.Get(&cc, sqlStatement, t, accountID)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return &cc, tx.Commit()
 }

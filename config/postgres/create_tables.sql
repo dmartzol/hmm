@@ -55,9 +55,9 @@ CREATE TABLE confirmation_codes (
     id BIGSERIAL PRIMARY KEY,
     "type" NUMERIC NOT NULL, -- email, phone number or password reset
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
-    code VARCHAR NOT NULL,
+    code UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
     confirm_time TIMESTAMP DEFAULT NULL,
-    expire_time TIMESTAMP NOT NULL,
+    expire_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP + interval '4 hours',
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

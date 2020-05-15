@@ -35,7 +35,7 @@ func (db *MockDB) AccountWithCredentials(email, allegedPassword string) (*models
 	return &a, nil
 }
 
-func (db *MockDB) CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, error) {
+func (db *MockDB) CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error) {
 	a := models.Account{
 		Row: models.Row{
 			ID:         1,
@@ -48,7 +48,8 @@ func (db *MockDB) CreateAccount(first, last, email, password string, dob time.Ti
 		DOB:       dob,
 		Gender:    gender,
 	}
-	return &a, nil
+	var cc models.ConfirmationCode
+	return &a, &cc, nil
 }
 
 func (db *MockDB) SessionFromIdentifier(identifier string) (*models.Session, error) {
@@ -72,4 +73,9 @@ func (db *MockDB) CleanSessionsOlderThan(age time.Duration) (int64, error) {
 func (db *MockDB) UpdateSession(sessionToken string) (*models.Session, error) {
 	var s models.Session
 	return &s, nil
+}
+
+func (db *MockDB) CreateConfirmationCode(accountID int64, t models.ConfirmationCodeType) (*models.ConfirmationCode, error) {
+	var cc models.ConfirmationCode
+	return &cc, nil
 }
