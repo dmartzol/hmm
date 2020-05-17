@@ -46,9 +46,9 @@ type AccountView struct {
 	FailedLoginsCount          int64
 }
 
-// Restrict returns the Account struct restricted to those fields allowed in options
+// View returns the Account struct restricted to those fields allowed in options
 // see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
-func (a Account) Restrict(options map[string]bool) AccountView {
+func (a Account) View(options map[string]bool) AccountView {
 	r := AccountView{
 		Row:               a.Row,
 		FirstName:         a.FirstName,
@@ -70,10 +70,10 @@ func (a Account) Restrict(options map[string]bool) AccountView {
 	return r
 }
 
-func (accs Accounts) Restrict(options map[string]bool) []AccountView {
+func (accs Accounts) Views(options map[string]bool) []AccountView {
 	l := []AccountView{}
 	for _, a := range accs {
-		l = append(l, a.Restrict(options))
+		l = append(l, a.View(options))
 	}
 	return l
 }
