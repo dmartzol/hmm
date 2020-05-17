@@ -53,13 +53,14 @@ CREATE TABLE accounts (
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE confirmation_codes (
+CREATE TABLE confirmations (
     id BIGSERIAL PRIMARY KEY,
     "type" NUMERIC NOT NULL, -- email, phone number or password reset
     confirmation_target VARCHAR DEFAULT NULL,
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
     key VARCHAR NOT NULL UNIQUE,
     confirm_time TIMESTAMP DEFAULT NULL,
+    failed_confirmations_count INT DEFAULT 0,
     expire_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP + interval '5 minutes',
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

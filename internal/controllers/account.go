@@ -19,8 +19,11 @@ type accountStorage interface {
 	Accounts() (models.Accounts, error)
 	AccountExists(email string) (bool, error)
 	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
-	CreateAccount(first, last, email, password, confirmationCode string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error)
-	CreateConfirmationCode(accountID int64, t models.ConfirmationCodeType) (*models.ConfirmationCode, error)
+	CreateAccount(first, last, email, password, confirmationCode string, dob time.Time, gender, phone *string) (*models.Account, *models.Confirmation, error)
+	CreateConfirmation(accountID int64, t models.ConfirmationType) (*models.Confirmation, error)
+	PendingConfirmationByKey(key string) (*models.Confirmation, error)
+	FailedConfirmationIncrease(id int64) (*models.Confirmation, error)
+	Confirm(id int64) (*models.Confirmation, error)
 }
 
 func (api API) GetAccounts(w http.ResponseWriter, r *http.Request) {
@@ -165,17 +168,65 @@ func (api API) ResetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api API) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	// fetching requester id
+	requesterID := ctx.Value(contextRequesterAccountIDKey)
+	if requesterID == nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	a, err := api.Account(requesterID.(int64))
+	if err != nil {
+		log.Printf("Account: %+v", err)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
 	var req models.ConfirmEmailRequest
-	err := httpresponse.Unmarshal(r, &req)
+	err = httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-
-	// TODO: fetch query parameter with confirmation code
-	// TODO: check if code matches in db
-
+	c, err := api.PendingConfirmationByKey(req.ConfirmationKey)
+	if err != nil {
+		log.Printf("PendingConfirmationByKey: %+v", err)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	if c.FailedConfirmationsCount >= 3 {
+		log.Printf("FailedConfirmationsCount: %d", c.FailedConfirmationsCount)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	// check if user is trying to confirm current email
+	if c.ConfirmationTarget == nil {
+		log.Printf("confirmation target is null for key %s", req.ConfirmationKey)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	if a.Email != *c.ConfirmationTarget {
+		log.Printf("confirmation target %s does not match account email %s", *c.ConfirmationTarget, a.Email)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	// check if keys match
+	if c.Key != req.ConfirmationKey {
+		_, err := api.FailedConfirmationIncrease(c.ID)
+		if err != nil {
+			log.Printf("FailedConfirmationIncrease: %+v", err)
+		}
+		log.Printf("confirmation target %s does not match account email %s", *c.ConfirmationTarget, a.Email)
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	// confirmation went OK
+	_, err = api.Confirm(c.ID)
+	if err != nil {
+		log.Printf("Confirm: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Email has been confirmed.")
 }

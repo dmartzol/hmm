@@ -35,7 +35,7 @@ func (db *MockDB) AccountWithCredentials(email, allegedPassword string) (*models
 	return &a, nil
 }
 
-func (db *MockDB) CreateAccount(first, last, email, password, confirmationCode string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error) {
+func (db *MockDB) CreateAccount(first, last, email, password, confirmationCode string, dob time.Time, gender, phone *string) (*models.Account, *models.Confirmation, error) {
 	a := models.Account{
 		Row: models.Row{
 			ID:         1,
@@ -48,7 +48,7 @@ func (db *MockDB) CreateAccount(first, last, email, password, confirmationCode s
 		DOB:       dob,
 		Gender:    gender,
 	}
-	var cc models.ConfirmationCode
+	var cc models.Confirmation
 	return &a, &cc, nil
 }
 
@@ -75,7 +75,22 @@ func (db *MockDB) UpdateSession(sessionToken string) (*models.Session, error) {
 	return &s, nil
 }
 
-func (db *MockDB) CreateConfirmationCode(accountID int64, t models.ConfirmationCodeType) (*models.ConfirmationCode, error) {
-	var cc models.ConfirmationCode
+func (db *MockDB) CreateConfirmation(accountID int64, t models.ConfirmationType) (*models.Confirmation, error) {
+	var cc models.Confirmation
 	return &cc, nil
+}
+
+func (db *MockDB) PendingConfirmationByKey(key string) (*models.Confirmation, error) {
+	var c models.Confirmation
+	return &c, nil
+}
+
+func (db *MockDB) FailedConfirmationIncrease(id int64) (*models.Confirmation, error) {
+	var c models.Confirmation
+	return &c, nil
+}
+
+func (db *MockDB) Confirm(id int64) (*models.Confirmation, error) {
+	var c models.Confirmation
+	return &c, nil
 }

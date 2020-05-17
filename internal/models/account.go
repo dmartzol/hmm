@@ -122,5 +122,5 @@ type ResetPasswordRequest struct {
 }
 
 type ConfirmEmailRequest struct {
-	ConfirmationCode string
+	ConfirmationKey string
 }
