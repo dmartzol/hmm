@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dmartzol/hackerspace/internal/models"
+	"github.com/dmartzol/hmmm/internal/models"
 	_ "github.com/lib/pq"
 )
 

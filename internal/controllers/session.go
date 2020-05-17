@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dmartzol/hackerspace/internal/models"
-	"github.com/dmartzol/hackerspace/pkg/httpresponse"
+	"github.com/dmartzol/hmmm/internal/models"
+	"github.com/dmartzol/hmmm/pkg/httpresponse"
 )
 
 const (

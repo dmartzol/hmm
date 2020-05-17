@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/dmartzol/hackerspace/pkg/environment"
+	"github.com/dmartzol/hmmm/pkg/environment"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )

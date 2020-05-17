@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/dmartzol/hackerspace/internal/controllers"
-	"github.com/dmartzol/hackerspace/internal/storage/mockdb"
+	"github.com/dmartzol/hmmm/internal/controllers"
+	"github.com/dmartzol/hmmm/internal/storage/mockdb"
 )
 
 var api *controllers.API

@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dmartzol/hackerspace/internal/models"
-	"github.com/dmartzol/hackerspace/pkg/httpresponse"
-	"github.com/dmartzol/hackerspace/pkg/randutil"
-	"github.com/dmartzol/hackerspace/pkg/timeutils"
+	"github.com/dmartzol/hmmm/internal/models"
+	"github.com/dmartzol/hmmm/pkg/httpresponse"
+	"github.com/dmartzol/hmmm/pkg/randutil"
+	"github.com/dmartzol/hmmm/pkg/timeutils"
 	"github.com/gorilla/mux"
 )
 

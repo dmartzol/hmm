@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dmartzol/hackerspace/pkg/timeutils"
+	"github.com/dmartzol/hmmm/pkg/timeutils"
 )
 
 type Accounts []*Account
