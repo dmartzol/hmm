@@ -39,9 +39,11 @@ CREATE TABLE accounts (
     last_name VARCHAR NOT NULL,
     dob date NOT NULL,
     gender VARCHAR(30) DEFAULT NULL,
-    active BOOLEAN NOT NULL DEFAULT TRUE,
+    active BOOLEAN NOT NULL DEFAULT FALSE,
     email CITEXT NOT NULL UNIQUE,
+    confirmed_email BOOLEAN DEFAULT FALSE,
     phone_number VARCHAR(20) UNIQUE DEFAULT NULL,
+    confirmed_phone BOOLEAN DEFAULT FALSE,
     passhash TEXT NOT NULL,
     failed_logins_count INT DEFAULT 0,
     door_code VARCHAR DEFAULT NULL,
@@ -54,8 +56,9 @@ CREATE TABLE accounts (
 CREATE TABLE confirmation_codes (
     id BIGSERIAL PRIMARY KEY,
     "type" NUMERIC NOT NULL, -- email, phone number or password reset
+    confirmation_target VARCHAR DEFAULT NULL,
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
-    code UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
+    key VARCHAR NOT NULL UNIQUE,
     confirm_time TIMESTAMP DEFAULT NULL,
     expire_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP + interval '4 hours',
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -78,7 +81,7 @@ CREATE TABLE addresses (
     city VARCHAR(20) NOT NULL,
     state_code VARCHAR(2) NOT NULL,
     street VARCHAR(80) NOT NULL,
-    -- zip
+    zip_code VARCHAR NOT NULL,
     "type" INT NOT NULL, -- type address and type billing address
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -108,6 +111,7 @@ CREATE TABLE authorizations (
     controller_id BIGINT REFERENCES equipment (id),
     "type" INT NOT NULL,
     "description" text,
+    renewable BOOLEAN NOT NULL,
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -118,6 +122,7 @@ CREATE TABLE account_authorizations (
     authorization_id BIGINT REFERENCES authorizations (id) NOT NULL,
     active BOOLEAN NOT NULL,
     efective_time TIMESTAMP,
+    renewal_time TIMESTAMP,
     expire_time TIMESTAMP,
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

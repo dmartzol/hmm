@@ -18,7 +18,7 @@ type accountStorage interface {
 	Accounts() (models.Accounts, error)
 	AccountExists(email string) (bool, error)
 	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
-	CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error)
+	CreateAccount(first, last, email, password, confirmationCode string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error)
 	CreateConfirmationCode(accountID int64, t models.ConfirmationCodeType) (*models.ConfirmationCode, error)
 }
 
@@ -112,6 +112,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		req.LastName,
 		req.Email,
 		req.Password,
+		"111111",
 		parsedDOB,
 		req.Gender,
 		req.PhoneNumber,

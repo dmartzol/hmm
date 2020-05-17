@@ -35,7 +35,7 @@ func (db *MockDB) AccountWithCredentials(email, allegedPassword string) (*models
 	return &a, nil
 }
 
-func (db *MockDB) CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error) {
+func (db *MockDB) CreateAccount(first, last, email, password, confirmationCode string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error) {
 	a := models.Account{
 		Row: models.Row{
 			ID:         1,

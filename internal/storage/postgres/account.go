@@ -52,7 +52,7 @@ func (db *DB) AccountWithCredentials(email, allegedPassword string) (*models.Acc
 }
 
 // CreateAccount creates a new account in the db and a confirmation code for the new registered email
-func (db *DB) CreateAccount(first, last, email, password string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error) {
+func (db *DB) CreateAccount(first, last, email, password, confirmationCode string, dob time.Time, gender, phone *string) (*models.Account, *models.ConfirmationCode, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, nil, err
@@ -65,8 +65,8 @@ func (db *DB) CreateAccount(first, last, email, password string, dob time.Time, 
 		return nil, nil, err
 	}
 	var cc models.ConfirmationCode
-	sqlStatement = `insert into confirmation_codes (type, account_id) values ($1, $2) returning *`
-	err = tx.Get(&cc, sqlStatement, models.ConfirmationCodeTypeEmail, a.ID)
+	sqlStatement = `insert into confirmation_codes (type, account_id, key) values ($1, $2, $3) returning *`
+	err = tx.Get(&cc, sqlStatement, models.ConfirmationCodeTypeEmail, a.ID, confirmationCode)
 	if err != nil {
 		tx.Rollback()
 		return nil, nil, err

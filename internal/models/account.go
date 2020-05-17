@@ -23,7 +23,10 @@ type Account struct {
 	DoorCode          *string `db:"door_code"`
 	PassHash          string
 	Email             string
+	ConfirmedEmail    bool    `db:"confirmed_email"`
 	PhoneNumber       *string `db:"phone_number"`
+	ConfirmedPhone    bool    `db:"confirmed_phone"`
+	ZipCode           string  `db:"zip_code"`
 
 	RoleID                    *int64 `db:"role_id"`
 	ExternalPaymentCustomerID *int64 `db:"external_payment_customer_id"`
@@ -86,10 +89,13 @@ type RegisterRequest struct {
 
 func (r RegisterRequest) Validate() error {
 	if r.FirstName == "" {
-		return errors.New("must provide first name")
+		return errors.New("first name is required")
 	}
 	if r.LastName == "" {
-		return errors.New("must provide last name")
+		return errors.New("last name is required")
+	}
+	if r.Email == "" {
+		return errors.New("email is required")
 	}
 	if len(r.Password) < 6 {
 		return errors.New("password too short")
