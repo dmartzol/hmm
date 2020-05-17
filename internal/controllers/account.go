@@ -9,6 +9,7 @@ import (
 
 	"github.com/dmartzol/hackerspace/internal/models"
 	"github.com/dmartzol/hackerspace/pkg/httpresponse"
+	"github.com/dmartzol/hackerspace/pkg/randutil"
 	"github.com/dmartzol/hackerspace/pkg/timeutils"
 	"github.com/gorilla/mux"
 )
@@ -107,12 +108,19 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	code, err := randutil.RandomCode(6)
+	if err != nil {
+		log.Printf("RandomCode: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("confirmation code: %s", code)
 	a, _, err := api.storage.CreateAccount(
 		req.FirstName,
 		req.LastName,
 		req.Email,
 		req.Password,
-		"111111",
+		code,
 		parsedDOB,
 		req.Gender,
 		req.PhoneNumber,
