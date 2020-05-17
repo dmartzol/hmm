@@ -1,5 +1,15 @@
-# Hmmm!
-## Hackerspace Membership Micro Management!
+# Hmmm! (Hackerspace Membership Micro Management!)
+
+## Description
+
+
+## Features
+
+* PostgreSQL
+* Sessions, cookies, permissions
+* Management of Hackerspace equipment authorizations
+* Dependency Injection to mock database and create unit tests
+
 
 ## Credits
 
