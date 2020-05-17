@@ -19,15 +19,15 @@ type Account struct {
 	DOB               time.Time
 	Gender            *string
 	Active            bool
-	Reviewed          bool
 	FailedLoginsCount int64   `db:"failed_logins_count"`
 	DoorCode          *string `db:"door_code"`
 	PassHash          string
 	Email             string
-	ConfirmedEmail    bool    `db:"confirmed_email"`
-	PhoneNumber       *string `db:"phone_number"`
-	ConfirmedPhone    bool    `db:"confirmed_phone"`
-	ZipCode           string  `db:"zip_code"`
+	ConfirmedEmail    bool       `db:"confirmed_email"`
+	PhoneNumber       *string    `db:"phone_number"`
+	ConfirmedPhone    bool       `db:"confirmed_phone"`
+	ZipCode           string     `db:"zip_code"`
+	ReviewTime        *time.Time `db:"review_time"`
 
 	RoleID                    *int64 `db:"role_id"`
 	ExternalPaymentCustomerID *int64 `db:"external_payment_customer_id"`

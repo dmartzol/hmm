@@ -40,7 +40,6 @@ CREATE TABLE accounts (
     dob date NOT NULL,
     gender VARCHAR DEFAULT NULL,
     active BOOLEAN NOT NULL DEFAULT FALSE,
-    reviewed BOOLEAN NOT NULL DEFAULT FALSE,
     email CITEXT NOT NULL UNIQUE,
     confirmed_email BOOLEAN DEFAULT FALSE CHECK  (confirmed_email OR NOT active),
     phone_number VARCHAR UNIQUE DEFAULT NULL,
@@ -56,19 +55,19 @@ CREATE TABLE accounts (
 
 ALTER TABLE accounts ADD CONSTRAINT external_payment_restrictions CHECK
 (
-    (confirmed_email AND reviewed)
+    (confirmed_email AND review_time IS NOT NULL)
     OR
     (NOT confirmed_email AND external_payment_customer_id IS NULL)
     OR
-    (NOT reviewed AND external_payment_customer_id IS NULL)
+    (review_time IS NULL AND external_payment_customer_id IS NULL)
 );
 ALTER TABLE accounts ADD CONSTRAINT active_restrictions CHECK
 (
-    (confirmed_email AND reviewed)
+    (confirmed_email AND review_time IS NOT NULL)
     OR
     (NOT confirmed_email AND NOT active)
     OR
-    (NOT reviewed AND NOT active)
+    (review_time IS NULL AND NOT active)
 );
 
 CREATE TABLE account_roles (
