@@ -65,8 +65,8 @@ func (db *DB) CreateAccount(first, last, email, password, confirmationCode strin
 		return nil, nil, err
 	}
 	var cc models.ConfirmationCode
-	sqlStatement = `insert into confirmation_codes (type, account_id, key) values ($1, $2, $3) returning *`
-	err = tx.Get(&cc, sqlStatement, models.ConfirmationCodeTypeEmail, a.ID, confirmationCode)
+	sqlStatement = `insert into confirmation_codes (type, account_id, key, confirmation_target) values ($1, $2, $3, $4) returning *`
+	err = tx.Get(&cc, sqlStatement, models.ConfirmationCodeTypeEmail, a.ID, confirmationCode, email)
 	if err != nil {
 		tx.Rollback()
 		return nil, nil, err

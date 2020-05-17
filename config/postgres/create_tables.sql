@@ -60,7 +60,7 @@ CREATE TABLE confirmation_codes (
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
     key VARCHAR NOT NULL UNIQUE,
     confirm_time TIMESTAMP DEFAULT NULL,
-    expire_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP + interval '4 hours',
+    expire_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP + interval '5 minutes',
     create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
