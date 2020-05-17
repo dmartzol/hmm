@@ -117,7 +117,6 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("confirmation code: %s", code)
 	a, _, err := api.storage.CreateAccount(
 		req.FirstName,
 		req.LastName,
@@ -133,6 +132,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	log.Printf("confirmation key: %s", code)
 
 	// create session and cookie
 	s, err := api.storage.CreateSession(a.ID)
@@ -149,7 +149,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, cookie)
 
-	// TODO: send confirmation code by email
+	// TODO: send confirmation key by email
 
 	httpresponse.RespondJSON(w, a.Restrict(nil))
 }
@@ -162,7 +162,7 @@ func (api API) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	// TODO: create confirmation code in db
+	// TODO: create confirmation key in db
 	// TODO: send email with link to reset password
 	httpresponse.RespondText(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
 }
