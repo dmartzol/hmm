@@ -19,6 +19,7 @@ type Account struct {
 	DOB               time.Time
 	Gender            *string
 	Active            bool
+	Reviewed          bool
 	FailedLoginsCount int64   `db:"failed_logins_count"`
 	DoorCode          *string `db:"door_code"`
 	PassHash          string

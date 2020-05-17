@@ -40,6 +40,7 @@ CREATE TABLE accounts (
     dob date NOT NULL,
     gender VARCHAR(30) DEFAULT NULL,
     active BOOLEAN NOT NULL DEFAULT FALSE,
+    reviewed BOOLEAN NOT NULL DEFAULT FALSE,
     email CITEXT NOT NULL UNIQUE,
     confirmed_email BOOLEAN DEFAULT FALSE,
     phone_number VARCHAR(20) UNIQUE DEFAULT NULL,
