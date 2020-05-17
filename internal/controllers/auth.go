@@ -19,7 +19,7 @@ func (api API) AuthMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		c, err := r.Cookie(hackerSpaceCookieName)
+		c, err := r.Cookie(hmmmCookieName)
 		if err != nil {
 			if err != http.ErrNoCookie {
 				log.Printf("cookie: %+v", err)

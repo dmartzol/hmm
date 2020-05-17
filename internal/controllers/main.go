@@ -1,8 +1,8 @@
 package controllers
 
 const (
-	apiVersionNumber      = "0.0.1"
-	hackerSpaceCookieName = "HackerSpace-Cookie"
+	apiVersionNumber = "0.0.1"
+	hmmmCookieName   = "Hmmm-Cookie"
 )
 
 type storage interface {

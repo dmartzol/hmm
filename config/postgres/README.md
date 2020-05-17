@@ -2,7 +2,7 @@
 
 ## For first time dabase setup run these:
 
-`psql -tc "SELECT 1 FROM pg_database WHERE datname = 'hackerspace'" | grep -q 1 || psql -c "CREATE DATABASE hackerspace"`
+`psql -tc "SELECT 1 FROM pg_database WHERE datname = 'hmmm'" | grep -q 1 || psql -c "CREATE DATABASE hmmm"`
 
 `psql -f create.sql`
 

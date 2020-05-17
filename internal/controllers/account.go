@@ -143,7 +143,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{
-		Name:   hackerSpaceCookieName,
+		Name:   hmmmCookieName,
 		Value:  s.SessionIdentifier,
 		MaxAge: sessionLength,
 	}

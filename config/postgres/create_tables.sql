@@ -1,5 +1,5 @@
 
-\c hackerspace
+\c hmmm
 SET client_min_messages TO WARNING;
 
 -- Trigger update update_time column
