@@ -103,5 +103,5 @@ func (api API) DeleteSession(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	}
 	http.SetCookie(w, c)
-	httpresponse.RespondText(w, "Session deleted.", http.StatusOK)
+	httpresponse.RespondJSON(w, models.Session{}.View(nil))
 }
