@@ -81,7 +81,7 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 		MaxAge: sessionLength,
 	}
 	http.SetCookie(w, cookie)
-	httpresponse.RespondText(w, "Successfully logged in", http.StatusOK)
+	httpresponse.RespondJSON(w, s.View(nil))
 }
 
 func (api API) DeleteSession(w http.ResponseWriter, r *http.Request) {
