@@ -41,6 +41,7 @@ func main() {
 	// sessions
 	// see: https://stackoverflow.com/questions/7140074/restfully-design-login-or-register-resources
 	r.HandleFunc("/sessions", api.CreateSession).Methods("POST")
+	r.HandleFunc("/sessions", api.GetSession).Methods("GET")
 	r.HandleFunc("/sessions", api.DeleteSession).Methods("DELETE")
 
 	// accounts

@@ -23,6 +23,22 @@ type sessionStorage interface {
 	UpdateSession(identifier string) (*models.Session, error)
 }
 
+func (api API) GetSession(w http.ResponseWriter, r *http.Request) {
+	c, err := r.Cookie(hmmmCookieName)
+	if err != nil {
+		log.Printf("%+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	s, err := api.storage.SessionFromIdentifier(c.Value)
+	if err != nil {
+		log.Printf("%+v", err)
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return
+	}
+	httpresponse.RespondJSON(w, s.View(nil))
+}
+
 func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	var credentials models.LoginCredentials
 	err := httpresponse.Unmarshal(r, &credentials)

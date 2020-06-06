@@ -12,6 +12,19 @@ type Session struct {
 	SessionIdentifier string    `db:"session_id"`
 }
 
+type SessionView struct {
+	AccountID        int64
+	LastActivityTime time.Time
+}
+
+func (s Session) View(options map[string]bool) SessionView {
+	view := SessionView{
+		AccountID:        s.AccountID,
+		LastActivityTime: s.LastActivityTime,
+	}
+	return view
+}
+
 type LoginCredentials struct {
 	Email    string
 	Password string
