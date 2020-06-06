@@ -33,7 +33,5 @@ func RespondJSON(w http.ResponseWriter, object interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 
-	//Allow CORS here By * or specific origin
-	// w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(object)
 }

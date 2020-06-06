@@ -8,6 +8,7 @@ import (
 	"github.com/dmartzol/hmmm/internal/storage/postgres"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 const (
@@ -34,11 +35,6 @@ func main() {
 
 	r := mux.NewRouter()
 	r = r.PathPrefix("/v1").Subrouter()
-	r.Use(
-		middleware.Logger,
-		middleware.Recoverer,
-		api.AuthMiddleware,
-	)
 
 	r.HandleFunc("/version", api.Version).Methods("GET")
 
@@ -54,6 +50,19 @@ func main() {
 	r.HandleFunc("/accounts/{id}/confirm-email", api.ConfirmEmail).Methods("POST")
 	r.HandleFunc("/accounts/password", api.ResetPassword).Methods("POST")
 
+	r.Use(
+		middleware.Logger,
+		middleware.Recoverer,
+		api.AuthMiddleware,
+	)
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowCredentials: true,
+		// Enable Debugging for testing, consider disabling in production
+		// Debug: true,
+	})
+
 	log.Print("listening and serving")
-	log.Fatal(http.ListenAndServe("localhost:8080", r))
+	log.Fatal(http.ListenAndServe("localhost:3001", c.Handler(r)))
 }
