@@ -1,10 +1,10 @@
 package models
 
-type RolePermission int
+type RolePermission string
 
 const (
-	PermissionAccountsView RolePermission = iota
-	PermissionAccountsEdit
-	PermissionAccountsDeactivate
-	PermissionAuthorizationAdd
+	PermissionAccountsView        RolePermission = "accounts-view"
+	PermissionAccountsEdit                       = "accounts-edit"
+	PermissionAccountsDeactivate                 = "accounts-deactivate"
+	PermissionAuthorizationCreate                = "authorizations-create"
 )
