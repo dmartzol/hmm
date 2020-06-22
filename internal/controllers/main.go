@@ -8,6 +8,7 @@ const (
 type storage interface {
 	sessionStorage
 	accountStorage
+	roleStorage
 }
 
 // API represents something

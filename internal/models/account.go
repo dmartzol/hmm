@@ -48,7 +48,7 @@ type AccountView struct {
 // View returns the Account struct restricted to those fields allowed in options
 // see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
 func (a Account) View(options map[string]bool) AccountView {
-	r := AccountView{
+	view := AccountView{
 		FirstName:         a.FirstName,
 		LastName:          a.LastName,
 		DOB:               a.DOB,
@@ -57,15 +57,15 @@ func (a Account) View(options map[string]bool) AccountView {
 		Email:             a.Email,
 	}
 	if a.DoorCode != nil && options["door_code"] {
-		r.DoorCode = *a.DoorCode
+		view.DoorCode = *a.DoorCode
 	}
 	if a.PhoneNumber != nil && options["phone_number"] {
-		r.PhoneNumber = *a.PhoneNumber
+		view.PhoneNumber = *a.PhoneNumber
 	}
 	if a.Gender != nil {
-		r.Gender = *a.Gender
+		view.Gender = *a.Gender
 	}
-	return r
+	return view
 }
 
 func (accs Accounts) Views(options map[string]bool) []AccountView {

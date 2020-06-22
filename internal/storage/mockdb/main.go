@@ -94,3 +94,12 @@ func (db *MockDB) Confirm(id int64) (*models.Confirmation, error) {
 	var c models.Confirmation
 	return &c, nil
 }
+
+func (db *MockDB) RoleExists(name string) (bool, error) {
+	return false, nil
+}
+
+func (db *MockDB) CreateRole(name string) (*models.Role, error) {
+	var r models.Role
+	return &r, nil
+}
