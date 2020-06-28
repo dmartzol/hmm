@@ -14,23 +14,25 @@ type Accounts []*Account
 // Account represents a user account
 type Account struct {
 	Row
-	FirstName         string `db:"first_name"`
-	LastName          string `db:"last_name"`
-	DOB               time.Time
-	Gender            *string
-	Active            bool
-	FailedLoginsCount int64   `db:"failed_logins_count"`
-	DoorCode          *string `db:"door_code"`
-	PassHash          string
-	Email             string
-	ConfirmedEmail    bool       `db:"confirmed_email"`
-	PhoneNumber       *string    `db:"phone_number"`
-	ConfirmedPhone    bool       `db:"confirmed_phone"`
-	ZipCode           string     `db:"zip_code"`
-	ReviewTime        *time.Time `db:"review_time"`
+	FirstName                 string `db:"first_name"`
+	LastName                  string `db:"last_name"`
+	DOB                       time.Time
+	Gender                    *string
+	Active                    bool
+	FailedLoginsCount         int64   `db:"failed_logins_count"`
+	DoorCode                  *string `db:"door_code"`
+	PassHash                  string
+	Email                     string
+	ConfirmedEmail            bool       `db:"confirmed_email"`
+	PhoneNumber               *string    `db:"phone_number"`
+	ConfirmedPhone            bool       `db:"confirmed_phone"`
+	ZipCode                   string     `db:"zip_code"`
+	ReviewTime                *time.Time `db:"review_time"`
+	ExternalPaymentCustomerID *int64     `db:"external_payment_customer_id"`
 
-	RoleID                    *int64 `db:"role_id"`
-	ExternalPaymentCustomerID *int64 `db:"external_payment_customer_id"`
+	// fields to populate
+	PermissionBit *int
+	Roles         Roles
 }
 
 // AccountView is the restricted response body of Account
@@ -48,7 +50,7 @@ type AccountView struct {
 // View returns the Account struct restricted to those fields allowed in options
 // see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
 func (a Account) View(options map[string]bool) AccountView {
-	r := AccountView{
+	view := AccountView{
 		FirstName:         a.FirstName,
 		LastName:          a.LastName,
 		DOB:               a.DOB,
@@ -57,15 +59,15 @@ func (a Account) View(options map[string]bool) AccountView {
 		Email:             a.Email,
 	}
 	if a.DoorCode != nil && options["door_code"] {
-		r.DoorCode = *a.DoorCode
+		view.DoorCode = *a.DoorCode
 	}
 	if a.PhoneNumber != nil && options["phone_number"] {
-		r.PhoneNumber = *a.PhoneNumber
+		view.PhoneNumber = *a.PhoneNumber
 	}
 	if a.Gender != nil {
-		r.Gender = *a.Gender
+		view.Gender = *a.Gender
 	}
-	return r
+	return view
 }
 
 func (accs Accounts) Views(options map[string]bool) []AccountView {

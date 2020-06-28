@@ -24,19 +24,6 @@ func init() {
 	}
 }
 
-func TestGetAccount(t *testing.T) {
-	req, err := http.NewRequest("GET", "/accounts/1", nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(api.GetAccount)
-	handler.ServeHTTP(rr, req)
-	if status := rr.Code; status != http.StatusUnauthorized {
-		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusUnauthorized)
-	}
-}
-
 func TestCreateAccount(t *testing.T) {
 	var jsonStr = []byte(`{"FirstName":"Daniel","LastName":"Martinez","DOB":"2020-01-01","Gender":"M","PhoneNumber":"+14443332222","Email":"random@email.com","Password":"randompass"}`)
 

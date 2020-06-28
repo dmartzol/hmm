@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -28,11 +29,14 @@ type accountStorage interface {
 
 func (api API) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	roleID := ctx.Value(contextRequesterRoleIDKey)
-	if roleID == nil {
+	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
+	err := api.AuthorizeAccount(requesterID, models.PermissionAccountsView)
+	if err != nil {
+		log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
+
 	accs, err := api.Accounts()
 	if err != nil {
 		log.Printf("accounts: %+v", err)
@@ -43,14 +47,6 @@ func (api API) GetAccounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	// fetching requester id
-	requesterID := ctx.Value(contextRequesterAccountIDKey)
-	if requesterID == nil {
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
-	}
-
 	// parsing parameters
 	params := mux.Vars(r)
 	idString, ok := params["id"]
@@ -58,18 +54,26 @@ func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "parameter 'id' not found", http.StatusBadRequest)
 		return
 	}
-	requestedAccountID, err := strconv.ParseInt(idString, 10, 64)
+	accountID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
 		return
 	}
 
 	// checking permissions
-	if requesterID != requestedAccountID {
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-		return
+	ctx := r.Context()
+	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
+	if requesterID != accountID {
+		err := api.AuthorizeAccount(requesterID, models.PermissionAccountsView)
+		if err != nil {
+			log.Printf("WARNING: account %d requested to see account %d", requesterID, accountID)
+			log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
 	}
-	a, err := api.Account(requestedAccountID)
+
+	a, err := api.Account(accountID)
 	if err != nil {
 		log.Printf("Account: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -229,4 +233,46 @@ func (api API) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Email has been confirmed.")
+}
+
+func (api API) AddAccountRole(w http.ResponseWriter, r *http.Request) {
+	var req models.AddAccountRoleReq
+	err := httpresponse.Unmarshal(r, &req)
+	if err != nil {
+		log.Printf("AddAccountRole Unmarshal ERROR: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	// parsing parameters
+	params := mux.Vars(r)
+	idString, ok := params["id"]
+	if !ok {
+		http.Error(w, "parameter 'id' not found", http.StatusBadRequest)
+		return
+	}
+	requestedAccountID, err := strconv.ParseInt(idString, 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
+		return
+	}
+
+	role, err := api.Role(req.RoleID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("AddAccountRole Role ERROR: %+v", err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+		log.Printf("AddAccountRole Role ERROR: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	accRole, err := api.storage.AddAccountRole(role.ID, requestedAccountID)
+	if err != nil {
+		log.Printf("AddAccountRole storage.AddAccountRole ERROR: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	httpresponse.RespondJSON(w, accRole.View(nil))
 }

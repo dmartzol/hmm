@@ -50,6 +50,10 @@ func main() {
 	r.HandleFunc("/accounts", api.GetAccounts).Methods("GET")
 	r.HandleFunc("/accounts/{id}/confirm-email", api.ConfirmEmail).Methods("POST")
 	r.HandleFunc("/accounts/password", api.ResetPassword).Methods("POST")
+	r.HandleFunc("/accounts/{id}/roles", api.AddAccountRole).Methods("POST")
+
+	// roles
+	r.HandleFunc("/roles", api.CreateRole).Methods("POST")
 
 	r.Use(
 		middleware.Logger,

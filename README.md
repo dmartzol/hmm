@@ -1,4 +1,4 @@
-# Hmmm! (Hackerspace Membership Micro Management!)
+# Hmm! (Hackerspace Membership Management!)
 
 ## Description
 
