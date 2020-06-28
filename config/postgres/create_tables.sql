@@ -17,56 +17,32 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 BEGIN;
 
-CREATE TABLE roles (
-    id BIGSERIAL PRIMARY KEY,
-    "name" TEXT UNIQUE,
-    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE role_permissions (
-    id BIGSERIAL PRIMARY KEY,
-    role_id BIGINT REFERENCES roles (id) NOT NULL,
-    permission BIGINT NOT NULL,
-    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE accounts (
     id BIGSERIAL PRIMARY KEY,
     first_name VARCHAR NOT NULL,
     last_name VARCHAR NOT NULL,
     dob date NOT NULL,
     gender VARCHAR DEFAULT NULL,
-    active BOOLEAN NOT NULL DEFAULT FALSE,
+    active BOOLEAN NOT NULL DEFAULT FALSE CHECK ((confirmed_email AND review_time IS NOT NULL) OR NOT active),
     email CITEXT NOT NULL UNIQUE,
-    confirmed_email BOOLEAN DEFAULT FALSE CHECK  (confirmed_email OR NOT active),
+    confirmed_email BOOLEAN DEFAULT FALSE,
     phone_number VARCHAR UNIQUE DEFAULT NULL,
     confirmed_phone BOOLEAN DEFAULT FALSE,
     passhash TEXT NOT NULL,
     failed_logins_count INT DEFAULT 0,
     door_code VARCHAR DEFAULT NULL,
-    external_payment_customer_id INT DEFAULT NULL,
+    external_payment_customer_id INT DEFAULT NULL CHECK ((confirmed_email and review_time IS NOT NULL) OR external_payment_customer_id IS NULL),
     review_time TIMESTAMPTZ DEFAULT NULL,
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-ALTER TABLE accounts ADD CONSTRAINT external_payment_restrictions CHECK
-(
-    (confirmed_email AND review_time IS NOT NULL)
-    OR
-    (NOT confirmed_email AND external_payment_customer_id IS NULL)
-    OR
-    (review_time IS NULL AND external_payment_customer_id IS NULL)
-);
-ALTER TABLE accounts ADD CONSTRAINT active_restrictions CHECK
-(
-    (confirmed_email AND review_time IS NOT NULL)
-    OR
-    (NOT confirmed_email AND NOT active)
-    OR
-    (review_time IS NULL AND NOT active)
+CREATE TABLE roles (
+    id BIGSERIAL PRIMARY KEY,
+    "name" TEXT UNIQUE,
+    permission_bit BIGINT NOT NULL CHECK (permission_bit >= 0),
+    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE account_roles (
@@ -74,7 +50,8 @@ CREATE TABLE account_roles (
     role_id BIGINT REFERENCES roles (id) NOT NULL,
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (role_id, account_id)
 );
 
 CREATE TABLE confirmations (

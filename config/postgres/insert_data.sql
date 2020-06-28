@@ -5,4 +5,9 @@ INSERT INTO accounts
 VALUES
     ('John', 'Dow', crypt('randomPassword', gen_salt('bf')), '1980-01-01');
 
+INSERT INTO roles
+    ()
+VALUES
+    ();
+
 COMMIT;

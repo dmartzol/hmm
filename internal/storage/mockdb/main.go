@@ -95,6 +95,10 @@ func (db *MockDB) Confirm(id int64) (*models.Confirmation, error) {
 	return &c, nil
 }
 
+func (db *MockDB) Role(roleID int64) (*models.Role, error) {
+	return nil, nil
+}
+
 func (db *MockDB) RoleExists(name string) (bool, error) {
 	return false, nil
 }
@@ -102,4 +106,12 @@ func (db *MockDB) RoleExists(name string) (bool, error) {
 func (db *MockDB) CreateRole(name string) (*models.Role, error) {
 	var r models.Role
 	return &r, nil
+}
+
+func (db *MockDB) RolesForAccount(accountID int64) (models.Roles, error) {
+	return nil, nil
+}
+
+func (db *MockDB) AddAccountRole(roleID, accountID int64) (*models.AccountRole, error) {
+	return nil, nil
 }
