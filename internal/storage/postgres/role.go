@@ -57,3 +57,14 @@ func (db *DB) RolesForAccount(accountID int64) (models.Roles, error) {
 	}
 	return rs, nil
 }
+
+// Roles fetches all roles in the database
+func (db *DB) Roles() (models.Roles, error) {
+	var rs models.Roles
+	sqlStatement := `select * from roles`
+	err := db.Select(&rs, sqlStatement)
+	if err != nil {
+		return nil, err
+	}
+	return rs, nil
+}
