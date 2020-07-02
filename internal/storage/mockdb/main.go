@@ -112,6 +112,10 @@ func (db *MockDB) RolesForAccount(accountID int64) (models.Roles, error) {
 	return nil, nil
 }
 
+func (db *MockDB) Roles() (models.Roles, error) {
+	return nil, nil
+}
+
 func (db *MockDB) AddAccountRole(roleID, accountID int64) (*models.AccountRole, error) {
 	return nil, nil
 }

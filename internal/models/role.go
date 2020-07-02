@@ -22,6 +22,14 @@ func (r Role) View(options map[string]bool) RoleView {
 	return roleView
 }
 
+func (rs Roles) View(options map[string]bool) []RoleView {
+	var views []RoleView
+	for _, r := range rs {
+		views = append(views, r.View(options))
+	}
+	return views
+}
+
 // HasPermission reports whether a role has the given permission
 func (r Role) HasPermission(permission RolePermission) bool {
 	if (r.PermissionsBit & permission) == permission {

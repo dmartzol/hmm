@@ -71,7 +71,7 @@ func (a Account) View(options map[string]bool) AccountView {
 }
 
 func (accs Accounts) Views(options map[string]bool) []AccountView {
-	l := []AccountView{}
+	var l []AccountView
 	for _, a := range accs {
 		l = append(l, a.View(options))
 	}

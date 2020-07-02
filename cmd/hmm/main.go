@@ -53,6 +53,7 @@ func main() {
 	r.HandleFunc("/accounts/{id}/roles", api.AddAccountRole).Methods("POST")
 
 	// roles
+	r.HandleFunc("/roles", api.GetRoles).Methods("GET")
 	r.HandleFunc("/roles", api.CreateRole).Methods("POST")
 
 	r.Use(

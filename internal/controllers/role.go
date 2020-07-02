@@ -9,9 +9,10 @@ import (
 )
 
 type roleStorage interface {
+	CreateRole(name string) (*models.Role, error)
+	Roles() (models.Roles, error)
 	RoleExists(name string) (bool, error)
 	RolesForAccount(accountID int64) (models.Roles, error)
-	CreateRole(name string) (*models.Role, error)
 	AddAccountRole(roleID, accountID int64) (*models.AccountRole, error)
 	Role(roleID int64) (*models.Role, error)
 }
@@ -42,4 +43,14 @@ func (api API) CreateRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpresponse.RespondJSON(w, role.View(nil))
+}
+
+func (api API) GetRoles(w http.ResponseWriter, r *http.Request) {
+	roles, err := api.Roles()
+	if err != nil {
+		log.Printf("GetRoles Roles ERROR: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	httpresponse.RespondJSON(w, roles.View(nil))
 }
