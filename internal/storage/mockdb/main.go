@@ -3,7 +3,7 @@ package mockdb
 import (
 	"time"
 
-	"github.com/dmartzol/hmmm/internal/models"
+	"github.com/dmartzol/hmm/internal/models"
 )
 
 // MockDB represents a database

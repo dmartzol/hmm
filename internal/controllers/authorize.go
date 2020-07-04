@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/dmartzol/hmmm/internal/models"
+	"github.com/dmartzol/hmm/internal/models"
 )
 
 func (api API) AuthorizeAccount(accountID int64, permission models.RolePermission) error {

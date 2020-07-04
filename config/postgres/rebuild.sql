@@ -1,5 +1,5 @@
 
-\c hmmm
+\c hmm
 SET client_min_messages TO WARNING;
 
 \i drop.sql

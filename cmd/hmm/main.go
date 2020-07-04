@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dmartzol/hmmm/internal/controllers"
-	"github.com/dmartzol/hmmm/internal/storage/postgres"
+	"github.com/dmartzol/hmm/internal/controllers"
+	"github.com/dmartzol/hmm/internal/storage/postgres"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"

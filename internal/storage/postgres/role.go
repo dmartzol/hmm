@@ -1,6 +1,6 @@
 package postgres
 
-import "github.com/dmartzol/hmmm/internal/models"
+import "github.com/dmartzol/hmm/internal/models"
 
 // RoleExists returns true if already exists a role with the provided name in the db
 func (db *DB) RoleExists(name string) (bool, error) {

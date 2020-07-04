@@ -3,7 +3,7 @@ package postgres
 import (
 	"time"
 
-	"github.com/dmartzol/hmmm/internal/models"
+	"github.com/dmartzol/hmm/internal/models"
 	_ "github.com/lib/pq"
 )
 

@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dmartzol/hmmm/internal/models"
-	"github.com/dmartzol/hmmm/pkg/httpresponse"
+	"github.com/dmartzol/hmm/internal/models"
+	"github.com/dmartzol/hmm/pkg/httpresponse"
 )
 
 type roleStorage interface {

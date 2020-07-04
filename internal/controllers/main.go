@@ -2,7 +2,7 @@ package controllers
 
 const (
 	apiVersionNumber = "0.0.1"
-	hmmmCookieName   = "Hmmm-Cookie"
+	hmmmCookieName   = "Hmm-Cookie"
 )
 
 type storage interface {

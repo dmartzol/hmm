@@ -1,6 +1,6 @@
 package postgres
 
-import "github.com/dmartzol/hmmm/internal/models"
+import "github.com/dmartzol/hmm/internal/models"
 
 func (db *DB) CreateConfirmation(accountID int64, t models.ConfirmationType) (*models.Confirmation, error) {
 	tx, err := db.Beginx()

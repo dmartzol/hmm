@@ -1,3 +1,5 @@
+github.com/dmartzol/hmmm v0.0.0-20200702050256-41dd6822c53e h1:TW7K+s4W2aeo+Tizqiq22JN2ifm9t6aTwWmFgk7DsKc=
+github.com/dmartzol/hmmm v0.0.0-20200702050256-41dd6822c53e/go.mod h1:UYx5vdA4vWBt2x5nSDIWytAi59ZY3x/GbeJVXXacqVs=
 github.com/go-chi/chi v4.1.1+incompatible h1:MmTgB0R8Bt/jccxp+t6S/1VGIKdJw5J74CK/c9tTfA4=
 github.com/go-chi/chi v4.1.1+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-sql-driver/mysql v1.4.0 h1:7LxgVwFb2hIQtMm87NdgAVfXjnt4OePseqT1tKx+opk=

@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dmartzol/hmmm/internal/models"
-	"github.com/dmartzol/hmmm/pkg/httpresponse"
-	"github.com/dmartzol/hmmm/pkg/randutil"
-	"github.com/dmartzol/hmmm/pkg/timeutils"
+	"github.com/dmartzol/hmm/internal/models"
+	"github.com/dmartzol/hmm/pkg/httpresponse"
+	"github.com/dmartzol/hmm/pkg/randutil"
+	"github.com/dmartzol/hmm/pkg/timeutils"
 	"github.com/gorilla/mux"
 )
 
