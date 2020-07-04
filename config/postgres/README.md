@@ -1,10 +1,8 @@
 # Intallation 
 
-## For first time dabase setup run these:
+## For first time dabase setup run:
 
-`psql -tc "SELECT 1 FROM pg_database WHERE datname = 'hmm'" | grep -q 1 || psql -c "CREATE DATABASE hmm"`
-
-`psql -f create.sql`
+`createdb 'hmm'`
 
 
 ## Next times you just need to run:
