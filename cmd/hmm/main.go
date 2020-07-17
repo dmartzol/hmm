@@ -55,6 +55,7 @@ func main() {
 	// roles
 	r.HandleFunc("/roles", api.GetRoles).Methods("GET")
 	r.HandleFunc("/roles", api.CreateRole).Methods("POST")
+	r.HandleFunc("/roles/{id}", api.EditRole).Methods("PUT")
 
 	r.Use(
 		middleware.Logger,

@@ -68,3 +68,18 @@ func (db *DB) Roles() (models.Roles, error) {
 	}
 	return rs, nil
 }
+
+func (db *DB) UpdateRole(roleID int64, permissionBit int) (*models.Role, error) {
+	tx, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	var r models.Role
+	sqlStatement := `update roles set permission_bit = $1 where id = $2 returning *`
+	err = tx.Get(&r, sqlStatement, permissionBit, roleID)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return &r, tx.Commit()
+}

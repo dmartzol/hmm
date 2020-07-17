@@ -4,21 +4,29 @@ type Role struct {
 	Row
 	Name           string
 	PermissionsBit RolePermission `db:"permission_bit"`
+
+	// Synthetic field
+	Permissions []string
 }
 
 type Roles []*Role
+
+func (r *Role) Populate() {
+	for i := 1; i <= int(LastPermission); i *= 2 {
+		if r.HasPermission(RolePermission(i)) {
+			r.Permissions = append(r.Permissions, RolePermission(i).String())
+		}
+	}
+}
 
 func (r Role) View(options map[string]bool) RoleView {
 	roleView := RoleView{
 		Name: r.Name,
 	}
-	if options["permissions"] {
-		for i := 1; i <= int(LastPermission); i *= 2 {
-			if r.HasPermission(RolePermission(i)) {
-				roleView.Permissions = append(roleView.Permissions, RolePermission(i).String())
-			}
-		}
+	if len(r.Permissions) == 0 {
+		r.Populate()
 	}
+	roleView.Permissions = r.Permissions
 	return roleView
 }
 
@@ -39,8 +47,9 @@ func (r Role) HasPermission(permission RolePermission) bool {
 }
 
 type RoleView struct {
-	Name        string
-	Permissions []string
+	Name          string
+	Permissions   []string
+	PermissionBit int
 }
 
 type AccountRole struct {
@@ -61,6 +70,12 @@ type AccountRoleView struct {
 
 type CreateRoleReq struct {
 	Name string
+}
+
+type EditRoleReq struct {
+	Name           *string
+	PermissionsBit *int
+	Permissions    []string
 }
 
 type AddAccountRoleReq struct {
