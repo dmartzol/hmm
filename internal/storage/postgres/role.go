@@ -21,7 +21,7 @@ func (db *DB) CreateRole(name string) (*models.Role, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &r, nil
+	return r.Populate(), nil
 }
 
 func (db *DB) Role(roleID int64) (*models.Role, error) {
@@ -31,7 +31,7 @@ func (db *DB) Role(roleID int64) (*models.Role, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &r, nil
+	return r.Populate(), nil
 }
 
 func (db *DB) AddAccountRole(roleID, accountID int64) (*models.AccountRole, error) {
@@ -46,7 +46,7 @@ func (db *DB) AddAccountRole(roleID, accountID int64) (*models.AccountRole, erro
 
 // RolesForAccount fetches all roles for the given account
 func (db *DB) RolesForAccount(accountID int64) (models.Roles, error) {
-	var rs []*models.Role
+	var rs models.Roles
 	sqlStatement := `select r.* from roles r 
 	inner join account_roles ar on ar.role_id = r.id
 	where
@@ -55,7 +55,7 @@ func (db *DB) RolesForAccount(accountID int64) (models.Roles, error) {
 	if err != nil {
 		return nil, err
 	}
-	return rs, nil
+	return rs.Populate(), nil
 }
 
 // Roles fetches all roles in the database
@@ -66,7 +66,7 @@ func (db *DB) Roles() (models.Roles, error) {
 	if err != nil {
 		return nil, err
 	}
-	return rs, nil
+	return rs.Populate(), nil
 }
 
 func (db *DB) UpdateRole(roleID int64, permissionBit int) (*models.Role, error) {
@@ -81,5 +81,5 @@ func (db *DB) UpdateRole(roleID int64, permissionBit int) (*models.Role, error) 
 		tx.Rollback()
 		return nil, err
 	}
-	return &r, tx.Commit()
+	return r.Populate(), tx.Commit()
 }

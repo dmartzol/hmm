@@ -11,17 +11,29 @@ type Role struct {
 
 type Roles []*Role
 
-func (r *Role) Populate() {
+// Populate populates synthetic fields for the role structure
+func (r *Role) Populate() *Role {
 	for i := 1; i <= int(LastPermission); i *= 2 {
 		if r.HasPermission(RolePermission(i)) {
 			r.Permissions = append(r.Permissions, RolePermission(i).String())
 		}
 	}
+	return r
 }
 
+// Populate populates synthetic fields for role structures
+func (rs Roles) Populate() Roles {
+	for _, r := range rs {
+		r.Populate()
+	}
+	return rs
+}
+
+// View returns a role view
 func (r Role) View(options map[string]bool) RoleView {
 	roleView := RoleView{
-		Name: r.Name,
+		Name:          r.Name,
+		PermissionBit: r.PermissionsBit.Int(),
 	}
 	if len(r.Permissions) == 0 {
 		r.Populate()
@@ -30,6 +42,7 @@ func (r Role) View(options map[string]bool) RoleView {
 	return roleView
 }
 
+// View returns role views
 func (rs Roles) View(options map[string]bool) []RoleView {
 	var views []RoleView
 	for _, r := range rs {

@@ -56,6 +56,8 @@ func (api API) GetRoles(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	log.Printf("Role: %+v", roles[0])
+	log.Printf("Role: %d", roles[0].PermissionsBit)
 	httpresponse.RespondJSON(w, roles.View(nil))
 }
 
