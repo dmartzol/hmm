@@ -2,12 +2,14 @@
 
 ## Description
 
+Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a Work In Progress project combining a backend writen in Golang and a frotend using React. The goal is to include only functionality, contents are not provided in this project.
 
 ## Features
 
-* PostgreSQL
-* Sessions, cookies, permissions
-* Management of Hackerspace equipment authorizations
+* React dashboard for easy use
+* PostgreSQL performant database
+* Management of Sessions, cookies, permissions, email authentication, accounts, ...
+* Management of Hackerspace equipment and equipment authorizations
 * Dependency Injection to mock database and create unit tests
 
 
