@@ -51,6 +51,7 @@ func main() {
 	r.HandleFunc("/accounts/{id}/confirm-email", api.ConfirmEmail).Methods("POST")
 	r.HandleFunc("/accounts/password", api.ResetPassword).Methods("POST")
 	r.HandleFunc("/accounts/{id}/roles", api.AddAccountRole).Methods("POST")
+	r.HandleFunc("/accounts/{id}/roles", api.GetAccountRoles).Methods("GET")
 
 	// roles
 	r.HandleFunc("/roles", api.GetRoles).Methods("GET")

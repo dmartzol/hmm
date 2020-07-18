@@ -276,3 +276,47 @@ func (api API) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 	}
 	httpresponse.RespondJSON(w, accRole.View(nil))
 }
+
+func (api API) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
+	var req models.AddAccountRoleReq
+	err := httpresponse.Unmarshal(r, &req)
+	if err != nil {
+		log.Printf("GetAccountRoles Unmarshal ERROR: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	// parsing parameters
+	params := mux.Vars(r)
+	idString, ok := params["id"]
+	if !ok {
+		http.Error(w, "parameter 'id' not found", http.StatusBadRequest)
+		return
+	}
+	requestedAccountID, err := strconv.ParseInt(idString, 10, 64)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
+		return
+	}
+
+	// checking permissions
+	ctx := r.Context()
+	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
+	if requesterID != requestedAccountID {
+		err := api.AuthorizeAccount(requesterID, models.PermissionAccountsView)
+		if err != nil {
+			log.Printf("WARNING: account %d requested to see account %d", requesterID, requestedAccountID)
+			log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+	}
+
+	rs, err := api.RolesForAccount(requestedAccountID)
+	if err != nil {
+		log.Printf("GetAccountRoles RolesForAccount ERROR: %+v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	httpresponse.RespondJSON(w, rs.View(nil))
+}
