@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"log"
 	"time"
 
 	"github.com/dmartzol/hmm/internal/models"
@@ -27,6 +28,17 @@ func (db *DB) Account(id int64) (*models.Account, error) {
 		return nil, err
 	}
 	return &a, nil
+}
+
+func (db *DB) PopulateAccount(a *models.Account) *models.Account {
+	var err error
+	if a.Roles == nil {
+		a.Roles, err = db.RolesForAccount(a.ID)
+		if err != nil {
+			log.Printf("PopulateAccount - RolesForAccount: %+v", err)
+		}
+	}
+	return a
 }
 
 // Accounts returns all accounts in the db

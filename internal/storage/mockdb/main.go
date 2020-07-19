@@ -25,6 +25,10 @@ func (db *MockDB) Account(id int64) (*models.Account, error) {
 	return &a, nil
 }
 
+func (db *MockDB) PopulateAccount(a *models.Account) *models.Account {
+	return a
+}
+
 func (db *MockDB) Accounts() (models.Accounts, error) {
 	var accs []*models.Account
 	return accs, nil

@@ -31,8 +31,7 @@ type Account struct {
 	ExternalPaymentCustomerID *int64     `db:"external_payment_customer_id"`
 
 	// fields to populate
-	PermissionBit *int
-	Roles         Roles
+	Roles Roles
 }
 
 // AccountView is the restricted response body of Account
@@ -45,6 +44,7 @@ type AccountView struct {
 	Gender                     string    `json:",omitempty"`
 	Active                     bool
 	FailedLoginsCount          int64
+	Roles                      []RoleView
 }
 
 // View returns the Account struct restricted to those fields allowed in options
@@ -66,6 +66,11 @@ func (a Account) View(options map[string]bool) AccountView {
 	}
 	if a.Gender != nil {
 		view.Gender = *a.Gender
+	}
+	if a.Roles != nil {
+		for _, r := range a.Roles {
+			view.Roles = append(view.Roles, r.View(nil))
+		}
 	}
 	return view
 }

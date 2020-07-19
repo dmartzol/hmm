@@ -16,6 +16,7 @@ import (
 )
 
 type accountStorage interface {
+	PopulateAccount(a *models.Account) *models.Account
 	Account(id int64) (*models.Account, error)
 	Accounts() (models.Accounts, error)
 	AccountExists(email string) (bool, error)
@@ -79,7 +80,7 @@ func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, a.View(nil))
+	httpresponse.RespondJSON(w, api.PopulateAccount(a).View(nil))
 }
 
 func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
