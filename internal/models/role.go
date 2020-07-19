@@ -86,9 +86,8 @@ type CreateRoleReq struct {
 }
 
 type EditRoleReq struct {
-	Name           *string
-	PermissionsBit *int
-	Permissions    []string
+	Name        *string
+	Permissions []string
 }
 
 type AddAccountRoleReq struct {

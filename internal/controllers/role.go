@@ -62,7 +62,7 @@ func (api API) GetRoles(w http.ResponseWriter, r *http.Request) {
 }
 
 func validateEditRole(req models.EditRoleReq, targetRole *models.Role) error {
-	if req.PermissionsBit == nil && req.Name == nil && len(req.Permissions) == 0 {
+	if req.Name == nil && len(req.Permissions) == 0 {
 		return fmt.Errorf("No updates found")
 	}
 	return nil
@@ -114,16 +114,16 @@ func (api API) EditRole(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: pass permission by string in request instead of int
-	newPermissionBit := models.RolePermission(1)
+	newBit := 0
 	for _, p := range req.Permissions {
-		newPermissionBit = newPermissionBit | models.StringToRolePermission(p)
+		newBit = newBit | models.StringToRolePermission(p).Int()
 	}
-	if role.HasPermission(newPermissionBit) {
+	if role.PermissionsBit.Int() == newBit {
 		log.Printf("EditRole ERROR: role already has those permissions")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	updatedRole, err := api.UpdateRole(role.ID, newPermissionBit.Int())
+	updatedRole, err := api.UpdateRole(role.ID, newBit)
 	if err != nil {
 		log.Printf("EditRole UpdateRole ERROR: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
