@@ -7,7 +7,7 @@ import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
 import Navigator from './Navigator';
 import AuthorizationsContent from './AuthorizationsContent';
-import AccountsContent from './MyAccountContent';
+import AccountsContent from './AccountsContent';
 import MyAccountContent from './MyAccountContent';
 import Header from './Header';
 import axios from "axios";
@@ -222,7 +222,7 @@ function Paperbase(props) {
           <Header onDrawerToggle={handleDrawerToggle} />
           <main className={classes.main}>
             <Switch>
-              <Route exact path="/accounts" component={AccountsContent} />
+              <Route exact path="/accounts" render={(props) => <AccountsContent {...props} session={session} isAuthed={session.loggedIn} />} />
               <Route exact path="/me" render={(props) => <MyAccountContent {...props} session={session} isAuthed={session.loggedIn} />} />
               <Route exact path="/authorizations" component={AuthorizationsContent} />
             </Switch>

@@ -38,7 +38,6 @@ export default function UserPage(props) {
               <th>Date of birth</th>
               <th>Email</th>
               <th>Gender</th>
-              <th>{console.log(user)}</th>
             </tr>
           </thead>
           <tbody>
