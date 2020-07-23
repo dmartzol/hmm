@@ -73,23 +73,6 @@ function EnhancedTableHead(props) {
         onRequestSort(event, property);
     };
 
-    const [loading, setLoading] = useState(true)
-    const [users, setUsers] = useState({})
-    useEffect(() => {
-        const getAccounts = async () => {
-            axios.get("http://localhost:3001/v1/accounts", { withCredentials: true }).then(response => {
-                if (response.status === 200) {
-                    setUsers(response.data);
-                    setLoading(false);
-                }
-            });
-        }
-
-        if (props.isAuthed) {
-            getAccounts()
-        }
-    }, [props])
-
     return (
         <TableHead>
             <TableRow>
@@ -222,7 +205,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function EnhancedTable() {
+export default function EnhancedTable(props) {
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('calories');
@@ -230,6 +213,23 @@ export default function EnhancedTable() {
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+    const [loading, setLoading] = useState(true)
+    const [users, setUsers] = useState({})
+    useEffect(() => {
+        const getAccounts = async () => {
+            axios.get("http://localhost:3001/v1/accounts", { withCredentials: true }).then(response => {
+                if (response.status === 200) {
+                    setUsers(response.data);
+                    setLoading(false);
+                }
+            });
+        }
+
+        if (props.isAuthed) {
+            getAccounts()
+        }
+    }, [props])
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
