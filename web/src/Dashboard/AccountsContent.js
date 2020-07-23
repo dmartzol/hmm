@@ -25,7 +25,7 @@ export default function SimpleTable(props) {
             axios.get("http://localhost:3001/v1/accounts", { withCredentials: true }).then(response => {
                 if (response.status === 200) {
                     setUsers(response.data);
-                    setLoading(true);
+                    setLoading(false);
                 }
             });
         }
