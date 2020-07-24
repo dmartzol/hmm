@@ -15,18 +15,6 @@ const useStyles = makeStyles({
     },
 });
 
-function createData(name, calories, fat, carbs, protein) {
-    return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData('Eclair', 262, 16.0, 24, 6.0),
-    createData('Cupcake', 305, 3.7, 67, 4.3),
-    createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
-
 export default function SimpleTable(props) {
     const classes = useStyles();
 
@@ -36,9 +24,8 @@ export default function SimpleTable(props) {
         const getAccounts = async () => {
             axios.get("http://localhost:3001/v1/accounts", { withCredentials: true }).then(response => {
                 if (response.status === 200) {
-                    setUsers(response.data.json());
+                    setUsers(response.data);
                     setLoading(false);
-                    console.log(response);
                 }
             });
         }
@@ -55,23 +42,21 @@ export default function SimpleTable(props) {
                 <Table className={classes.table} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell>Dessert (100g serving)</TableCell>
-                            <TableCell align="right">Calories</TableCell>
-                            <TableCell align="right">Fat&nbsp;(g)</TableCell>
-                            <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-                            <TableCell align="right">Protein&nbsp;(g)</TableCell>
+                            <TableCell align="center">First Name</TableCell>
+                            <TableCell align="center">Last Name</TableCell>
+                            <TableCell align="center">Email</TableCell>
+                            <TableCell align="center">Active</TableCell>
+                            <TableCell align="center">Role</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.map((user) => (
+                        {users.map((user) => (
                             <TableRow key={user.FirstName}>
-                                <TableCell component="th" scope="user">
-                                    {user.FirstName}
-                                </TableCell>
-                                <TableCell align="right">{user.FirstName}</TableCell>
-                                <TableCell align="right">{user.FirstName}</TableCell>
-                                <TableCell align="right">{user.FirstName}</TableCell>
-                                <TableCell align="right">{user.FirstName}</TableCell>
+                                <TableCell align="center" component="th" scope="user">{user.FirstName}</TableCell>
+                                <TableCell align="center">{user.LastName}</TableCell>
+                                <TableCell align="center">{user.Email}</TableCell>
+                                <TableCell align="center">{user.Active}</TableCell>
+                                <TableCell align="center">{user.Roles[0] ? user.Roles[0].Name : "-"}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
