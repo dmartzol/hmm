@@ -9,7 +9,17 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import axios from 'axios';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Grid from '@material-ui/core/Grid';
 
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import { withStyles } from '@material-ui/core/styles';
+import SearchIcon from '@material-ui/icons/Search';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 
 const columns = [
@@ -25,6 +35,20 @@ const useStyles = makeStyles({
     },
     container: {
         maxHeight: 440,
+    },
+    paper: {
+      maxWidth: 936,
+      margin: 'auto',
+      overflow: 'hidden',
+    },
+    searchBar: {
+      borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    },
+    block: {
+      display: 'block',
+    },
+    contentWrapper: {
+      margin: '40px 16px',
     },
 });
 
@@ -62,8 +86,27 @@ export default function StickyHeadTable(props) {
     return loading ? (
         <div align="center">Loading...</div>
     ) : (
-            <Paper className={classes.root}>
-                <TableContainer className={classes.container}>
+            <Paper className={classes.paper}>
+                <AppBar className={classes.searchBar} position="static" color="default" elevation={0}>
+                    <Toolbar>
+                        <Grid container spacing={2} alignItems="center">
+                            <Grid item>
+                                <SearchIcon className={classes.block} color="inherit" />
+                            </Grid>
+                            <Grid item xs>
+                                <TextField
+                                    fullWidth
+                                    placeholder="Search account"
+                                    InputProps={{
+                                        disableUnderline: true,
+                                        className: classes.searchInput,
+                                    }}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Toolbar>
+                </AppBar>
+                <TableContainer >
                     <Table stickyHeader aria-label="sticky table">
                         <TableHead>
                             <TableRow>
