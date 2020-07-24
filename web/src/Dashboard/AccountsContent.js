@@ -32,18 +32,18 @@ const useStyles = makeStyles({
         maxHeight: 440,
     },
     paper: {
-      maxWidth: 936,
-      margin: 'auto',
-      overflow: 'hidden',
+        maxWidth: 936,
+        margin: 'auto',
+        overflow: 'hidden',
     },
     searchBar: {
-      borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
     },
     block: {
-      display: 'block',
+        display: 'block',
     },
     contentWrapper: {
-      margin: '40px 16px',
+        margin: '40px 16px',
     },
 });
 
