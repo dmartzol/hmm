@@ -16,8 +16,7 @@ const columns = [
     { id: 'FirstName', label: 'First Name', minWidth: 170 },
     { id: 'LastName', label: 'Last Name', minWidth: 100 },
     { id: 'Email', label: 'Email', minWidth: 170, align: 'center' },
-    { id: 'DateOfBird', label: 'Date Of Birth', minWidth: 170, align: 'center', format: (value) => new Date(value).toString() },
-    { id: 'Active', label: 'Active', minWidth: 170, align: 'center'},
+    { id: 'Active', label: 'Active', formatedCell: true, minWidth: 170, align: 'center', format: (value) => value ? "True" : "False" },
 ];
 
 const useStyles = makeStyles({
@@ -87,7 +86,7 @@ export default function StickyHeadTable(props) {
                                             const value = user[column.id];
                                             return (
                                                 <TableCell key={column.id} align={column.align}>
-                                                    {column.format && typeof value === 'number' ? column.format(value) : value}
+                                                    {column.formatedCell ? column.format(value) : value}
                                                 </TableCell>
                                             );
                                         })}
