@@ -2,11 +2,10 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
-	"github.com/dmartzol/hmmm/pkg/timeutils"
+	"github.com/dmartzol/hmm/pkg/timeutils"
 )
 
 type Accounts []*Account
@@ -38,10 +37,10 @@ type Account struct {
 // see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
 type AccountView struct {
 	FirstName, LastName, Email string
-	DOB                        time.Time `json:"DateOfBird"`
-	PhoneNumber                string    `json:",omitempty"`
-	DoorCode                   string    `json:",omitempty"`
-	Gender                     string    `json:",omitempty"`
+	DOB                        string `json:"DateOfBird"`
+	PhoneNumber                string `json:",omitempty"`
+	DoorCode                   string `json:",omitempty"`
+	Gender                     string `json:",omitempty"`
 	Active                     bool
 	FailedLoginsCount          int64
 	Roles                      []RoleView
@@ -53,7 +52,7 @@ func (a Account) View(options map[string]bool) AccountView {
 	view := AccountView{
 		FirstName:         a.FirstName,
 		LastName:          a.LastName,
-		DOB:               a.DOB,
+		DOB:               a.DOB.Format(timeutils.LayoutISODay),
 		Active:            a.Active,
 		FailedLoginsCount: a.FailedLoginsCount,
 		Email:             a.Email,
@@ -106,9 +105,8 @@ func (r RegisterRequest) Validate() error {
 	if len(r.Password) < 6 {
 		return errors.New("password too short")
 	}
-	_, err := time.Parse(timeutils.LayoutISO, r.DOB)
-	if err != nil {
-		return fmt.Errorf("time.Parse %v: %w", r.DOB, err)
+	if r.Gender != nil && *r.Gender != "" && *r.Gender != "M" && *r.Gender != "F" {
+		return errors.New("Gender value not implemented")
 	}
 	return nil
 }

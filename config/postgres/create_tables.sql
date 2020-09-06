@@ -22,7 +22,7 @@ CREATE TABLE accounts (
     first_name VARCHAR NOT NULL,
     last_name VARCHAR NOT NULL,
     dob date NOT NULL,
-    gender VARCHAR DEFAULT NULL,
+    gender CITEXT DEFAULT NULL,
     active BOOLEAN NOT NULL DEFAULT FALSE CHECK ((confirmed_email AND review_time IS NOT NULL) OR NOT active),
     email CITEXT NOT NULL UNIQUE,
     confirmed_email BOOLEAN DEFAULT FALSE,
@@ -62,7 +62,7 @@ CREATE TABLE confirmations (
     key VARCHAR NOT NULL UNIQUE,
     confirm_time TIMESTAMPTZ DEFAULT NULL,
     failed_confirmations_count INT DEFAULT 0,
-    expire_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP + interval '5 minutes',
+    expire_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP + interval '5 hours',
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

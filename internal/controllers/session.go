@@ -11,7 +11,7 @@ import (
 
 const (
 	// sessionLength represents the duration(in seconds) a session will be valid for
-	sessionLength = 3600
+	sessionLength = 345600
 )
 
 type sessionStorage interface {

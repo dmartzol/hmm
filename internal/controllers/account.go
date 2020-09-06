@@ -89,38 +89,47 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	exists, err := api.AccountExists(req.Email)
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	if exists {
 		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
 		err = fmt.Errorf("email '%s' already registered", req.Email)
 		log.Printf("%+v", err)
-		http.Error(w, fmt.Sprintf("email '%s' alrady exists", req.Email), http.StatusConflict)
+		httpresponse.RespondJSONError(w, fmt.Sprintf("account with email '%s' alrady exists", req.Email), http.StatusBadRequest)
 		return
+	}
+	// normalizing gender
+	if req.Gender != nil {
+		if *req.Gender == "female" {
+			*req.Gender = "F"
+		}
+		if *req.Gender == "male" {
+			*req.Gender = "M"
+		}
 	}
 	err = req.Validate()
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		httpresponse.RespondJSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	parsedDOB, err := time.Parse(timeutils.LayoutISO, req.DOB)
+	parsedDOB, err := time.Parse(timeutils.LayoutISODay, req.DOB)
 	if err != nil {
 		log.Printf("%s: %+v", req.DOB, err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	code, err := randutil.RandomCode(6)
 	if err != nil {
 		log.Printf("RandomCode: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	a, _, err := api.storage.CreateAccount(
@@ -135,7 +144,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	log.Printf("confirmation key: %s", code)
@@ -144,7 +153,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	s, err := api.storage.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 

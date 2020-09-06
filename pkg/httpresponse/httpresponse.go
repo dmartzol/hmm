@@ -8,6 +8,11 @@ import (
 	"net/http"
 )
 
+type JSONError struct {
+	Error      string
+	StatusCode int
+}
+
 func Unmarshal(r *http.Request, iface interface{}) error {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -32,6 +37,16 @@ func RespondText(w http.ResponseWriter, text string, code int) {
 func RespondJSON(w http.ResponseWriter, object interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
-
 	json.NewEncoder(w).Encode(object)
+}
+
+func RespondJSONError(w http.ResponseWriter, errorMessage string, code int) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(code)
+	e := JSONError{
+		Error:      errorMessage,
+		StatusCode: code,
+	}
+	json.NewEncoder(w).Encode(e)
 }
