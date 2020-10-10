@@ -29,26 +29,53 @@ export default function SingleAccount(props) {
     <div align="center">Loading...</div>
   ) : (
       <div className="container">
-        <div className="row d-block">
-          <div className="title my-4 border-bottom border-dark">
-            <h1>{user.FirstName} {user.LastName}</h1>
+        <div className="row">
+          <div className="col-sm">
+            <div className="title mt-4 border-bottom border-dark">
+              <h1>{user.FirstName} {user.LastName}</h1>
+            </div>
           </div>
-          <table className="table-sm table-hover">
-            <tbody>
-              {
-                SingleAccountFields.map((accountField) => {
-                  const value = user[accountField.id];
-                  return (
-                    <tr>
-                      <td>{accountField.label}:</td>
-                      <td>{accountField.formatedCell ? accountField.format(value) : value}</td>
-                      <td><button className="btn btn-sm m-0" disabled={!accountField.Editable}>Edit</button></td>
-                    </tr>
-                  );
-                })
-              }
-            </tbody>
-          </table>
+        </div>
+        <div className="row mt-3">
+          <div className="col-lg mt-2">
+            <div>
+              <h3 className="border-bottom border-dark m-0">Account details</h3>
+            </div>
+            <table className="table table-hover">
+              <tbody>
+                {
+                  SingleAccountFields.map((accountField) => {
+                    const value = user[accountField.id];
+                    return (
+                      <tr>
+                        <td>{accountField.label}:</td>
+                        <td>{accountField.formatedCell ? accountField.format(value) : value}</td>
+                        <td><button className="btn btn-sm m-0" disabled={!accountField.Editable}>Edit</button></td>
+                      </tr>
+                    );
+                  })
+                }
+              </tbody>
+            </table>
+          </div>
+          <div className="col-lg mt-2">
+            <div>
+              <h3 className="border-bottom border-dark m-0">Roles</h3>
+            </div>
+            <table className="table table-hover">
+              <tbody>
+                {
+                  user.Roles ? (
+                    user.Roles.map((role) => {
+                      return (
+                        <tr><td>{role.Name}</td></tr>
+                      );
+                    })
+                  ) : (<div></div>)
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div>
