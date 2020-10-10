@@ -1,6 +1,6 @@
 
 
-export const AccountFields = [
+export const AccountIndexViewFields = [
     { id: 'ID', label: 'ID#', minWidth: 170 },
     { id: 'FirstName', label: 'First Name', minWidth: 170 },
     { id: 'LastName', label: 'Last Name', minWidth: 100 },
