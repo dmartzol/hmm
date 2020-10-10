@@ -4,16 +4,9 @@ import AuthorizationsContent from './AuthorizationsContent';
 import AccountsContent from './AccountsContent';
 import MyAccountContent from './MyAccountContent';
 import Header from './Header';
+import Footer from './Footer';
 import axios from "axios";
 import { Route, Switch, withRouter } from 'react-router-dom';
-
-function Copyright() {
-  return (
-    <div className="container-fluid text-center text-secondary">
-      Copyright © {new Date().getFullYear()}{'.'}
-    </div>
-  );
-}
 
 
 function AdminPanel(props) {
@@ -59,9 +52,7 @@ function AdminPanel(props) {
             <Route exact path="/me" render={(props) => <MyAccountContent {...props} session={session} isAuthed={session.loggedIn} />} />
             <Route exact path="/authorizations" component={AuthorizationsContent} />
           </Switch>
-          <footer className="mt-5">
-            <Copyright />
-          </footer>
+          <Footer />
         </div>
       </div>
     </div>
