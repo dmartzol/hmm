@@ -6,7 +6,7 @@ function Footer() {
         <footer class="container-fluid mt-5">
             <div className="row">
                 <div className="container-fluid text-center text-secondary">
-                    Copyright © {new Date().getFullYear()}{'.'}
+                    Hmm! © {new Date().getFullYear()}{'.'}
                 </div>
             </div>
         </footer>
