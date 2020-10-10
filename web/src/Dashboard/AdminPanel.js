@@ -1,9 +1,9 @@
 import React from 'react';
 import Navigator from './Navigator';
-import AuthorizationsContent from './AuthorizationsContent';
+import AuthorizationsIndexView from './AuthorizationsIndexView';
 import AccountsIndexView from './AccountsIndexView';
 import SingleAccountView from './SingleAccountView';
-import MyAccountContent from './MyAccountContent';
+import MyAccount from './MyAccount';
 import Header from './Header';
 import Footer from './Footer';
 import axios from "axios";
@@ -51,8 +51,8 @@ function AdminPanel(props) {
           <Switch>
             <Route exact path="/accounts" render={(props) => <AccountsIndexView {...props} session={session} isAuthed={session.loggedIn} />} />
             <Route exact path="/accounts/:id" render={(props) => <SingleAccountView {...props} session={session} isAuthed={session.loggedIn} />} />
-            <Route exact path="/me" render={(props) => <MyAccountContent {...props} session={session} isAuthed={session.loggedIn} />} />
-            <Route exact path="/authorizations" component={AuthorizationsContent} />
+            <Route exact path="/me" render={(props) => <MyAccount {...props} session={session} isAuthed={session.loggedIn} />} />
+            <Route exact path="/authorizations" component={AuthorizationsIndexView} />
           </Switch>
           <Footer />
         </div>
