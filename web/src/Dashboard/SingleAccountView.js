@@ -30,10 +30,10 @@ export default function SingleAccount(props) {
   ) : (
       <div className="container">
         <div className="row d-block">
-          <div className="title">
+          <div className="title my-4 border-bottom border-dark">
             <h1>{user.FirstName} {user.LastName}</h1>
           </div>
-          <table className="table-sm table-hover border">
+          <table className="table-sm table-hover">
             <tbody>
               {
                 SingleAccountFields.map((accountField) => {
@@ -42,13 +42,7 @@ export default function SingleAccount(props) {
                     <tr>
                       <td>{accountField.label}:</td>
                       <td>{accountField.formatedCell ? accountField.format(value) : value}</td>
-                      {
-                        accountField.Editable ? (
-                          <td><button className="btn btn-sm m-0">Edit</button></td>
-                        ) : (
-                            <td><button className="btn btn-sm m-0 disabled">Edit</button></td>
-                          )
-                      }
+                      <td><button className="btn btn-sm m-0" disabled={!accountField.Editable}>Edit</button></td>
                     </tr>
                   );
                 })
