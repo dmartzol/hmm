@@ -2,6 +2,7 @@ import React from 'react';
 import Navigator from './Navigator';
 import AuthorizationsContent from './AuthorizationsContent';
 import AccountsContent from './AccountsContent';
+import SingleAccountView from './SingleAccountView';
 import MyAccountContent from './MyAccountContent';
 import Header from './Header';
 import Footer from './Footer';
@@ -49,6 +50,7 @@ function AdminPanel(props) {
           <Header />
           <Switch>
             <Route exact path="/accounts" render={(props) => <AccountsContent {...props} session={session} isAuthed={session.loggedIn} />} />
+            <Route exact path="/accounts/:id" render={(props) => <SingleAccountView {...props} session={session} isAuthed={session.loggedIn} />} />
             <Route exact path="/me" render={(props) => <MyAccountContent {...props} session={session} isAuthed={session.loggedIn} />} />
             <Route exact path="/authorizations" component={AuthorizationsContent} />
           </Switch>

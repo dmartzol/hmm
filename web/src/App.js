@@ -17,6 +17,7 @@ export default class App extends Component {
         <Route exact path={"/signup"} render={props => (<Logout />)} />
         <Route exact path={"/me"} render={props => (<AdminPanel />)} />
         <Route exact path={"/accounts"} render={props => (<AdminPanel />)} />
+        <Route exact path={"/accounts/:id"} render={props => (<AdminPanel />)} />
         <Route exact path={"/authorizations"} render={props => (<AdminPanel />)} />
         <Route exact path={"/equipment"} render={props => (<AdminPanel />)} />
         <Route exact path={"/roles"} render={props => (<AdminPanel />)} />

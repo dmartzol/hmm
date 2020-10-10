@@ -77,9 +77,15 @@ func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
 
 	a, err := api.Account(accountID)
 	if err != nil {
-		log.Printf("Account: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
+		if err == sql.ErrNoRows {
+			log.Printf("account %d not found", accountID)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		} else {
+			log.Printf("could not fetch account %d: %+v", accountID, err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 	}
 	httpresponse.RespondJSON(w, api.PopulateAccount(a).View(nil))
 }
