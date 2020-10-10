@@ -26,7 +26,7 @@ type Account struct {
 	PhoneNumber               *string    `db:"phone_number"`
 	ConfirmedPhone            bool       `db:"confirmed_phone"`
 	ZipCode                   string     `db:"zip_code"`
-	ReviewTime                *time.Time `db:"review_time"`
+	ReviewTime                *time.Time `db:"review_time"` // timestamp of when the account was reviewed
 	ExternalPaymentCustomerID *int64     `db:"external_payment_customer_id"`
 
 	// fields to populate
@@ -43,6 +43,8 @@ type AccountView struct {
 	DoorCode                   string `json:",omitempty"`
 	Gender                     string `json:",omitempty"`
 	Active                     bool
+	ConfirmedEmail             bool
+	ConfirmedPhone             bool
 	FailedLoginsCount          int64
 	Roles                      []RoleView
 }
@@ -58,6 +60,8 @@ func (a Account) View(options map[string]bool) AccountView {
 		Active:            a.Active,
 		FailedLoginsCount: a.FailedLoginsCount,
 		Email:             a.Email,
+		ConfirmedEmail:    a.ConfirmedEmail,
+		ConfirmedPhone:    a.ConfirmedPhone,
 	}
 	if a.DoorCode != nil && options["door_code"] {
 		view.DoorCode = *a.DoorCode
