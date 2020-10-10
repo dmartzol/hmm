@@ -69,7 +69,7 @@ class Login extends Component {
                 required
               />
               <div className="mt-3">
-                <button className="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+                <button className="btn btn-lg btn-primary btn-block" type="submit">Log in</button>
               </div>
             </form>
           </div>

@@ -3,14 +3,11 @@ import axios from 'axios'
 
 export default function UserPage(props) {
 
-    const initialStates = {
-    loggedIn: false,
-    session: {
+    const sessionInitialStates = {
       AccountID: 0,
       LastActivityTime: "",
-    },
   };
-  const [session, setSession] = useState(initialStates);
+  const [session, setSession] = useState(sessionInitialStates);
   useEffect(() => {
     const getSession = async () => {
       axios.get(
@@ -18,11 +15,8 @@ export default function UserPage(props) {
         { withCredentials: true }
       ).then(response => {
         if (response.status === 200) {
-          setSession({
-            loggedIn: true,
-            session: response.data,
-          });
-          props.history.push('/accounts/' + response.data.AccountID);
+          setSession(response.data);
+          props.history.push('/accounts/' + session.AccountID);
         }
       }).catch(error => {
         props.history.push('/');
@@ -30,7 +24,7 @@ export default function UserPage(props) {
       });
     }
     getSession()
-  },[props])
+  },[props, session])
 
   return (
     <div align="center">Loading...</div>
