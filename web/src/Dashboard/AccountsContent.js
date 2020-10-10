@@ -3,7 +3,7 @@ import axios from 'axios';
 
 
 const columns = [
-    { id: 'ID', label: 'ID', minWidth: 170 },
+    { id: 'ID', label: 'ID#', minWidth: 170 },
     { id: 'FirstName', label: 'First Name', minWidth: 170 },
     { id: 'LastName', label: 'Last Name', minWidth: 100 },
     { id: 'Email', label: 'Email', minWidth: 170, align: 'center' },
@@ -37,11 +37,13 @@ export default function StickyHeadTable(props) {
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th scope="col">ID#</th>
-                                <th scope="col">First Name</th>
-                                <th scope="col">Last Name</th>
-                                <th scope="col">Email</th>
-                                <th scope="col">Active</th>
+                                {
+                                    columns.map((column) => {
+                                        return (
+                                            <th scope="col">{column.label}</th>
+                                        );
+                                    })
+                                }
                             </tr>
                         </thead>
                         <tbody>
@@ -49,11 +51,14 @@ export default function StickyHeadTable(props) {
                                 users.map((user) => {
                                     return (
                                         <tr>
-                                            <th scope="row">{user.ID}</th>
-                                            <td>{user.FirstName}</td>
-                                            <td>{user.LastName}</td>
-                                            <td>{user.Email}</td>
-                                            <td>{user.Active}</td>
+                                            {
+                                                columns.map((column) => {
+                                                    const value = user[column.id];
+                                                    return (
+                                                        <td>{column.formatedCell ? column.format(value) : value}</td>
+                                                    );
+                                                })
+                                            }
                                         </tr>
                                     );
                                 })
