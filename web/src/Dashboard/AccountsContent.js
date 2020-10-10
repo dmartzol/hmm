@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
-
-const columns = [
-    { id: 'ID', label: 'ID#', minWidth: 170 },
-    { id: 'FirstName', label: 'First Name', minWidth: 170 },
-    { id: 'LastName', label: 'Last Name', minWidth: 100 },
-    { id: 'Email', label: 'Email', minWidth: 170, align: 'center' },
-    { id: 'Active', label: 'Active', formatedCell: true, minWidth: 170, align: 'center', format: (value) => value ? "True" : "False" },
-];
+import { AccountFields } from '../constants'
 
 export default function StickyHeadTable(props) {
-
     const [loading, setLoading] = useState(true)
     const [users, setUsers] = useState([])
     useEffect(() => {
@@ -38,7 +29,7 @@ export default function StickyHeadTable(props) {
                         <thead>
                             <tr>
                                 {
-                                    columns.map((column) => {
+                                    AccountFields.map((column) => {
                                         return (
                                             <th scope="col">{column.label}</th>
                                         );
@@ -52,10 +43,10 @@ export default function StickyHeadTable(props) {
                                     return (
                                         <tr>
                                             {
-                                                columns.map((column) => {
+                                                AccountFields.map((column) => {
                                                     const value = user[column.id];
                                                     return (
-                                                        <td>{column.formatedCell ? column.format(value) : value}</td>
+                                                        <td><a className="d-block" href={"/accounts/" + user.ID}>{column.formatedCell ? column.format(value) : value}</a></td>
                                                     );
                                                 })
                                             }
