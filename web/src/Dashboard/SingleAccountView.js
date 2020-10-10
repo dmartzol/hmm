@@ -41,7 +41,7 @@ export default function SingleAccount(props) {
             <div>
               <h3 className="border-bottom border-dark m-0">Account details</h3>
             </div>
-            <table className="table table-hover">
+            <table className="table">
               <tbody>
                 {
                   SingleAccountFields.map((accountField) => {
