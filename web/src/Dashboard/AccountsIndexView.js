@@ -25,7 +25,7 @@ export default function StickyHeadTable(props) {
   ) : (
       <div className="container border col-10">
         <div className="row">
-          <table class="table table-hover table-striped">
+          <table className="table table-hover table-striped">
             <thead className="thead-dark">
               <tr>
                 {

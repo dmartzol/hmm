@@ -28,20 +28,27 @@ export default function SingleAccount(props) {
   return loading ? (
     <div align="center">Loading...</div>
   ) : (
-      <div className="container border">
+      <div className="container">
         <div className="row d-block">
           <div className="title">
             <h1>{user.FirstName} {user.LastName}</h1>
           </div>
-          <table>
+          <table className="table-sm table-hover border">
             <tbody>
               {
                 SingleAccountFields.map((accountField) => {
                   const value = user[accountField.id];
                   return (
                     <tr>
-                      <td>{accountField.id}:</td>
+                      <td>{accountField.label}:</td>
                       <td>{accountField.formatedCell ? accountField.format(value) : value}</td>
+                      {
+                        accountField.Editable ? (
+                          <td><button className="btn btn-sm m-0">Edit</button></td>
+                        ) : (
+                            <td><button className="btn btn-sm m-0 disabled">Edit</button></td>
+                          )
+                      }
                     </tr>
                   );
                 })
