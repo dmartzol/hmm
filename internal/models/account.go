@@ -36,6 +36,7 @@ type Account struct {
 // AccountView is the restricted response body of Account
 // see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
 type AccountView struct {
+	ID                         int64 `json:"ID"`
 	FirstName, LastName, Email string
 	DOB                        string `json:"DateOfBird"`
 	PhoneNumber                string `json:",omitempty"`
@@ -50,6 +51,7 @@ type AccountView struct {
 // see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
 func (a Account) View(options map[string]bool) AccountView {
 	view := AccountView{
+		ID:                a.ID,
 		FirstName:         a.FirstName,
 		LastName:          a.LastName,
 		DOB:               a.DOB.Format(timeutils.LayoutISODay),

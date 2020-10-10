@@ -18,39 +18,14 @@ import SearchIcon from '@material-ui/icons/Search';
 
 
 const columns = [
+    { id: 'ID', label: 'ID', minWidth: 170 },
     { id: 'FirstName', label: 'First Name', minWidth: 170 },
     { id: 'LastName', label: 'Last Name', minWidth: 100 },
     { id: 'Email', label: 'Email', minWidth: 170, align: 'center' },
     { id: 'Active', label: 'Active', formatedCell: true, minWidth: 170, align: 'center', format: (value) => value ? "True" : "False" },
 ];
 
-const useStyles = makeStyles({
-    root: {
-        width: '100%',
-    },
-    container: {
-        maxHeight: 440,
-    },
-    paper: {
-        maxWidth: 936,
-        margin: 'auto',
-        overflow: 'hidden',
-    },
-    searchBar: {
-        borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
-    },
-    block: {
-        display: 'block',
-    },
-    contentWrapper: {
-        margin: '40px 16px',
-    },
-});
-
 export default function StickyHeadTable(props) {
-    const classes = useStyles();
-    const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
     const [loading, setLoading] = useState(true)
     const [users, setUsers] = useState([])
@@ -69,80 +44,40 @@ export default function StickyHeadTable(props) {
         }
     }, [props])
 
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
-    };
-
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(+event.target.value);
-        setPage(0);
-    };
-
     return loading ? (
         <div align="center">Loading...</div>
     ) : (
-            <Paper className={classes.paper}>
-                <AppBar className={classes.searchBar} position="static" color="default" elevation={0}>
-                    <Toolbar>
-                        <Grid container spacing={2} alignItems="center">
-                            <Grid item>
-                                <SearchIcon className={classes.block} color="inherit" />
-                            </Grid>
-                            <Grid item xs>
-                                <TextField
-                                    fullWidth
-                                    placeholder="Search account"
-                                    InputProps={{
-                                        disableUnderline: true,
-                                        className: classes.searchInput,
-                                    }}
-                                />
-                            </Grid>
-                        </Grid>
-                    </Toolbar>
-                </AppBar>
-                <TableContainer >
-                    <Table stickyHeader aria-label="sticky table">
-                        <TableHead>
-                            <TableRow>
-                                {columns.map((column) => (
-                                    <TableCell
-                                        key={column.id}
-                                        align={column.align}
-                                        style={{ minWidth: column.minWidth }}
-                                    >
-                                        {column.label}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {users.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((user) => {
-                                return (
-                                    <TableRow hover role="checkbox" tabIndex={-1} key={user.FirstName}>
-                                        {columns.map((column) => {
-                                            const value = user[column.id];
-                                            return (
-                                                <TableCell key={column.id} align={column.align}>
-                                                    {column.formatedCell ? column.format(value) : value}
-                                                </TableCell>
-                                            );
-                                        })}
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                <TablePagination
-                    rowsPerPageOptions={[10, 25, 100]}
-                    component="div"
-                    count={users.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onChangePage={handleChangePage}
-                    onChangeRowsPerPage={handleChangeRowsPerPage}
-                />
-            </Paper>
+            <div className="container border col-10">
+                <div className="row">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">ID#</th>
+                                <th scope="col">First Name</th>
+                                <th scope="col">Last Name</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Active</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                users.map((user) => {
+                                    return (
+                                        <tr>
+                                            <th scope="row">{user.ID}</th>
+                                            <td>{user.FirstName}</td>
+                                            <td>{user.LastName}</td>
+                                            <td>{user.Email}</td>
+                                            <td>{user.Active}</td>
+                                        </tr>
+                                    );
+                                })
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         )
 }
+
