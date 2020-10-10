@@ -5,6 +5,8 @@ export const AccountIndexViewFields = [
   { id: 'FirstName', label: 'First Name', minWidth: 170 },
   { id: 'LastName', label: 'Last Name', minWidth: 100 },
   { id: 'Email', label: 'Email', minWidth: 170, align: 'center' },
+  { id: 'ConfirmedEmail', label: 'Confirmed Email', formatedCell: true, minWidth: 170, align: 'center', format: (value) => value ? "True" : "False", Editable: false },
+  { id: 'FailedLoginsCount', label: 'Failed Logins', minWidth: 170, align: 'center', Editable: false },
   { id: 'Active', label: 'Active', formatedCell: true, minWidth: 170, align: 'center', format: (value) => value ? "True" : "False" },
 ];
 
