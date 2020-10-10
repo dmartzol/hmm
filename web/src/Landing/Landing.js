@@ -1,26 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { Link } from 'react-router-dom';
 import axios from "axios";
 
-const styles = {
-    root: {
-        flexGrow: 1,
-    },
-    title: {
-        flexGrow: 1,
-    },
-    appbar: {
-        backgroundColor: '#ED1C16',
-    },
-};
-
-function Landing(props) {
-    const { classes } = props;
+function Landing() {
     const initialUserState = {
         loggedIn: false,
         session: {
@@ -52,11 +35,12 @@ function Landing(props) {
 
 
     return (
-        <React.Fragment>
-            <div className={classes.root}>
-                <AppBar position="static" className={classes.appbar}>
-                    <Toolbar>
-                        <Typography variant="h6" className={classes.title}>Hackerspace Membership Management</Typography>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Hmm!</a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li>
                         {
                             session.loggedIn ?
                                 <div>
@@ -68,11 +52,15 @@ function Landing(props) {
                                     <Button component={Link} to={'/signup'} color="inherit">Sign Up</Button>
                                 </div>
                         }
-                    </Toolbar>
-                </AppBar>
+                    </li>
+                </ul>
+                <form class="form-inline my-2 my-lg-0">
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" />
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </form>
             </div>
-        </React.Fragment >
+        </nav>
     );
 }
 
-export default withStyles(styles)(Landing);
+export default Landing;
