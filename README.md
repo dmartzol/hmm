@@ -6,10 +6,10 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 
 ## Features
 
-* React dashboard for easy use
-* PostgreSQL performant database
+* React admin panel to administer resources and sub-resources
 * Management of Sessions, cookies, permissions, email authentication, accounts, ...
 * Management of Hackerspace equipment and equipment authorizations
+* PostgreSQL performant database
 * Dependency Inversion to mock database and create unit tests
 
 
