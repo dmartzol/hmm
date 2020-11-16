@@ -8,7 +8,7 @@ import (
 )
 
 func (api API) AuthorizeAccount(accountID int64, permission models.RolePermission) error {
-	roles, err := api.RolesForAccount(accountID)
+	roles, err := api.db.RolesForAccount(accountID)
 	if err != nil {
 		log.Printf("AuthorizeAccount Account ERROR: %+v", err)
 		return err

@@ -15,20 +15,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type accountStorage interface {
-	PopulateAccount(a *models.Account) *models.Account
-	PopulateAccounts(accs models.Accounts) models.Accounts
-	Account(id int64) (*models.Account, error)
-	Accounts() (models.Accounts, error)
-	AccountExists(email string) (bool, error)
-	AccountWithCredentials(email, allegedPassword string) (*models.Account, error)
-	CreateAccount(first, last, email, password, confirmationCode string, dob time.Time, gender, phone *string) (*models.Account, *models.Confirmation, error)
-	CreateConfirmation(accountID int64, t models.ConfirmationType) (*models.Confirmation, error)
-	PendingConfirmationByKey(key string) (*models.Confirmation, error)
-	FailedConfirmationIncrease(id int64) (*models.Confirmation, error)
-	Confirm(id int64) (*models.Confirmation, error)
-}
-
 func (api API) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
@@ -39,13 +25,13 @@ func (api API) GetAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accs, err := api.Accounts()
+	accs, err := api.db.Accounts()
 	if err != nil {
 		log.Printf("accounts: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, api.PopulateAccounts(accs).Views(nil))
+	httpresponse.RespondJSON(w, api.db.PopulateAccounts(accs).Views(nil))
 }
 
 func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +61,7 @@ func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	a, err := api.Account(accountID)
+	a, err := api.db.Account(accountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("account %d not found", accountID)
@@ -87,7 +73,7 @@ func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	httpresponse.RespondJSON(w, api.PopulateAccount(a).View(nil))
+	httpresponse.RespondJSON(w, api.db.PopulateAccount(a).View(nil))
 }
 
 func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +84,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	exists, err := api.AccountExists(req.Email)
+	exists, err := api.db.AccountExists(req.Email)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -138,7 +124,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	a, _, err := api.storage.CreateAccount(
+	a, _, err := api.db.CreateAccount(
 		req.FirstName,
 		req.LastName,
 		req.Email,
@@ -156,7 +142,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	log.Printf("confirmation key: %s", code)
 
 	// create session and cookie
-	s, err := api.storage.CreateSession(a.ID)
+	s, err := api.db.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -196,7 +182,7 @@ func (api API) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	a, err := api.Account(requesterID.(int64))
+	a, err := api.db.Account(requesterID.(int64))
 	if err != nil {
 		log.Printf("Account: %+v", err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -209,7 +195,7 @@ func (api API) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	c, err := api.PendingConfirmationByKey(req.ConfirmationKey)
+	c, err := api.db.PendingConfirmationByKey(req.ConfirmationKey)
 	if err != nil {
 		log.Printf("PendingConfirmationByKey: %+v", err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -233,7 +219,7 @@ func (api API) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	}
 	// check if keys match
 	if c.Key != req.ConfirmationKey {
-		_, err := api.FailedConfirmationIncrease(c.ID)
+		_, err := api.db.FailedConfirmationIncrease(c.ID)
 		if err != nil {
 			log.Printf("FailedConfirmationIncrease: %+v", err)
 		}
@@ -242,7 +228,7 @@ func (api API) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// confirmation went OK
-	_, err = api.Confirm(c.ID)
+	_, err = api.db.Confirm(c.ID)
 	if err != nil {
 		log.Printf("Confirm: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -274,7 +260,7 @@ func (api API) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := api.Role(req.RoleID)
+	role, err := api.db.Role(req.RoleID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("AddAccountRole Role ERROR: %+v", err)
@@ -285,7 +271,7 @@ func (api API) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	accRole, err := api.storage.AddAccountRole(role.ID, requestedAccountID)
+	accRole, err := api.db.AddAccountRole(role.ID, requestedAccountID)
 	if err != nil {
 		log.Printf("AddAccountRole storage.AddAccountRole ERROR: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -329,7 +315,7 @@ func (api API) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	rs, err := api.RolesForAccount(requestedAccountID)
+	rs, err := api.db.RolesForAccount(requestedAccountID)
 	if err != nil {
 		log.Printf("GetAccountRoles RolesForAccount ERROR: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

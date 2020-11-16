@@ -30,7 +30,7 @@ func (api API) GetSession(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	s, err := api.storage.SessionFromIdentifier(c.Value)
+	s, err := api.db.SessionFromIdentifier(c.Value)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -49,7 +49,7 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fetching account with credentials(errors reurned should be purposedly broad)
-	registered, err := api.AccountExists(credentials.Email)
+	registered, err := api.db.AccountExists(credentials.Email)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -60,7 +60,7 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 		return
 	}
-	a, err := api.AccountWithCredentials(credentials.Email, credentials.Password)
+	a, err := api.db.AccountWithCredentials(credentials.Email, credentials.Password)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -69,7 +69,7 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	credentials.Password = ""
 
 	// create session and cookie
-	s, err := api.storage.CreateSession(a.ID)
+	s, err := api.db.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -91,7 +91,7 @@ func (api API) DeleteSession(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	err = api.storage.DeleteSession(c.Value)
+	err = api.db.DeleteSession(c.Value)
 	if err != nil {
 		log.Printf("%+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

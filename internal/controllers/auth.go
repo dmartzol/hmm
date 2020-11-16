@@ -28,7 +28,7 @@ func (api API) AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
 		}
-		s, err := api.UpdateSession(c.Value)
+		s, err := api.db.UpdateSession(c.Value)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				log.Printf("UpdateSession: %+v", err)

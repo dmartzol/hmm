@@ -29,7 +29,7 @@ func (api API) CreateRole(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	exists, err := api.RoleExists(req.Name)
+	exists, err := api.db.RoleExists(req.Name)
 	if err != nil {
 		log.Printf("CreateRole RoleExists ERROR: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -40,7 +40,7 @@ func (api API) CreateRole(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusConflict), http.StatusConflict)
 		return
 	}
-	role, err := api.storage.CreateRole(req.Name)
+	role, err := api.db.CreateRole(req.Name)
 	if err != nil {
 		log.Printf("CreateRole storage.CreateRole ERROR: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -50,7 +50,7 @@ func (api API) CreateRole(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api API) GetRoles(w http.ResponseWriter, r *http.Request) {
-	roles, err := api.Roles()
+	roles, err := api.db.Roles()
 	if err != nil {
 		log.Printf("GetRoles Roles ERROR: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -98,7 +98,7 @@ func (api API) EditRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := api.Role(roleID)
+	role, err := api.db.Role(roleID)
 	if err != nil {
 		log.Printf("EditRole Role ERROR: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -121,7 +121,7 @@ func (api API) EditRole(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	updatedRole, err := api.UpdateRole(role.ID, newBit)
+	updatedRole, err := api.db.UpdateRole(role.ID, newBit)
 	if err != nil {
 		log.Printf("EditRole UpdateRole ERROR: %+v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

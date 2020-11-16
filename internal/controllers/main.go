@@ -1,21 +1,17 @@
 package controllers
 
+import "github.com/dmartzol/hmm/internal/storage/postgres"
+
 const (
 	apiVersionNumber = "0.0.1"
 	hmmmCookieName   = "Hmm-Cookie"
 )
 
-type storage interface {
-	sessionStorage
-	accountStorage
-	roleStorage
-}
-
 // API represents something
 type API struct {
-	storage
+	db *postgres.DB
 }
 
-func NewAPI(db storage) (*API, error) {
+func NewAPI(db *postgres.DB) (*API, error) {
 	return &API{db}, nil
 }
