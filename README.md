@@ -10,7 +10,6 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 * Management of Sessions, cookies, permissions, email authentication, accounts, ...
 * Management of Hackerspace equipment and equipment authorizations
 * PostgreSQL performant database
-* Dependency Inversion to mock database and create unit tests
 
 
 ## Credits
