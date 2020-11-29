@@ -44,6 +44,9 @@ func RespondJSONError(w http.ResponseWriter, errorMessage string, code int) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
+	if errorMessage == "" {
+		errorMessage = http.StatusText(code)
+	}
 	e := JSONError{
 		Error:      errorMessage,
 		StatusCode: code,

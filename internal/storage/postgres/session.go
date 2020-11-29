@@ -8,11 +8,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// SessionFromIdentifier fetches a session from a given its identifier
-func (db *DB) SessionFromIdentifier(identifier string) (*models.Session, error) {
+// SessionFromToken fetches a session by its token
+func (db *DB) SessionFromToken(token string) (*models.Session, error) {
 	var s models.Session
-	sqlStatement := `select * from sessions where session_id = $1`
-	err := db.Get(&s, sqlStatement, identifier)
+	sqlStatement := `select * from sessions where token = $1`
+	err := db.Get(&s, sqlStatement, token)
 	if err != nil {
 		return nil, err
 	}
@@ -35,10 +35,10 @@ func (db *DB) CreateSession(accountID int64) (*models.Session, error) {
 	return &s, tx.Commit()
 }
 
-// DeleteSession deletes the session with the given identifier
-func (db *DB) DeleteSession(identifier string) error {
-	sqlStatement := `delete from sessions where session_id = $1`
-	res, err := db.Exec(sqlStatement, identifier)
+// DeleteSession deletes the session with the given token
+func (db *DB) DeleteSession(token string) error {
+	sqlStatement := `delete from sessions where token = $1`
+	res, err := db.Exec(sqlStatement, token)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (db *DB) UpdateSession(sessionToken string) (*models.Session, error) {
 		return nil, err
 	}
 	var s models.Session
-	sqlStatement := `update sessions set last_activity_time=default where session_id = $1 returning *`
+	sqlStatement := `update sessions set last_activity_time=default where token = $1 returning *`
 	err = tx.Get(&s, sqlStatement, sessionToken)
 	if err != nil {
 		tx.Rollback()

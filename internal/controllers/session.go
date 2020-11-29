@@ -3,7 +3,6 @@ package controllers
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/dmartzol/hmm/internal/models"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
@@ -14,26 +13,17 @@ const (
 	sessionLength = 345600
 )
 
-type sessionStorage interface {
-	SessionFromIdentifier(identifier string) (*models.Session, error)
-	CreateSession(accountID int64) (*models.Session, error)
-	DeleteSession(identifier string) error
-	CleanSessionsOlderThan(age time.Duration) (int64, error)
-	// UpdateSession updates a session in the db with the current timestamp
-	UpdateSession(identifier string) (*models.Session, error)
-}
-
 func (api API) GetSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	s, err := api.db.SessionFromIdentifier(c.Value)
+	s, err := api.db.SessionFromToken(c.Value)
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 	httpresponse.RespondJSON(w, s.View(nil))
@@ -44,7 +34,7 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	err := httpresponse.Unmarshal(r, &credentials)
 	if err != nil {
 		log.Printf("Unmarshal: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
@@ -52,18 +42,18 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	registered, err := api.db.AccountExists(credentials.Email)
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	if !registered {
 		log.Printf("unable to find email '%s' in db", credentials.Email)
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 	a, err := api.db.AccountWithCredentials(credentials.Email, credentials.Password)
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 	credentials.Password = ""
@@ -72,12 +62,12 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	s, err := api.db.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	cookie := &http.Cookie{
 		Name:   hmmmCookieName,
-		Value:  s.SessionIdentifier,
+		Value:  s.Token,
 		MaxAge: sessionLength,
 	}
 	http.SetCookie(w, cookie)
@@ -88,13 +78,13 @@ func (api API) DeleteSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	err = api.db.DeleteSession(c.Value)
 	if err != nil {
 		log.Printf("%+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	c = &http.Cookie{

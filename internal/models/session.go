@@ -7,9 +7,9 @@ import (
 // Session represents an account session
 type Session struct {
 	Row
-	AccountID         int64     `db:"account_id"`
-	LastActivityTime  time.Time `db:"last_activity_time"`
-	SessionIdentifier string    `db:"session_id"`
+	AccountID        int64     `db:"account_id"`
+	Token            string    `db:"token"`
+	LastActivityTime time.Time `db:"last_activity_time"`
 }
 
 type SessionView struct {

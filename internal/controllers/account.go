@@ -21,14 +21,14 @@ func (api API) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	err := api.AuthorizeAccount(requesterID, models.PermissionAccountsView)
 	if err != nil {
 		log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 
 	accs, err := api.db.Accounts()
 	if err != nil {
 		log.Printf("accounts: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	httpresponse.RespondJSON(w, api.db.PopulateAccounts(accs).Views(nil))
@@ -37,14 +37,14 @@ func (api API) GetAccounts(w http.ResponseWriter, r *http.Request) {
 func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
 	// parsing parameters
 	params := mux.Vars(r)
-	idString, ok := params["id"]
+	idString, ok := params[idQueryParameter]
 	if !ok {
-		http.Error(w, "parameter 'id' not found", http.StatusBadRequest)
+		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
 	accountID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
+		httpresponse.RespondJSONError(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("WARNING: account %d requested to see account %d", requesterID, accountID)
 			log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 			return
 		}
 	}
@@ -65,11 +65,11 @@ func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("account %d not found", accountID)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			httpresponse.RespondJSONError(w, "", http.StatusNotFound)
 			return
 		} else {
 			log.Printf("could not fetch account %d: %+v", accountID, err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 			return
 		}
 	}
@@ -81,13 +81,13 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
-		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	exists, err := api.db.AccountExists(req.Email)
 	if err != nil {
 		log.Printf("%+v", err)
-		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	if exists {
@@ -115,13 +115,13 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	parsedDOB, err := time.Parse(timeutils.LayoutISODay, req.DOB)
 	if err != nil {
 		log.Printf("%s: %+v", req.DOB, err)
-		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	code, err := randutil.RandomCode(6)
 	if err != nil {
 		log.Printf("RandomCode: %+v", err)
-		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	a, _, err := api.db.CreateAccount(
@@ -136,7 +136,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		log.Printf("%+v", err)
-		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	log.Printf("confirmation key: %s", code)
@@ -145,13 +145,13 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	s, err := api.db.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
-		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	cookie := &http.Cookie{
 		Name:   hmmmCookieName,
-		Value:  s.SessionIdentifier,
+		Value:  s.Token,
 		MaxAge: sessionLength,
 	}
 	http.SetCookie(w, cookie)
@@ -166,7 +166,7 @@ func (api API) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	// TODO: create confirmation key in db
@@ -179,42 +179,42 @@ func (api API) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	// fetching requester id
 	requesterID := ctx.Value(contextRequesterAccountIDKey)
 	if requesterID == nil {
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 	a, err := api.db.Account(requesterID.(int64))
 	if err != nil {
 		log.Printf("Account: %+v", err)
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 	var req models.ConfirmEmailRequest
 	err = httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	c, err := api.db.PendingConfirmationByKey(req.ConfirmationKey)
 	if err != nil {
 		log.Printf("PendingConfirmationByKey: %+v", err)
-		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 	if c.FailedConfirmationsCount >= 3 {
 		log.Printf("FailedConfirmationsCount: %d", c.FailedConfirmationsCount)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
 	// check if user is trying to confirm current email
 	if c.ConfirmationTarget == nil {
 		log.Printf("confirmation target is null for key %s", req.ConfirmationKey)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
 	if a.Email != *c.ConfirmationTarget {
 		log.Printf("confirmation target %s does not match account email %s", *c.ConfirmationTarget, a.Email)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
 	// check if keys match
@@ -224,14 +224,14 @@ func (api API) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 			log.Printf("FailedConfirmationIncrease: %+v", err)
 		}
 		log.Printf("confirmation target %s does not match account email %s", *c.ConfirmationTarget, a.Email)
-		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
 	// confirmation went OK
 	_, err = api.db.Confirm(c.ID)
 	if err != nil {
 		log.Printf("Confirm: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -243,38 +243,35 @@ func (api API) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("AddAccountRole Unmarshal ERROR: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	// parsing parameters
 	params := mux.Vars(r)
-	idString, ok := params["id"]
+	idString, ok := params[idQueryParameter]
 	if !ok {
-		http.Error(w, "parameter 'id' not found", http.StatusBadRequest)
+		errMSg := fmt.Sprintf("parameter '%s' not found", idQueryParameter)
+		httpresponse.RespondJSONError(w, errMSg, http.StatusInternalServerError)
 		return
 	}
 	requestedAccountID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
+		errMsg := fmt.Sprintf("wrong parameter '%s'", idString)
+		httpresponse.RespondJSONError(w, errMsg, http.StatusBadRequest)
 		return
 	}
 
 	role, err := api.db.Role(req.RoleID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			log.Printf("AddAccountRole Role ERROR: %+v", err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-		log.Printf("AddAccountRole Role ERROR: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		log.Printf("AddAccountRole ERROR fetching role: %+v", err)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	accRole, err := api.db.AddAccountRole(role.ID, requestedAccountID)
 	if err != nil {
 		log.Printf("AddAccountRole storage.AddAccountRole ERROR: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	httpresponse.RespondJSON(w, accRole.View(nil))
@@ -285,20 +282,22 @@ func (api API) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("GetAccountRoles Unmarshal ERROR: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	// parsing parameters
 	params := mux.Vars(r)
-	idString, ok := params["id"]
+	idString, ok := params[idQueryParameter]
 	if !ok {
-		http.Error(w, "parameter 'id' not found", http.StatusBadRequest)
+		errMsg := fmt.Sprintf("parameter '%s' not found", idQueryParameter)
+		httpresponse.RespondJSONError(w, errMsg, http.StatusBadRequest)
 		return
 	}
 	requestedAccountID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
+		errMsg := fmt.Sprintf("wrong parameter '%s'", idString)
+		httpresponse.RespondJSONError(w, errMsg, http.StatusBadRequest)
 		return
 	}
 
@@ -310,7 +309,7 @@ func (api API) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("WARNING: account %d requested to see account %d", requesterID, requestedAccountID)
 			log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 			return
 		}
 	}
@@ -318,7 +317,7 @@ func (api API) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 	rs, err := api.db.RolesForAccount(requestedAccountID)
 	if err != nil {
 		log.Printf("GetAccountRoles RolesForAccount ERROR: %+v", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	httpresponse.RespondJSON(w, rs.View(nil))

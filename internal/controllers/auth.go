@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+
+	"github.com/dmartzol/hmm/pkg/httpresponse"
 )
 
 func (api API) AuthMiddleware(next http.Handler) http.Handler {
@@ -21,22 +23,19 @@ func (api API) AuthMiddleware(next http.Handler) http.Handler {
 		}
 		c, err := r.Cookie(hmmmCookieName)
 		if err != nil {
-			if err != http.ErrNoCookie {
-				log.Printf("cookie: %+v", err)
-			}
-			log.Printf("AuthMiddleware Cookie ERROR: %+v", err)
-			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			log.Printf("AuthMiddleware ERROR getting cookie: %+v", err)
+			httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 			return
 		}
 		s, err := api.db.UpdateSession(c.Value)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				log.Printf("UpdateSession: %+v", err)
-				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				log.Printf("AuthMiddleware ERROR unable to update session %s: %+v", c.Value, err)
+				httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 				return
 			}
-			log.Printf("UpdateSession: %+v", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("AuthMiddleware ERROR for session %s: %+v", c.Value, err)
+			httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 			return
 		}
 

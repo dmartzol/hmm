@@ -93,7 +93,7 @@ CREATE TABLE sessions (
     id BIGSERIAL PRIMARY KEY,
     account_id BIGINT REFERENCES accounts (id) NOT NULL,
     last_activity_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    session_id UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
+    token UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -110,7 +110,6 @@ CREATE TABLE equipment (
 CREATE TABLE authorizations (
     id BIGSERIAL PRIMARY KEY,
     equipment_id BIGINT REFERENCES equipment (id) NOT NULL,
-    controller_id BIGINT REFERENCES equipment (id),
     "type" INT NOT NULL,
     "description" text,
     renewable BOOLEAN NOT NULL,
