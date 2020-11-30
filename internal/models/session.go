@@ -10,6 +10,7 @@ type Session struct {
 	AccountID        int64     `db:"account_id"`
 	Token            string    `db:"token"`
 	LastActivityTime time.Time `db:"last_activity_time"`
+	ExpirationTime   time.Time `db:"expiration_time"`
 }
 
 type SessionView struct {
