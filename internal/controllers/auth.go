@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dmartzol/hmm/internal/storage/postgres"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 )
 
@@ -30,7 +31,12 @@ func (api API) AuthMiddleware(next http.Handler) http.Handler {
 		s, err := api.db.UpdateSession(c.Value)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				log.Printf("AuthMiddleware ERROR unable to update session %s: %+v", c.Value, err)
+				log.Printf("AuthMiddleware ERROR unable to find session %s: %+v", c.Value, err)
+				httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
+				return
+			}
+			if err != postgres.ErrExpiredResource {
+				log.Printf("AuthMiddleware ERROR session %s is expired: %+v", c.Value, err)
 				httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 				return
 			}

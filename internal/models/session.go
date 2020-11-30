@@ -16,12 +16,14 @@ type Session struct {
 type SessionView struct {
 	AccountID        int64
 	LastActivityTime time.Time
+	ExpirationTime   time.Time
 }
 
 func (s Session) View(options map[string]bool) SessionView {
 	view := SessionView{
 		AccountID:        s.AccountID,
 		LastActivityTime: s.LastActivityTime,
+		ExpirationTime:   s.ExpirationTime,
 	}
 	return view
 }

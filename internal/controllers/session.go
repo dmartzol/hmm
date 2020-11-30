@@ -74,16 +74,16 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondJSON(w, s.View(nil))
 }
 
-func (api API) DeleteSession(w http.ResponseWriter, r *http.Request) {
+func (api API) ExpireSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	err = api.db.DeleteSession(c.Value)
+	session, err := api.db.ExpireSessionFromToken(c.Value)
 	if err != nil {
-		log.Printf("%+v", err)
+		log.Printf("ExpireSession - ERROR expiring session: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -93,5 +93,5 @@ func (api API) DeleteSession(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	}
 	http.SetCookie(w, c)
-	httpresponse.RespondJSON(w, models.Session{}.View(nil))
+	httpresponse.RespondJSON(w, session.View(nil))
 }

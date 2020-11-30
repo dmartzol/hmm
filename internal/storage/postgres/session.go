@@ -1,11 +1,15 @@
 package postgres
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/dmartzol/hmm/internal/models"
 	_ "github.com/lib/pq"
+)
+
+var (
+	ErrExpiredResource error
 )
 
 // SessionFromToken fetches a session by its token
@@ -35,22 +39,20 @@ func (db *DB) CreateSession(accountID int64) (*models.Session, error) {
 	return &s, tx.Commit()
 }
 
-// DeleteSession deletes the session with the given token
-func (db *DB) DeleteSession(token string) error {
-	sqlStatement := `delete from sessions where token = $1`
-	res, err := db.Exec(sqlStatement, token)
+// ExpireSessionFromToken expires the session with the given token
+func (db *DB) ExpireSessionFromToken(token string) (*models.Session, error) {
+	tx, err := db.Beginx()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	count, err := res.RowsAffected()
+	var s models.Session
+	sqlStatement := `update sessions set expiration_time = current_timestamp where token = $1 returning *`
+	err = tx.Get(&s, sqlStatement, token)
 	if err != nil {
-		return err
+		tx.Rollback()
+		return nil, err
 	}
-	if count != 1 {
-		return fmt.Errorf("%d rows affected by DeleteSession", count)
-	}
-	fmt.Println(count)
-	return nil
+	return &s, tx.Commit()
 }
 
 // CleanSessionsOlderThan deletes all sessions older than age(in seconds) and returns the number of rows affected
@@ -69,17 +71,29 @@ func (db *DB) CleanSessionsOlderThan(age time.Duration) (int64, error) {
 }
 
 // UpdateSession updates a session in the db with the current timestamp
-func (db *DB) UpdateSession(sessionToken string) (*models.Session, error) {
+func (db *DB) UpdateSession(token string) (*models.Session, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
-	var s models.Session
-	sqlStatement := `update sessions set last_activity_time=default where token = $1 returning *`
-	err = tx.Get(&s, sqlStatement, sessionToken)
+	var session models.Session
+	sqlStatement := `select * from sessions where token = $1`
+	tx.Get(&session, sqlStatement, token)
 	if err != nil {
+		log.Printf("UpdateSession db - ERROR fetching session from token %s: %+v", token, err)
 		tx.Rollback()
 		return nil, err
 	}
-	return &s, tx.Commit()
+	if session.ExpirationTime.Before(time.Now()) {
+		return nil, ErrExpiredResource
+	}
+	var updatedSession models.Session
+	sqlStatement = `update sessions set last_activity_time=default where token = $1 returning *`
+	err = tx.Get(&updatedSession, sqlStatement, token)
+	if err != nil {
+		log.Printf("UpdateSession db - ERROR updating session from token %s: %+v", token, err)
+		tx.Rollback()
+		return nil, err
+	}
+	return &updatedSession, tx.Commit()
 }
