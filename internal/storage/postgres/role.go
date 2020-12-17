@@ -1,6 +1,11 @@
 package postgres
 
-import "github.com/dmartzol/hmm/internal/models"
+import (
+	"log"
+
+	"github.com/dmartzol/hmm/internal/models"
+	"github.com/lib/pq"
+)
 
 // RoleExists returns true if already exists a role with the provided name in the db
 func (db *DB) RoleExists(name string) (bool, error) {
@@ -16,12 +21,12 @@ func (db *DB) RoleExists(name string) (bool, error) {
 // CreateRole creates a new role with the given name
 func (db *DB) CreateRole(name string) (*models.Role, error) {
 	var r models.Role
-	sqlStatement := `insert into roles (name, permission_bit) values ($1, 0) returning *`
+	sqlStatement := `insert into roles (name) values ($1) returning *`
 	err := db.Get(&r, sqlStatement, name)
 	if err != nil {
 		return nil, err
 	}
-	return r.Populate(), nil
+	return &r, nil
 }
 
 func (db *DB) Role(roleID int64) (*models.Role, error) {
@@ -31,7 +36,7 @@ func (db *DB) Role(roleID int64) (*models.Role, error) {
 	if err != nil {
 		return nil, err
 	}
-	return r.Populate(), nil
+	return &r, nil
 }
 
 func (db *DB) AddAccountRole(roleID, accountID int64) (*models.AccountRole, error) {
@@ -55,7 +60,7 @@ func (db *DB) RolesForAccount(accountID int64) (models.Roles, error) {
 	if err != nil {
 		return nil, err
 	}
-	return rs.Populate(), nil
+	return rs, nil
 }
 
 // Roles fetches all roles in the database
@@ -66,20 +71,34 @@ func (db *DB) Roles() (models.Roles, error) {
 	if err != nil {
 		return nil, err
 	}
-	return rs.Populate(), nil
+	return rs, nil
 }
 
-func (db *DB) UpdateRole(roleID int64, permissionBit int) (*models.Role, error) {
+func (db *DB) UpdateRole(roleID int64, req models.EditRoleReq) (*models.Role, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
-	var r models.Role
-	sqlStatement := `update roles set permission_bit = $1 where id = $2 returning *`
-	err = tx.Get(&r, sqlStatement, permissionBit, roleID)
+	sqlStatement := `select * from roles where id = $1`
+	var role models.Role
+	err = tx.Get(&role, sqlStatement, roleID)
+	if err != nil {
+		log.Printf("UpdateRole - ERROR fetching role %d: %+v", roleID, err)
+		tx.Rollback()
+		return nil, err
+	}
+	var newName string
+	if req.Name != nil && *req.Name != "" && *req.Name != role.Name {
+		newName = *req.Name
+	} else {
+		newName = role.Name
+	}
+	var updatedRole models.Role
+	sqlStatement = `update roles set name = $1, permissions = $2 where id = $3 returning *`
+	err = tx.Get(&updatedRole, sqlStatement, newName, pq.Array(req.Permissions), roleID)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
-	return r.Populate(), tx.Commit()
+	return &updatedRole, tx.Commit()
 }

@@ -35,7 +35,7 @@ func (api API) AuthMiddleware(next http.Handler) http.Handler {
 				httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 				return
 			}
-			if err != postgres.ErrExpiredResource {
+			if err == postgres.ErrExpiredResource {
 				log.Printf("AuthMiddleware ERROR session %s is expired: %+v", c.Value, err)
 				httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 				return

@@ -3,11 +3,9 @@ package controllers
 import (
 	"fmt"
 	"log"
-
-	"github.com/dmartzol/hmm/internal/models"
 )
 
-func (api API) AuthorizeAccount(accountID int64, permission models.RolePermission) error {
+func (api API) AuthorizeAccount(accountID int64, permission string) error {
 	roles, err := api.db.RolesForAccount(accountID)
 	if err != nil {
 		log.Printf("AuthorizeAccount Account ERROR: %+v", err)

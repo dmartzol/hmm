@@ -104,16 +104,17 @@ func (api API) EditRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newBit := 0
-	for _, p := range req.Permissions {
-		newBit = newBit | models.StringToRolePermission(p).Int()
-	}
-	if role.PermissionsBit.Int() == newBit {
-		log.Printf("EditRole ERROR: role already has those permissions")
-		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
-		return
-	}
-	updatedRole, err := api.db.UpdateRole(role.ID, newBit)
+	// newBit := 0
+	// for _, p := range req.Permissions {
+	// 	newBit = newBit | models.StringToRolePermission(p).Int()
+	// }
+	// TODO: update
+	// if role.PermissionsBit.Int() == newBit {
+	// 	log.Printf("EditRole ERROR: role already has those permissions")
+	// 	httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
+	// 	return
+	// }
+	updatedRole, err := api.db.UpdateRole(role.ID, req)
 	if err != nil {
 		log.Printf("EditRole UpdateRole ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

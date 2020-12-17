@@ -17,68 +17,24 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 BEGIN;
 
-CREATE TABLE accounts (
+CREATE TABLE emails (
     id BIGSERIAL PRIMARY KEY,
-    first_name VARCHAR NOT NULL,
-    last_name VARCHAR NOT NULL,
-    dob date NOT NULL,
-    gender CITEXT DEFAULT NULL,
-    active BOOLEAN NOT NULL DEFAULT FALSE CHECK ((confirmed_email AND review_time IS NOT NULL) OR NOT active),
     email CITEXT NOT NULL UNIQUE,
-    confirmed_email BOOLEAN DEFAULT FALSE,
-    phone_number VARCHAR UNIQUE DEFAULT NULL,
-    confirmed_phone BOOLEAN DEFAULT FALSE,
-    passhash TEXT NOT NULL,
-    failed_logins_count INT DEFAULT 0,
-    door_code VARCHAR DEFAULT NULL,
-    external_payment_customer_id INT DEFAULT NULL CHECK ((confirmed_email and review_time IS NOT NULL) OR external_payment_customer_id IS NULL),
-    review_time TIMESTAMPTZ DEFAULT NULL,
+    confirmed BOOLEAN DEFAULT FALSE,
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE roles (
+CREATE TABLE phone_numbers (
     id BIGSERIAL PRIMARY KEY,
-    "name" TEXT UNIQUE,
-    permission_bit BIGINT NOT NULL CHECK (permission_bit >= 0),
-    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE account_roles (
-    id BIGSERIAL PRIMARY KEY,
-    role_id BIGINT REFERENCES roles (id) NOT NULL,
-    account_id BIGINT REFERENCES accounts (id) NOT NULL,
-    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (role_id, account_id)
-);
-
-CREATE TABLE confirmations (
-    id BIGSERIAL PRIMARY KEY,
-    "type" NUMERIC NOT NULL, -- email, phone number or password reset
-    confirmation_target VARCHAR DEFAULT NULL,
-    account_id BIGINT REFERENCES accounts (id) NOT NULL,
-    key VARCHAR NOT NULL UNIQUE,
-    confirm_time TIMESTAMPTZ DEFAULT NULL,
-    failed_confirmations_count INT DEFAULT 0,
-    expire_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP + interval '5 hours',
-    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE account_events (
-    id BIGSERIAL PRIMARY KEY,
-    account_id BIGINT REFERENCES accounts (id) NOT NULL,
-    "type" NUMERIC NOT NULL,
-    note VARCHAR,
+    "number" CITEXT NOT NULL UNIQUE,
+    confirmed BOOLEAN DEFAULT FALSE,
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE addresses (
     id BIGSERIAL PRIMARY KEY,
-    account_id BIGINT REFERENCES accounts (id) UNIQUE NOT NULL,
     country VARCHAR(20) NOT NULL,
     city VARCHAR(20) NOT NULL,
     state_code VARCHAR(2) NOT NULL,
@@ -88,6 +44,79 @@ CREATE TABLE addresses (
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TRIGGER update_addresses_update_time BEFORE UPDATE ON addresses FOR EACH ROW EXECUTE PROCEDURE update_update_time_column();
+
+CREATE TABLE accounts (
+    id BIGSERIAL PRIMARY KEY,
+    email_id BIGINT REFERENCES emails (id) NOT NULL,
+    address_id BIGINT REFERENCES addresses (id) NOT NULL,
+    phone_number_id BIGINT REFERENCES phone_numbers (id) DEFAULT NULL,
+    first_name CITEXT NOT NULL,
+    last_name CITEXT NOT NULL,
+    dob date NOT NULL,
+    gender CITEXT DEFAULT NULL,
+    active BOOLEAN NOT NULL DEFAULT FALSE CHECK (review_time IS NOT NULL OR NOT active),
+    passhash TEXT NOT NULL,
+    failed_logins_count INT DEFAULT 0,
+    review_time TIMESTAMPTZ DEFAULT NULL,
+    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TRIGGER update_accounts_update_time BEFORE UPDATE ON accounts FOR EACH ROW EXECUTE PROCEDURE update_update_time_column();
+
+CREATE TABLE door_codes (
+    id BIGSERIAL PRIMARY KEY,
+    account_id BIGINT REFERENCES accounts (id) NOT NULL,
+    door_code TEXT NOT NULL,
+    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX door_codes_account_idx ON door_codes (account_id);
+
+CREATE TABLE roles (
+    id BIGSERIAL PRIMARY KEY,
+    "name" TEXT UNIQUE,
+    permissions JSON DEFAULT NULL,
+    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TRIGGER update_roles_update_time BEFORE UPDATE ON roles FOR EACH ROW EXECUTE PROCEDURE update_update_time_column();
+
+CREATE TABLE account_roles (
+    id BIGSERIAL PRIMARY KEY,
+    account_id BIGINT REFERENCES accounts (id) NOT NULL,
+    role_id BIGINT REFERENCES roles (id) NOT NULL,
+    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (role_id, account_id)
+);
+CREATE INDEX account_roles_account_idx ON account_roles (account_id);
+CREATE INDEX account_roles_role_idx ON account_roles (role_id);
+
+CREATE TABLE confirmations (
+    id BIGSERIAL PRIMARY KEY,
+    account_id BIGINT REFERENCES accounts (id) NOT NULL,
+    "type" NUMERIC NOT NULL, -- email, phone number or password reset
+    confirmation_target VARCHAR DEFAULT NULL,
+    key VARCHAR NOT NULL UNIQUE,
+    confirmation_time TIMESTAMPTZ DEFAULT NULL,
+    failed_confirmations_count INT DEFAULT 0,
+    expire_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP + interval '5 hours',
+    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX confirmations_account_idx ON confirmations (account_id);
+
+CREATE TABLE account_events (
+    id BIGSERIAL PRIMARY KEY,
+    account_id BIGINT REFERENCES accounts (id) NOT NULL,
+    "type" NUMERIC NOT NULL,
+    note VARCHAR,
+    create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX account_events_account_idx ON account_events (account_id);
+CREATE TRIGGER update_account_events_update_time BEFORE UPDATE ON account_events FOR EACH ROW EXECUTE PROCEDURE update_update_time_column();
 
 CREATE TABLE sessions (
     id BIGSERIAL PRIMARY KEY,
@@ -98,6 +127,7 @@ CREATE TABLE sessions (
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TRIGGER update_sessions_update_time BEFORE UPDATE ON sessions FOR EACH ROW EXECUTE PROCEDURE update_update_time_column();
 
 CREATE TABLE equipment (
     id BIGSERIAL PRIMARY KEY,
@@ -107,6 +137,7 @@ CREATE TABLE equipment (
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TRIGGER update_equipment_update_time BEFORE UPDATE ON equipment FOR EACH ROW EXECUTE PROCEDURE update_update_time_column();
 
 CREATE TABLE authorizations (
     id BIGSERIAL PRIMARY KEY,
@@ -117,6 +148,8 @@ CREATE TABLE authorizations (
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX authorizations_equipment_idx ON authorizations (equipment_id);
+CREATE TRIGGER update_authorizations_update_time BEFORE UPDATE ON authorizations FOR EACH ROW EXECUTE PROCEDURE update_update_time_column();
 
 CREATE TABLE account_authorizations (
     id BIGSERIAL PRIMARY KEY,
@@ -129,5 +162,8 @@ CREATE TABLE account_authorizations (
     create_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX account_authorizations_account_idx ON account_authorizations (account_id);
+CREATE INDEX account_authorizations_authorization_idx ON account_authorizations (authorization_id);
+CREATE TRIGGER update_account_authorizations_update_time BEFORE UPDATE ON account_authorizations FOR EACH ROW EXECUTE PROCEDURE update_update_time_column();
 
 COMMIT;

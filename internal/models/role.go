@@ -1,42 +1,19 @@
 package models
 
+import "strings"
+
 type Role struct {
 	Row
-	Name           string
-	PermissionsBit RolePermission `db:"permission_bit"`
-
-	// Synthetic field
+	Name        string
 	Permissions []string
 }
 
 type Roles []*Role
 
-// Populate populates synthetic fields for the role structure
-func (r *Role) Populate() *Role {
-	for i := 1; i <= int(LastPermission); i *= 2 {
-		if r.HasPermission(RolePermission(i)) {
-			r.Permissions = append(r.Permissions, RolePermission(i).String())
-		}
-	}
-	return r
-}
-
-// Populate populates synthetic fields for role structures
-func (rs Roles) Populate() Roles {
-	for _, r := range rs {
-		r.Populate()
-	}
-	return rs
-}
-
 // View returns a role view
 func (r Role) View(options map[string]bool) RoleView {
 	roleView := RoleView{
-		Name:          r.Name,
-		PermissionBit: r.PermissionsBit.Int(),
-	}
-	if len(r.Permissions) == 0 {
-		r.Populate()
+		Name: r.Name,
 	}
 	roleView.Permissions = r.Permissions
 	return roleView
@@ -52,9 +29,11 @@ func (rs Roles) View(options map[string]bool) []RoleView {
 }
 
 // HasPermission reports whether a role has the given permission
-func (r Role) HasPermission(permission RolePermission) bool {
-	if (r.PermissionsBit & permission) == permission {
-		return true
+func (r Role) HasPermission(permission string) bool {
+	for _, p := range r.Permissions {
+		if strings.EqualFold(p, permission) {
+			return true
+		}
 	}
 	return false
 }
