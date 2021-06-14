@@ -22,6 +22,7 @@ type Account struct {
 	DoorCode                  *string `db:"door_code"`
 	PassHash                  string
 	Email                     string
+	EmailID                   int64
 	ConfirmedEmail            bool       `db:"confirmed_email"`
 	PhoneNumber               *string    `db:"phone_number"`
 	ConfirmedPhone            bool       `db:"confirmed_phone"`

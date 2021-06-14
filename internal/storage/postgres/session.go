@@ -1,15 +1,12 @@
 package postgres
 
 import (
+	"database/sql"
 	"log"
 	"time"
 
 	"github.com/dmartzol/hmm/internal/models"
 	_ "github.com/lib/pq"
-)
-
-var (
-	ErrExpiredResource error
 )
 
 // SessionFromToken fetches a session by its token
@@ -23,15 +20,47 @@ func (db *DB) SessionFromToken(token string) (*models.Session, error) {
 	return &s, nil
 }
 
-// CreateSession creates a new session
+// Login creates a new session from credentials request
+func (db *DB) Login(r models.LoginCredentials) (*models.Session, error) {
+	tx, err := db.Beginx()
+	if err != nil {
+		return nil, err
+	}
+	a, err := db.AccountFromCredentialsUsingTx(tx, r.Email, r.Password)
+	if err != nil {
+		tx.Rollback()
+		if err == sql.ErrNoRows {
+			return nil, ErrResourceDoesNotExist
+		}
+		return nil, err
+	}
+	var s models.Session
+	sqlStatement := `insert into sessions (account_id) values ($1) returning *`
+	err = tx.Get(&s, sqlStatement, a.ID)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return &s, tx.Commit()
+}
+
+// CreateSession creates a new session from account id
 func (db *DB) CreateSession(accountID int64) (*models.Session, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
+	a, err := db.AccountUsingTx(tx, accountID)
+	if err != nil {
+		tx.Rollback()
+		if err == sql.ErrNoRows {
+			return nil, ErrResourceDoesNotExist
+		}
+		return nil, err
+	}
 	var s models.Session
 	sqlStatement := `insert into sessions (account_id) values ($1) returning *`
-	err = tx.Get(&s, sqlStatement, accountID)
+	err = tx.Get(&s, sqlStatement, a.ID)
 	if err != nil {
 		tx.Rollback()
 		return nil, err

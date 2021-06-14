@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/dmartzol/hmm/internal/models"
+	"github.com/dmartzol/hmm/internal/storage/postgres"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 )
 
@@ -12,6 +13,7 @@ const (
 	// sessionLength represents the duration(in seconds) a session will be valid for
 	sessionLength = 345600
 )
+
 
 func (api API) GetSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
@@ -38,33 +40,18 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fetching account with credentials(errors reurned should be purposedly broad)
-	registered, err := api.db.AccountExists(credentials.Email)
+	// create session and cookie
+	s, err := api.db.Login(credentials)
 	if err != nil {
 		log.Printf("%+v", err)
+		if err == postgres.ErrResourceDoesNotExist {
+			httpresponse.RespondJSONError(w, "", http.StatusInternalServerError) // purposely ambiguous
+			return
+		}
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
-		return
-	}
-	if !registered {
-		log.Printf("unable to find email '%s' in db", credentials.Email)
-		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
-		return
-	}
-	a, err := api.db.AccountWithCredentials(credentials.Email, credentials.Password)
-	if err != nil {
-		log.Printf("%+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 	credentials.Password = ""
-
-	// create session and cookie
-	s, err := api.db.CreateSession(a.ID)
-	if err != nil {
-		log.Printf("%+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
-		return
-	}
 	cookie := &http.Cookie{
 		Name:   hmmmCookieName,
 		Value:  s.Token,

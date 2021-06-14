@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/dmartzol/hmm/internal/models"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
@@ -18,15 +19,27 @@ func (db *DB) AccountExists(email string) (bool, error) {
 	return exists, nil
 }
 
+func (db *DB) EmailExistsUsingTx(tx *sqlx.Tx, email string) (bool, error) {
+	var exists bool
+	sql := `select exists(select 1 from emails e where e.email = $1)`
+	err := tx.Get(&exists, sql, email)
+	return exists, err
+}
+
 // Account fetches an account by id
 func (db *DB) Account(id int64) (*models.Account, error) {
 	var a models.Account
 	sqlStatement := `select * from accounts a where a.id = $1`
 	err := db.Get(&a, sqlStatement, id)
-	if err != nil {
-		return nil, err
-	}
-	return &a, nil
+	return &a, err
+}
+
+// AccountUsingTx fetches an account by id using a database tx
+func (db *DB) AccountUsingTx(tx *sqlx.Tx, id int64) (*models.Account, error) {
+	var a models.Account
+	sqlStatement := `select * from accounts a where a.id = $1`
+	err := tx.Get(&a, sqlStatement, id)
+	return &a, err
 }
 
 // Accounts returns all accounts in the db
@@ -40,15 +53,27 @@ func (db *DB) Accounts() (models.Accounts, error) {
 	return accs, nil
 }
 
-// AccountWithCredentials returns an account if the email and password provided match an (email,password) pair in the db
-func (db *DB) AccountWithCredentials(email, allegedPassword string) (*models.Account, error) {
-	var a models.Account
-	sqlStatement := `select * from accounts a where a.email = $1 and a.passhash = crypt($2, a.passhash)`
-	err := db.Get(&a, sqlStatement, email, allegedPassword)
+// AccountFromCredentials returns an account if the email and password provided match an (email,password) pair in the db
+func (db *DB) AccountFromCredentials(email, password string) (*models.Account, error) {
+	tx, err := db.Beginx()
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
-	return &a, nil
+	a, err := db.AccountFromCredentialsUsingTx(tx, email, password)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	return a, tx.Commit()
+}
+
+// AccountFromCredentials returns an account if the email and password provided match an (email,password) pair in the db
+func (db *DB) AccountFromCredentialsUsingTx(tx *sqlx.Tx, email, password string) (*models.Account, error) {
+	var a models.Account
+	sqlStatement := `select a.* from accounts a inner join emails e ON a.email_id = e.id where e.email = $1 and a.passhash = crypt($2, a.passhash)`
+	err := tx.Get(&a, sqlStatement, email, password)
+	return &a, err
 }
 
 // CreateAccount creates a new account in the db and a confirmation code for the new registered email

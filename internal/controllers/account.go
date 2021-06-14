@@ -54,8 +54,7 @@ func (api API) GetAccount(w http.ResponseWriter, r *http.Request) {
 	if requesterID != accountID {
 		err := api.AuthorizeAccount(requesterID, models.PermissionAccountsView)
 		if err != nil {
-			log.Printf("WARNING: account %d requested to see account %d", requesterID, accountID)
-			log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
+			log.Printf("WARNING: account %d requested to see account %d: %+v", requesterID, accountID, err)
 			httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 			return
 		}
@@ -94,7 +93,7 @@ func (api API) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
 		err = fmt.Errorf("email '%s' already registered", req.Email)
 		log.Printf("%+v", err)
-		httpresponse.RespondJSONError(w, fmt.Sprintf("account with email '%s' alrady exists", req.Email), http.StatusBadRequest)
+		httpresponse.RespondJSONError(w, fmt.Sprintf("account with email '%s' already exists", req.Email), http.StatusBadRequest)
 		return
 	}
 	// normalizing gender
