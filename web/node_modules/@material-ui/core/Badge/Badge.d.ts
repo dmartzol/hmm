@@ -15,7 +15,7 @@ export interface BadgeTypeMap<P = {}, D extends React.ElementType = 'div'> {
     /**
      * Wrapped shape the badge should overlap.
      */
-    overlap?: 'rectangle' | 'circle';
+    overlap?: 'rectangle' | 'circle' | 'rectangular' | 'circular';
     /**
      * The content rendered within the badge.
      */
@@ -25,8 +25,7 @@ export interface BadgeTypeMap<P = {}, D extends React.ElementType = 'div'> {
      */
     children?: React.ReactNode;
     /**
-     * The color of the component.
-     * It supports those theme colors that make sense for this component.
+     * The color of the component. It supports those theme colors that make sense for this component.
      */
     color?: 'primary' | 'secondary' | 'default' | 'error';
     /**
@@ -64,6 +63,13 @@ export type BadgeClassKey =
   | 'anchorOriginTopRightCircle'
   | 'anchorOriginBottomRightCircle'
   | 'anchorOriginTopLeftCircle'
+  | 'anchorOriginTopRightRectangular'
+  | 'anchorOriginBottomRightRectangular'
+  | 'anchorOriginTopLeftRectangular'
+  | 'anchorOriginBottomLeftRectangular'
+  | 'anchorOriginTopRightCircular'
+  | 'anchorOriginBottomRightCircular'
+  | 'anchorOriginTopLeftCircular'
   | 'invisible';
 /**
  *
