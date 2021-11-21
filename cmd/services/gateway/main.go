@@ -38,7 +38,7 @@ func main() {
 			&cli.StringFlag{
 				Name:   flagDBName,
 				EnvVar: "PGDATABASE",
-				Value:  "hmm",
+				Value:  "development",
 			},
 			&cli.StringFlag{
 				Name:   flagDBUser,

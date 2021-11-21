@@ -13,7 +13,14 @@ import (
 )
 
 func newGatewayServiceRun(c *cli.Context) error {
-	db, err := postgres.NewDB()
+	dbConfig := postgres.Config{
+		Host:     c.String(flagDBHost),
+		Port:     c.Int(flagDBPort),
+		Name:     c.String(flagDBName),
+		User:     c.String(flagDBUser),
+		Password: c.String(flagDBPass),
+	}
+	db, err := postgres.NewDB(dbConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
