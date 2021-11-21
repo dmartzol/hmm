@@ -29,7 +29,6 @@ type DatabaseConfig struct {
 }
 
 func NewDB() (*DB, error) {
-	dbConfig := DatabaseConfig{}
 	name, ok := os.LookupEnv(dbname)
 	if !ok {
 		return nil, fmt.Errorf("PGDATABASE environment variable required but not set")
@@ -42,6 +41,7 @@ func NewDB() (*DB, error) {
 	if !ok {
 		return nil, fmt.Errorf("PGHOST environment variable required but not set")
 	}
+	dbConfig := DatabaseConfig{}
 	dbConfig.Port = environment.GetEnvInt(dbport, 5432)
 	dbConfig.Password = environment.GetEnvString(dbpass, "")
 	dbConfig.Host = host
