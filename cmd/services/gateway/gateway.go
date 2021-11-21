@@ -1,4 +1,4 @@
-package service
+package main
 
 import (
 	"log"
@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-func NewGatewayServiceRun(c *cli.Context) error {
+func newGatewayServiceRun(c *cli.Context) error {
 	db, err := postgres.NewDB()
 	if err != nil {
 		log.Fatal(err)
