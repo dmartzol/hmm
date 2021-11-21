@@ -14,8 +14,6 @@ const (
 	flagDBUser            = "databaseUser"
 	flagDBPass            = "databasePassword"
 	flagStructuredLogging = "structuredLoggin"
-
-	dbname = "PGDATABASE"
 )
 
 func main() {
