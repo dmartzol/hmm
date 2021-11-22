@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/dmartzol/hmm/internal/domain"
+	"github.com/dmartzol/hmm/internal/models"
 	"github.com/dmartzol/hmm/internal/storage"
 	"github.com/dmartzol/hmm/internal/storage/postgres"
 )
@@ -15,7 +15,7 @@ const (
 // API represents something
 type Handler struct {
 	db             *postgres.DB
-	AccountService domain.AccountService
+	AccountService models.AccountService
 }
 
 func New(db *postgres.DB) (*Handler, error) {

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/dmartzol/hmm/internal/domain"
+	"github.com/dmartzol/hmm/internal/models"
 )
 
-func (h Handler) AuthorizeAccount(accountID int64, permission domain.RolePermission) error {
+func (h Handler) AuthorizeAccount(accountID int64, permission models.RolePermission) error {
 	roles, err := h.db.RolesForAccount(accountID)
 	if err != nil {
 		log.Printf("AuthorizeAccount Account ERROR: %+v", err)

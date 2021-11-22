@@ -1,6 +1,6 @@
 package postgres
 
-import "github.com/dmartzol/hmm/internal/domain"
+import "github.com/dmartzol/hmm/internal/models"
 
 // RoleExists returns true if already exists a role with the provided name in the db
 func (db *DB) RoleExists(name string) (bool, error) {
@@ -14,8 +14,8 @@ func (db *DB) RoleExists(name string) (bool, error) {
 }
 
 // CreateRole creates a new role with the given name
-func (db *DB) CreateRole(name string) (*domain.Role, error) {
-	var r domain.Role
+func (db *DB) CreateRole(name string) (*models.Role, error) {
+	var r models.Role
 	sqlStatement := `insert into roles (name, permission_bit) values ($1, 0) returning *`
 	err := db.Get(&r, sqlStatement, name)
 	if err != nil {
@@ -24,8 +24,8 @@ func (db *DB) CreateRole(name string) (*domain.Role, error) {
 	return r.Populate(), nil
 }
 
-func (db *DB) Role(roleID int64) (*domain.Role, error) {
-	var r domain.Role
+func (db *DB) Role(roleID int64) (*models.Role, error) {
+	var r models.Role
 	sqlStatement := `select * from roles where id = $1`
 	err := db.Get(&r, sqlStatement, roleID)
 	if err != nil {
@@ -34,8 +34,8 @@ func (db *DB) Role(roleID int64) (*domain.Role, error) {
 	return r.Populate(), nil
 }
 
-func (db *DB) AddAccountRole(roleID, accountID int64) (*domain.AccountRole, error) {
-	var r domain.AccountRole
+func (db *DB) AddAccountRole(roleID, accountID int64) (*models.AccountRole, error) {
+	var r models.AccountRole
 	sqlStatement := `insert into account_roles (role_id, account_id) values ($1, $2) returning *`
 	err := db.Get(&r, sqlStatement, roleID, accountID)
 	if err != nil {
@@ -45,8 +45,8 @@ func (db *DB) AddAccountRole(roleID, accountID int64) (*domain.AccountRole, erro
 }
 
 // RolesForAccount fetches all roles for the given account
-func (db *DB) RolesForAccount(accountID int64) (domain.Roles, error) {
-	var rs domain.Roles
+func (db *DB) RolesForAccount(accountID int64) (models.Roles, error) {
+	var rs models.Roles
 	sqlStatement := `select r.* from roles r 
 	inner join account_roles ar on ar.role_id = r.id
 	where
@@ -59,8 +59,8 @@ func (db *DB) RolesForAccount(accountID int64) (domain.Roles, error) {
 }
 
 // Roles fetches all roles in the database
-func (db *DB) Roles() (domain.Roles, error) {
-	var rs domain.Roles
+func (db *DB) Roles() (models.Roles, error) {
+	var rs models.Roles
 	sqlStatement := `select * from roles`
 	err := db.Select(&rs, sqlStatement)
 	if err != nil {
@@ -69,12 +69,12 @@ func (db *DB) Roles() (domain.Roles, error) {
 	return rs.Populate(), nil
 }
 
-func (db *DB) UpdateRole(roleID int64, permissionBit int) (*domain.Role, error) {
+func (db *DB) UpdateRole(roleID int64, permissionBit int) (*models.Role, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
-	var r domain.Role
+	var r models.Role
 	sqlStatement := `update roles set permission_bit = $1 where id = $2 returning *`
 	err = tx.Get(&r, sqlStatement, permissionBit, roleID)
 	if err != nil {

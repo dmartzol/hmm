@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dmartzol/hmm/internal/domain"
+	"github.com/dmartzol/hmm/internal/models"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 )
 
@@ -30,7 +30,7 @@ func (h Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
-	var credentials domain.LoginCredentials
+	var credentials models.LoginCredentials
 	err := httpresponse.Unmarshal(r, &credentials)
 	if err != nil {
 		log.Printf("Unmarshal: %+v", err)
