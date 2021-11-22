@@ -20,7 +20,7 @@ func newGatewayServiceRun(c *cli.Context) error {
 		User:     c.String(flagDBUser),
 		Password: c.String(flagDBPass),
 	}
-	db, err := postgres.NewDB(dbConfig)
+	db, err := postgres.New(dbConfig)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -18,7 +18,7 @@ type Config struct {
 	Port                       int
 }
 
-func NewDB(config Config) (*DB, error) {
+func New(config Config) (*DB, error) {
 	var dataSourceName string
 	dataSourceName = "host=%s port=%d user=%s dbname=%s sslmode=disable"
 	dataSourceName = fmt.Sprintf(dataSourceName, config.Host, config.Port, config.User, config.Name)
