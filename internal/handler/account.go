@@ -33,7 +33,7 @@ func (h Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.db.PopulateAccounts(accs)
-	httpresponse.RespondJSON(w, api.AccountsToAPI(accs, nil))
+	httpresponse.RespondJSON(w, api.AccountsView(accs, nil))
 }
 
 func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +78,7 @@ func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 
 	h.db.PopulateAccount(a)
 
-	httpresponse.RespondJSON(w, api.AccountToAPI(a, nil))
+	httpresponse.RespondJSON(w, api.AccountView(a, nil))
 }
 
 func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
@@ -163,7 +163,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: send confirmation key by email
 
-	httpresponse.RespondJSON(w, api.AccountToAPI(a, nil))
+	httpresponse.RespondJSON(w, api.AccountView(a, nil))
 }
 
 func (h Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {

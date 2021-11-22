@@ -23,7 +23,7 @@ type Account struct {
 	Roles                      []Role
 }
 
-func AccountToAPI(a *hmm.Account, options map[string]bool) Account {
+func AccountView(a *hmm.Account, options map[string]bool) Account {
 	view := Account{
 		ID:                a.ID,
 		FirstName:         a.FirstName,
@@ -52,10 +52,10 @@ func AccountToAPI(a *hmm.Account, options map[string]bool) Account {
 	return view
 }
 
-func AccountsToAPI(accs hmm.Accounts, options map[string]bool) []Account {
+func AccountsView(accs hmm.Accounts, options map[string]bool) []Account {
 	var l []Account
 	for _, a := range accs {
-		l = append(l, AccountToAPI(a, options))
+		l = append(l, AccountView(a, options))
 	}
 	return l
 }
