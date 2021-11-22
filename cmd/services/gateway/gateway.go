@@ -69,6 +69,5 @@ func newGatewayServiceRun(c *cli.Context) error {
 	})
 
 	log.Print("listening and serving")
-	log.Fatal(http.ListenAndServe("localhost:3001", cors.Handler(r)))
-	return nil
+	return http.ListenAndServe("localhost:3001", cors.Handler(r))
 }
