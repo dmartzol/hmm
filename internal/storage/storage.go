@@ -28,9 +28,9 @@ func (a AccountService) Account(id int64) (*domain.Account, error) {
 }
 
 func (a AccountService) Accounts() (domain.Accounts, error) {
-	return nil, nil
+	panic("not implemented")
 }
 
 func (a AccountService) Create(req domain.RegisterRequest) (*domain.Account, error) {
-	return nil, nil
+	panic("not implemented")
 }
