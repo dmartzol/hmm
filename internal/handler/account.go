@@ -32,7 +32,9 @@ func (h Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
+
 	h.db.PopulateAccounts(accs)
+
 	httpresponse.RespondJSON(w, api.AccountsView(accs, nil))
 }
 
@@ -44,6 +46,7 @@ func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
+
 	accountID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
 		httpresponse.RespondJSONError(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
@@ -89,6 +92,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
+
 	exists, err := h.db.AccountExists(req.Email)
 	if err != nil {
 		log.Printf("%+v", err)
@@ -102,6 +106,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, fmt.Sprintf("account with email '%s' alrady exists", req.Email), http.StatusBadRequest)
 		return
 	}
+
 	// normalizing gender
 	if req.Gender != nil {
 		if *req.Gender == "female" {
@@ -111,24 +116,28 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 			*req.Gender = "M"
 		}
 	}
+
 	err = req.Validate()
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	parsedDOB, err := time.Parse(timeutils.LayoutISODay, req.DOB)
 	if err != nil {
 		log.Printf("%s: %+v", req.DOB, err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
+
 	code, err := randutil.RandomCode(6)
 	if err != nil {
 		log.Printf("RandomCode: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
+
 	a, _, err := h.db.CreateAccount(
 		req.FirstName,
 		req.LastName,
