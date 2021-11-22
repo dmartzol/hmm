@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dmartzol/hmm/internal/api"
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 	"github.com/gorilla/mux"
@@ -37,7 +38,7 @@ func (h Handler) CreateRole(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, role.View(nil))
+	httpresponse.RespondJSON(w, api.RoleView(role, nil))
 }
 
 func (h Handler) GetRoles(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +48,7 @@ func (h Handler) GetRoles(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, roles.View(nil))
+	httpresponse.RespondJSON(w, api.RolesView(roles, nil))
 }
 
 func validateEditRole(req hmm.EditRoleReq, targetRole *hmm.Role) error {
@@ -119,5 +120,5 @@ func (h Handler) EditRole(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, updatedRole.View(nil))
+	httpresponse.RespondJSON(w, api.RoleView(updatedRole, nil))
 }

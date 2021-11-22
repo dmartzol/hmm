@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/dmartzol/hmm/internal/api"
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 	"github.com/dmartzol/hmm/pkg/randutil"
@@ -31,7 +32,8 @@ func (h Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, h.db.PopulateAccounts(accs).Views(nil))
+	h.db.PopulateAccounts(accs)
+	httpresponse.RespondJSON(w, api.AccountsToAPI(accs, nil))
 }
 
 func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
@@ -73,11 +75,12 @@ func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	httpresponse.RespondJSON(w, h.db.PopulateAccount(a).View(nil))
+	h.db.PopulateAccount(a)
+	httpresponse.RespondJSON(w, api.AccountToAPI(a, nil))
 }
 
 func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
-	var req hmm.RegisterRequest
+	var req api.RegisterRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
@@ -158,7 +161,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: send confirmation key by email
 
-	httpresponse.RespondJSON(w, a.View(nil))
+	httpresponse.RespondJSON(w, api.AccountToAPI(a, nil))
 }
 
 func (h Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
@@ -274,7 +277,7 @@ func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, accRole.View(nil))
+	httpresponse.RespondJSON(w, api.AccountRoleView(accRole, nil))
 }
 
 func (h Handler) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
@@ -320,5 +323,5 @@ func (h Handler) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, rs.View(nil))
+	httpresponse.RespondJSON(w, api.RolesView(rs, nil))
 }

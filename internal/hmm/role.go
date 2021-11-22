@@ -29,28 +29,6 @@ func (rs Roles) Populate() Roles {
 	return rs
 }
 
-// View returns a role view
-func (r Role) View(options map[string]bool) RoleView {
-	roleView := RoleView{
-		Name:          r.Name,
-		PermissionBit: r.PermissionsBit.Int(),
-	}
-	if len(r.Permissions) == 0 {
-		r.Populate()
-	}
-	roleView.Permissions = r.Permissions
-	return roleView
-}
-
-// View returns role views
-func (rs Roles) View(options map[string]bool) []RoleView {
-	var views []RoleView
-	for _, r := range rs {
-		views = append(views, r.View(options))
-	}
-	return views
-}
-
 // HasPermission reports whether a role has the given permission
 func (r Role) HasPermission(permission RolePermission) bool {
 	if (r.PermissionsBit & permission) == permission {
@@ -59,26 +37,10 @@ func (r Role) HasPermission(permission RolePermission) bool {
 	return false
 }
 
-type RoleView struct {
-	Name          string
-	Permissions   []string
-	PermissionBit int
-}
-
 type AccountRole struct {
 	Row
 	AccountID int64 `db:"account_id"`
 	RoleID    int64 `db:"role_id"`
-}
-
-func (ar AccountRole) View(options map[string]bool) AccountRoleView {
-	view := AccountRoleView{}
-	return view
-}
-
-type AccountRoleView struct {
-	Account AccountView
-	Role    RoleView
 }
 
 type CreateRoleReq struct {

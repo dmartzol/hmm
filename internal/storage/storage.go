@@ -35,6 +35,6 @@ func (a AccountService) Accounts() (hmm.Accounts, error) {
 	panic("not implemented")
 }
 
-func (a AccountService) Create(req hmm.RegisterRequest) (*hmm.Account, error) {
+func (a AccountService) Create(account *hmm.Account) (*hmm.Account, error) {
 	panic("not implemented")
 }
