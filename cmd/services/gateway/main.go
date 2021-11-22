@@ -18,6 +18,8 @@ const (
 
 func main() {
 	app := &cli.App{
+		Name:  "gateway",
+		Usage: "",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:   "host",
@@ -59,8 +61,6 @@ func main() {
 				Value:  "database",
 			},
 		},
-		Name:   "gateway",
-		Usage:  "",
 		Action: newGatewayServiceRun,
 	}
 
