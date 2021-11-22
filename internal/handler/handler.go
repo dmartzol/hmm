@@ -1,6 +1,10 @@
 package handler
 
-import "github.com/dmartzol/hmm/internal/storage/postgres"
+import (
+	"github.com/dmartzol/hmm/internal/domain"
+	"github.com/dmartzol/hmm/internal/storage"
+	"github.com/dmartzol/hmm/internal/storage/postgres"
+)
 
 const (
 	apiVersionNumber = "0.0.1"
@@ -10,9 +14,14 @@ const (
 
 // API represents something
 type Handler struct {
-	db *postgres.DB
+	db             *postgres.DB
+	AccountService domain.AccountService
 }
 
 func New(db *postgres.DB) (*Handler, error) {
-	return &Handler{db}, nil
+	handler := Handler{
+		db:             db,
+		AccountService: storage.NewAccountService(db),
+	}
+	return &handler, nil
 }

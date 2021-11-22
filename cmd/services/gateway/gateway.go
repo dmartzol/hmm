@@ -24,40 +24,40 @@ func newGatewayServiceRun(c *cli.Context) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	api, err := handler.New(db)
+	h, err := handler.New(db)
 	if err != nil {
-		log.Fatalf("error starting api: %+v", err)
+		log.Fatalf("error starting h: %+v", err)
 	}
 
 	r := mux.NewRouter()
 	r = r.PathPrefix("/v1").Subrouter()
 
-	r.HandleFunc("/version", api.Version).Methods("GET")
+	r.HandleFunc("/version", h.Version).Methods("GET")
 
 	// sessions
 	// see: https://stackoverflow.com/questions/7140074/restfully-design-login-or-register-resources
-	r.HandleFunc("/sessions", api.CreateSession).Methods("POST")
-	r.HandleFunc("/sessions", api.GetSession).Methods("GET")
-	r.HandleFunc("/sessions", api.ExpireSession).Methods("DELETE")
+	r.HandleFunc("/sessions", h.CreateSession).Methods("POST")
+	r.HandleFunc("/sessions", h.GetSession).Methods("GET")
+	r.HandleFunc("/sessions", h.ExpireSession).Methods("DELETE")
 
 	// accounts
-	r.HandleFunc("/accounts", api.CreateAccount).Methods("POST")
-	r.HandleFunc("/accounts/{id}", api.GetAccount).Methods("GET")
-	r.HandleFunc("/accounts", api.GetAccounts).Methods("GET")
-	r.HandleFunc("/accounts/{id}/confirm-email", api.ConfirmEmail).Methods("POST")
-	r.HandleFunc("/accounts/password", api.ResetPassword).Methods("POST")
-	r.HandleFunc("/accounts/{id}/roles", api.AddAccountRole).Methods("POST")
-	r.HandleFunc("/accounts/{id}/roles", api.GetAccountRoles).Methods("GET")
+	r.HandleFunc("/accounts", h.CreateAccount).Methods("POST")
+	r.HandleFunc("/accounts/{id}", h.GetAccount).Methods("GET")
+	r.HandleFunc("/accounts", h.GetAccounts).Methods("GET")
+	r.HandleFunc("/accounts/{id}/confirm-email", h.ConfirmEmail).Methods("POST")
+	r.HandleFunc("/accounts/password", h.ResetPassword).Methods("POST")
+	r.HandleFunc("/accounts/{id}/roles", h.AddAccountRole).Methods("POST")
+	r.HandleFunc("/accounts/{id}/roles", h.GetAccountRoles).Methods("GET")
 
 	// roles
-	r.HandleFunc("/roles", api.GetRoles).Methods("GET")
-	r.HandleFunc("/roles", api.CreateRole).Methods("POST")
-	r.HandleFunc("/roles/{id}", api.EditRole).Methods("PUT")
+	r.HandleFunc("/roles", h.GetRoles).Methods("GET")
+	r.HandleFunc("/roles", h.CreateRole).Methods("POST")
+	r.HandleFunc("/roles/{id}", h.EditRole).Methods("PUT")
 
 	r.Use(
 		middleware.Logger,
 		middleware.Recoverer,
-		api.AuthMiddleware,
+		h.AuthMiddleware,
 	)
 
 	cors := cors.New(cors.Options{

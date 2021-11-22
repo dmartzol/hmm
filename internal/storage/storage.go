@@ -1,14 +1,36 @@
 package storage
 
-type Storage interface {
+import (
+	"github.com/dmartzol/hmm/internal/domain"
+	"github.com/dmartzol/hmm/internal/storage/memcache"
+	"github.com/dmartzol/hmm/internal/storage/postgres"
+)
+
+type AccountService struct {
+	MemCache *memcache.AccountMemcache
+	DB       *postgres.DB
 }
 
-type MacroStorage struct {
-	db Storage
-}
-
-func NewStorage(db Storage) *MacroStorage {
-	return &MacroStorage{
-		db: db,
+func NewAccountService(db *postgres.DB) *AccountService {
+	as := AccountService{
+		DB:       db,
+		MemCache: memcache.NewAccountMemcache(),
 	}
+	return &as
+}
+
+func (a AccountService) Account(id int64) (*domain.Account, error) {
+	account, err := a.MemCache.Account(id)
+	if err != nil {
+		return nil, err
+	}
+	return account, nil
+}
+
+func (a AccountService) Accounts() (domain.Accounts, error) {
+	return nil, nil
+}
+
+func (a AccountService) Create(req domain.RegisterRequest) (*domain.Account, error) {
+	return nil, nil
 }

@@ -37,9 +37,6 @@ type AccountService interface {
 	Create(r RegisterRequest) (*Account, error)
 	Account(id int64) (*Account, error)
 	Accounts() (Accounts, error)
-	GetByEmail(email string) (*Account, error)
-	GetByPhone(phone string) (*Account, error)
-	GetByDoorCode(doorCode string) (*Account, error)
 }
 
 // AccountView is the restricted response body of Account

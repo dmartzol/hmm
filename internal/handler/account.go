@@ -61,7 +61,7 @@ func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	a, err := h.db.Account(accountID)
+	a, err := h.AccountService.Account(accountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("account %d not found", accountID)
