@@ -20,7 +20,11 @@ func NewAccountService(db *postgres.DB) *AccountService {
 }
 
 func (a AccountService) Account(id int64) (*domain.Account, error) {
-	account, err := a.MemCache.Account(id)
+	account, ok := a.MemCache.Account(id)
+	if ok {
+		return account, nil
+	}
+	account, err := a.DB.Account(id)
 	if err != nil {
 		return nil, err
 	}

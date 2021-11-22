@@ -17,10 +17,10 @@ func NewAccountMemcache() *AccountMemcache {
 	return &m
 }
 
-func (a AccountMemcache) Account(id int64) (*domain.Account, error) {
+func (a AccountMemcache) Account(id int64) (*domain.Account, bool) {
 	acc, ok := a[id]
 	if !ok {
-		return nil, ErrNotFound
+		return nil, false
 	}
-	return acc, nil
+	return acc, true
 }
