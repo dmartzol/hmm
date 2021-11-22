@@ -1,4 +1,4 @@
-package models
+package hmm
 
 import (
 	"time"

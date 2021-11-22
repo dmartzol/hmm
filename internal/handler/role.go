@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/dmartzol/hmm/internal/models"
+	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 	"github.com/gorilla/mux"
 )
 
 func (h Handler) CreateRole(w http.ResponseWriter, r *http.Request) {
-	var req models.CreateRoleReq
+	var req hmm.CreateRoleReq
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("CreateRole Unmarshal ERROR: %+v", err)
@@ -50,7 +50,7 @@ func (h Handler) GetRoles(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondJSON(w, roles.View(nil))
 }
 
-func validateEditRole(req models.EditRoleReq, targetRole *models.Role) error {
+func validateEditRole(req hmm.EditRoleReq, targetRole *hmm.Role) error {
 	if req.Name == nil && len(req.Permissions) == 0 {
 		return fmt.Errorf("No updates found")
 	}
@@ -75,7 +75,7 @@ func (h Handler) EditRole(w http.ResponseWriter, r *http.Request) {
 	// checking permissions
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
-	err = h.AuthorizeAccount(requesterID, models.PermissionRolesEdit)
+	err = h.AuthorizeAccount(requesterID, hmm.PermissionRolesEdit)
 	if err != nil {
 		log.Printf("WARNING: account %d requested to edit role %d", requesterID, roleID)
 		log.Printf("EditRole AuthorizeAccount ERROR: %+v", err)
@@ -83,7 +83,7 @@ func (h Handler) EditRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req models.EditRoleReq
+	var req hmm.EditRoleReq
 	err = httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("CreateRole Unmarshal ERROR: %+v", err)
@@ -106,7 +106,7 @@ func (h Handler) EditRole(w http.ResponseWriter, r *http.Request) {
 
 	newBit := 0
 	for _, p := range req.Permissions {
-		newBit = newBit | models.StringToRolePermission(p).Int()
+		newBit = newBit | hmm.StringToRolePermission(p).Int()
 	}
 	if role.PermissionsBit.Int() == newBit {
 		log.Printf("EditRole ERROR: role already has those permissions")

@@ -1,4 +1,4 @@
-package models
+package hmm
 
 type Role struct {
 	Row

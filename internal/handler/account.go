@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dmartzol/hmm/internal/models"
+	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 	"github.com/dmartzol/hmm/pkg/randutil"
 	"github.com/dmartzol/hmm/pkg/timeutils"
@@ -18,7 +18,7 @@ import (
 func (h Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
-	err := h.AuthorizeAccount(requesterID, models.PermissionAccountsView)
+	err := h.AuthorizeAccount(requesterID, hmm.PermissionAccountsView)
 	if err != nil {
 		log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
@@ -52,7 +52,7 @@ func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
 	if requesterID != accountID {
-		err := h.AuthorizeAccount(requesterID, models.PermissionAccountsView)
+		err := h.AuthorizeAccount(requesterID, hmm.PermissionAccountsView)
 		if err != nil {
 			log.Printf("WARNING: account %d requested to see account %d", requesterID, accountID)
 			log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
@@ -77,7 +77,7 @@ func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
-	var req models.RegisterRequest
+	var req hmm.RegisterRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
@@ -162,7 +162,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
-	var req models.ResetPasswordRequest
+	var req hmm.ResetPasswordRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
@@ -188,7 +188,7 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
-	var req models.ConfirmEmailRequest
+	var req hmm.ConfirmEmailRequest
 	err = httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("JSON: %+v", err)
@@ -239,7 +239,7 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
-	var req models.AddAccountRoleReq
+	var req hmm.AddAccountRoleReq
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("AddAccountRole Unmarshal ERROR: %+v", err)
@@ -278,7 +278,7 @@ func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
-	var req models.AddAccountRoleReq
+	var req hmm.AddAccountRoleReq
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("GetAccountRoles Unmarshal ERROR: %+v", err)
@@ -305,7 +305,7 @@ func (h Handler) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
 	if requesterID != requestedAccountID {
-		err := h.AuthorizeAccount(requesterID, models.PermissionAccountsView)
+		err := h.AuthorizeAccount(requesterID, hmm.PermissionAccountsView)
 		if err != nil {
 			log.Printf("WARNING: account %d requested to see account %d", requesterID, requestedAccountID)
 			log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
