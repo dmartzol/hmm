@@ -1,14 +1,14 @@
-package controllers
+package handler
 
 import (
 	"fmt"
 	"log"
 
-	"github.com/dmartzol/hmm/internal/models"
+	"github.com/dmartzol/hmm/internal/domain"
 )
 
-func (api API) AuthorizeAccount(accountID int64, permission models.RolePermission) error {
-	roles, err := api.db.RolesForAccount(accountID)
+func (h Handler) AuthorizeAccount(accountID int64, permission domain.RolePermission) error {
+	roles, err := h.db.RolesForAccount(accountID)
 	if err != nil {
 		log.Printf("AuthorizeAccount Account ERROR: %+v", err)
 		return err

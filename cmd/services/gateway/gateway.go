@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dmartzol/hmm/internal/controllers"
+	"github.com/dmartzol/hmm/internal/handler"
 	"github.com/dmartzol/hmm/internal/storage/postgres"
 	"github.com/go-chi/chi/middleware"
 	"github.com/gorilla/mux"
@@ -24,7 +24,7 @@ func newGatewayServiceRun(c *cli.Context) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	api, err := controllers.NewAPI(db)
+	api, err := handler.New(db)
 	if err != nil {
 		log.Fatalf("error starting api: %+v", err)
 	}

@@ -1,10 +1,10 @@
-package controllers
+package handler
 
 import (
 	"log"
 	"net/http"
 
-	"github.com/dmartzol/hmm/internal/models"
+	"github.com/dmartzol/hmm/internal/domain"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 )
 
@@ -13,14 +13,14 @@ const (
 	sessionLength = 345600
 )
 
-func (api API) GetSession(w http.ResponseWriter, r *http.Request) {
+func (h Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	s, err := api.db.SessionFromToken(c.Value)
+	s, err := h.db.SessionFromToken(c.Value)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
@@ -29,8 +29,8 @@ func (api API) GetSession(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondJSON(w, s.View(nil))
 }
 
-func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
-	var credentials models.LoginCredentials
+func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
+	var credentials domain.LoginCredentials
 	err := httpresponse.Unmarshal(r, &credentials)
 	if err != nil {
 		log.Printf("Unmarshal: %+v", err)
@@ -39,7 +39,7 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fetching account with credentials(errors reurned should be purposedly broad)
-	registered, err := api.db.AccountExists(credentials.Email)
+	registered, err := h.db.AccountExists(credentials.Email)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -50,7 +50,7 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
-	a, err := api.db.AccountWithCredentials(credentials.Email, credentials.Password)
+	a, err := h.db.AccountWithCredentials(credentials.Email, credentials.Password)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
@@ -59,7 +59,7 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	credentials.Password = ""
 
 	// create session and cookie
-	s, err := api.db.CreateSession(a.ID)
+	s, err := h.db.CreateSession(a.ID)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -74,14 +74,14 @@ func (api API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondJSON(w, s.View(nil))
 }
 
-func (api API) ExpireSession(w http.ResponseWriter, r *http.Request) {
+func (h Handler) ExpireSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	session, err := api.db.ExpireSessionFromToken(c.Value)
+	session, err := h.db.ExpireSessionFromToken(c.Value)
 	if err != nil {
 		log.Printf("ExpireSession - ERROR expiring session: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

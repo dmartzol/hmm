@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import (
 	"fmt"
@@ -6,20 +6,20 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/dmartzol/hmm/internal/models"
+	"github.com/dmartzol/hmm/internal/domain"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 	"github.com/gorilla/mux"
 )
 
-func (api API) CreateRole(w http.ResponseWriter, r *http.Request) {
-	var req models.CreateRoleReq
+func (h Handler) CreateRole(w http.ResponseWriter, r *http.Request) {
+	var req domain.CreateRoleReq
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("CreateRole Unmarshal ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	exists, err := api.db.RoleExists(req.Name)
+	exists, err := h.db.RoleExists(req.Name)
 	if err != nil {
 		log.Printf("CreateRole RoleExists ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -31,7 +31,7 @@ func (api API) CreateRole(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusConflict)
 		return
 	}
-	role, err := api.db.CreateRole(req.Name)
+	role, err := h.db.CreateRole(req.Name)
 	if err != nil {
 		log.Printf("CreateRole storage.CreateRole ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -40,8 +40,8 @@ func (api API) CreateRole(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondJSON(w, role.View(nil))
 }
 
-func (api API) GetRoles(w http.ResponseWriter, r *http.Request) {
-	roles, err := api.db.Roles()
+func (h Handler) GetRoles(w http.ResponseWriter, r *http.Request) {
+	roles, err := h.db.Roles()
 	if err != nil {
 		log.Printf("GetRoles Roles ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -50,14 +50,14 @@ func (api API) GetRoles(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondJSON(w, roles.View(nil))
 }
 
-func validateEditRole(req models.EditRoleReq, targetRole *models.Role) error {
+func validateEditRole(req domain.EditRoleReq, targetRole *domain.Role) error {
 	if req.Name == nil && len(req.Permissions) == 0 {
 		return fmt.Errorf("No updates found")
 	}
 	return nil
 }
 
-func (api API) EditRole(w http.ResponseWriter, r *http.Request) {
+func (h Handler) EditRole(w http.ResponseWriter, r *http.Request) {
 	// parsing parameters
 	params := mux.Vars(r)
 	idString, ok := params[idQueryParameter]
@@ -75,7 +75,7 @@ func (api API) EditRole(w http.ResponseWriter, r *http.Request) {
 	// checking permissions
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
-	err = api.AuthorizeAccount(requesterID, models.PermissionRolesEdit)
+	err = h.AuthorizeAccount(requesterID, domain.PermissionRolesEdit)
 	if err != nil {
 		log.Printf("WARNING: account %d requested to edit role %d", requesterID, roleID)
 		log.Printf("EditRole AuthorizeAccount ERROR: %+v", err)
@@ -83,7 +83,7 @@ func (api API) EditRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req models.EditRoleReq
+	var req domain.EditRoleReq
 	err = httpresponse.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("CreateRole Unmarshal ERROR: %+v", err)
@@ -91,7 +91,7 @@ func (api API) EditRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := api.db.Role(roleID)
+	role, err := h.db.Role(roleID)
 	if err != nil {
 		log.Printf("EditRole Role ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -106,14 +106,14 @@ func (api API) EditRole(w http.ResponseWriter, r *http.Request) {
 
 	newBit := 0
 	for _, p := range req.Permissions {
-		newBit = newBit | models.StringToRolePermission(p).Int()
+		newBit = newBit | domain.StringToRolePermission(p).Int()
 	}
 	if role.PermissionsBit.Int() == newBit {
 		log.Printf("EditRole ERROR: role already has those permissions")
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
-	updatedRole, err := api.db.UpdateRole(role.ID, newBit)
+	updatedRole, err := h.db.UpdateRole(role.ID, newBit)
 	if err != nil {
 		log.Printf("EditRole UpdateRole ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

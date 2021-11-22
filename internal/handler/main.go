@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import "github.com/dmartzol/hmm/internal/storage/postgres"
 
@@ -9,10 +9,10 @@ const (
 )
 
 // API represents something
-type API struct {
+type Handler struct {
 	db *postgres.DB
 }
 
-func NewAPI(db *postgres.DB) (*API, error) {
-	return &API{db}, nil
+func New(db *postgres.DB) (*Handler, error) {
+	return &Handler{db}, nil
 }

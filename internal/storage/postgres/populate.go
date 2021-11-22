@@ -3,10 +3,10 @@ package postgres
 import (
 	"log"
 
-	"github.com/dmartzol/hmm/internal/models"
+	"github.com/dmartzol/hmm/internal/domain"
 )
 
-func (db *DB) PopulateAccount(a *models.Account) *models.Account {
+func (db *DB) PopulateAccount(a *domain.Account) *domain.Account {
 	var err error
 	if a.Roles == nil {
 		a.Roles, err = db.RolesForAccount(a.ID)
@@ -17,7 +17,7 @@ func (db *DB) PopulateAccount(a *models.Account) *models.Account {
 	return a
 }
 
-func (db *DB) PopulateAccounts(accs models.Accounts) models.Accounts {
+func (db *DB) PopulateAccounts(accs domain.Accounts) domain.Accounts {
 	for _, a := range accs {
 		db.PopulateAccount(a)
 	}

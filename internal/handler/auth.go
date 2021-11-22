@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 )
 
-func (api API) AuthMiddleware(next http.Handler) http.Handler {
+func (h Handler) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		publicRoutes := map[string]string{
 			"/v1/version":  "GET",
@@ -28,7 +28,7 @@ func (api API) AuthMiddleware(next http.Handler) http.Handler {
 			httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 			return
 		}
-		s, err := api.db.UpdateSession(c.Value)
+		s, err := h.db.UpdateSession(c.Value)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				log.Printf("AuthMiddleware ERROR unable to find session %s: %+v", c.Value, err)
