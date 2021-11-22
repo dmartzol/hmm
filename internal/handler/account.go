@@ -75,7 +75,9 @@ func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
 	h.db.PopulateAccount(a)
+
 	httpresponse.RespondJSON(w, api.AccountToAPI(a, nil))
 }
 
