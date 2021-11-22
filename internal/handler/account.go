@@ -26,7 +26,7 @@ func (h Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accs, err := h.db.Accounts()
+	accs, err := h.AccountService.Accounts()
 	if err != nil {
 		log.Printf("accounts: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

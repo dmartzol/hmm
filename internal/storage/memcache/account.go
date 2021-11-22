@@ -1,13 +1,7 @@
 package memcache
 
 import (
-	"errors"
-
 	"github.com/dmartzol/hmm/internal/hmm"
-)
-
-var (
-	ErrNotFound = errors.New("not found")
 )
 
 type AccountMemcache map[int64]*hmm.Account
