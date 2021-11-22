@@ -32,7 +32,11 @@ func (a AccountService) Account(id int64) (*hmm.Account, error) {
 }
 
 func (a AccountService) Accounts() (hmm.Accounts, error) {
-	panic("not implemented")
+	accs, err := a.DB.Accounts()
+	if err != nil {
+		return nil, err
+	}
+	return accs, nil
 }
 
 func (a AccountService) Create(account *hmm.Account) (*hmm.Account, error) {
