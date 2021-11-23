@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
@@ -24,14 +26,26 @@ func (db *DB) SessionFromToken(token string) (*hmm.Session, error) {
 }
 
 // CreateSession creates a new session
-func (db *DB) CreateSession(accountID int64) (*hmm.Session, error) {
+func (db *DB) CreateSession(email, password string) (*hmm.Session, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
 	}
+
+	var a hmm.Account
+	sqlSelect := `select * from accounts a where a.email = $1 and a.passhash = crypt($2, a.passhash)`
+	err = tx.Get(&a, sqlSelect, email, password)
+	if err == sql.ErrNoRows {
+		tx.Rollback()
+		return nil, fmt.Errorf("invalid credentials")
+	} else if err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("error fetching account for email %q: %w", email, err)
+	}
+
 	var s hmm.Session
-	sqlStatement := `insert into sessions (account_id) values ($1) returning *`
-	err = tx.Get(&s, sqlStatement, accountID)
+	sqlInsert := `insert into sessions (account_id) values ($1) returning *`
+	err = tx.Get(&s, sqlInsert, a.ID)
 	if err != nil {
 		tx.Rollback()
 		return nil, err

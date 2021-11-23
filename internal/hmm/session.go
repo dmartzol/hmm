@@ -4,6 +4,10 @@ import (
 	"time"
 )
 
+type SessionService interface {
+	Create(email, password string) (*Session, error)
+}
+
 // Session represents an account session
 type Session struct {
 	Row

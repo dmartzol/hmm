@@ -50,7 +50,7 @@ func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
-	a, err := h.db.AccountWithCredentials(credentials.Email, credentials.Password)
+	_, err = h.db.AccountWithCredentials(credentials.Email, credentials.Password)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
@@ -59,7 +59,8 @@ func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	credentials.Password = ""
 
 	// create session and cookie
-	s, err := h.db.CreateSession(a.ID)
+	// s, err := h.db.CreateSession(a.ID)
+	s, err := h.SessionService.Create(credentials.Email, credentials.Password)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

@@ -155,7 +155,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	log.Printf("confirmation key: %s", code)
 
 	// create session and cookie
-	s, err := h.db.CreateSession(a.ID)
+	s, err := h.SessionService.Create(a.Email, req.Password)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

@@ -16,12 +16,14 @@ const (
 type Handler struct {
 	db             *postgres.DB
 	AccountService hmm.AccountService
+	SessionService hmm.SessionService
 }
 
 func New(db *postgres.DB) (*Handler, error) {
 	handler := Handler{
 		db:             db,
 		AccountService: storage.NewAccountService(db),
+		SessionService: storage.NewSessionService(db),
 	}
 	return &handler, nil
 }
