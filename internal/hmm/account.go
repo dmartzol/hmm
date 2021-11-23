@@ -31,7 +31,7 @@ type Account struct {
 }
 
 type AccountService interface {
-	Create(a *Account) (*Account, error)
+	Create(a *Account, password, confirmationCode string) (*Account, *Confirmation, error)
 	Account(id int64) (*Account, error)
 	Accounts() (Accounts, error)
 }

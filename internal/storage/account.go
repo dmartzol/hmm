@@ -19,26 +19,31 @@ func NewAccountService(db *postgres.DB) *AccountService {
 	return &as
 }
 
-func (a AccountService) Account(id int64) (*hmm.Account, error) {
-	account, ok := a.MemCache.Account(id)
+func (as AccountService) Account(id int64) (*hmm.Account, error) {
+	account, ok := as.MemCache.Account(id)
 	if ok {
 		return account, nil
 	}
-	account, err := a.DB.Account(id)
+	account, err := as.DB.Account(id)
 	if err != nil {
 		return nil, err
 	}
 	return account, nil
 }
 
-func (a AccountService) Accounts() (hmm.Accounts, error) {
-	accs, err := a.DB.Accounts()
+func (as AccountService) Accounts() (hmm.Accounts, error) {
+	accs, err := as.DB.Accounts()
 	if err != nil {
 		return nil, err
 	}
 	return accs, nil
 }
 
-func (a AccountService) Create(account *hmm.Account) (*hmm.Account, error) {
-	panic("not implemented")
+func (as AccountService) Create(account *hmm.Account, password, confirmationCode string) (*hmm.Account, *hmm.Confirmation, error) {
+	newAccount, confirmation, err := as.DB.CreateAccount(account, password, confirmationCode)
+	if err != nil {
+		return nil, nil, err
+	}
+	as.MemCache.AddAccount(newAccount)
+	return newAccount, confirmation, nil
 }

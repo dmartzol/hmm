@@ -138,7 +138,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	acc := hmm.Account{
+	inputAccount := hmm.Account{
 		Email:       req.Email,
 		FirstName:   req.FirstName,
 		LastName:    req.LastName,
@@ -146,7 +146,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		DOB:         parsedDOB,
 		PhoneNumber: req.PhoneNumber,
 	}
-	a, _, err := h.db.CreateAccount(&acc, req.Password, code)
+	a, _, err := h.AccountService.Create(&inputAccount, req.Password, code)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

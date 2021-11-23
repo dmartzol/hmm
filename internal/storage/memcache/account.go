@@ -18,3 +18,7 @@ func (a AccountMemcache) Account(id int64) (*hmm.Account, bool) {
 	}
 	return acc, true
 }
+
+func (a AccountMemcache) AddAccount(acc *hmm.Account) {
+	a[acc.ID] = acc
+}
