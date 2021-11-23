@@ -138,16 +138,15 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a, _, err := h.db.CreateAccount(
-		req.FirstName,
-		req.LastName,
-		req.Email,
-		req.Password,
-		code,
-		parsedDOB,
-		req.Gender,
-		req.PhoneNumber,
-	)
+	acc := hmm.Account{
+		Email:       req.Email,
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		Gender:      req.Gender,
+		DOB:         parsedDOB,
+		PhoneNumber: req.PhoneNumber,
+	}
+	a, _, err := h.db.CreateAccount(&acc, req.Password, code)
 	if err != nil {
 		log.Printf("%+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

@@ -1,8 +1,6 @@
 package postgres
 
 import (
-	"time"
-
 	"github.com/dmartzol/hmm/internal/hmm"
 	_ "github.com/lib/pq"
 )
@@ -52,24 +50,56 @@ func (db *DB) AccountWithCredentials(email, allegedPassword string) (*hmm.Accoun
 }
 
 // CreateAccount creates a new account in the db and a confirmation code for the new registered email
-func (db *DB) CreateAccount(first, last, email, password, confirmationCode string, dob time.Time, gender, phone *string) (*hmm.Account, *hmm.Confirmation, error) {
+func (db *DB) CreateAccount(a *hmm.Account, password, confirmationCode string) (*hmm.Account, *hmm.Confirmation, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, nil, err
 	}
-	var a hmm.Account
-	sqlStatement := `insert into accounts (first_name, last_name, dob, gender, phone_number, email, passhash) values ($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8))) returning *`
-	err = tx.Get(&a, sqlStatement, first, last, dob, gender, phone, email, password)
+
+	var newAccount hmm.Account
+	sqlStatement := `
+		INSERT INTO accounts (
+		first_name,
+		last_name,
+		dob,
+		gender,
+		phone_number,
+		email,
+		passhash)
+		values
+		($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8))) returning *
+	`
+	err = tx.Get(
+		&newAccount,
+		sqlStatement,
+		a.FirstName,
+		a.LastName,
+		a.DOB,
+		a.Gender,
+		a.PhoneNumber,
+		a.Email,
+		password,
+	)
 	if err != nil {
 		tx.Rollback()
 		return nil, nil, err
 	}
-	var cc hmm.Confirmation
-	sqlStatement = `insert into confirmations (type, account_id, key, confirmation_target) values ($1, $2, $3, $4) returning *`
-	err = tx.Get(&cc, sqlStatement, hmm.ConfirmationTypeEmail, a.ID, confirmationCode, email)
+
+	var confirmation hmm.Confirmation
+	sqlStatement = `
+		insert into confirmations (
+		type,
+		account_id,
+		key,
+		confirmation_target)
+		values
+		($1, $2, $3, $4) returning *
+	`
+	err = tx.Get(&confirmation, sqlStatement, hmm.ConfirmationTypeEmail, newAccount.ID, confirmationCode, newAccount.Email)
 	if err != nil {
 		tx.Rollback()
 		return nil, nil, err
 	}
-	return &a, &cc, tx.Commit()
+
+	return &newAccount, &confirmation, tx.Commit()
 }
