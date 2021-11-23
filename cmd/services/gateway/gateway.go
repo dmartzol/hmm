@@ -13,6 +13,9 @@ import (
 )
 
 func newGatewayServiceRun(c *cli.Context) error {
+	port := c.String(flagPort)
+	host := c.String(flagHost)
+
 	dbConfig := postgres.Config{
 		Host:     c.String(flagDBHost),
 		Port:     c.Int(flagDBPort),
@@ -24,6 +27,7 @@ func newGatewayServiceRun(c *cli.Context) error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	h, err := handler.New(db)
 	if err != nil {
 		log.Fatalf("error starting h: %+v", err)
@@ -69,5 +73,5 @@ func newGatewayServiceRun(c *cli.Context) error {
 	})
 
 	log.Print("listening and serving")
-	return http.ListenAndServe("localhost:3001", cors.Handler(r))
+	return http.ListenAndServe(host+":"+port, cors.Handler(r))
 }

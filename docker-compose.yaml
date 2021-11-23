@@ -34,7 +34,7 @@ services:
       - 1100:1100
     command: ./gateway
     environment:
-      VERBOSE: "true"
+      STRUCTURED_LOGGING: "false"
     depends_on:
       - database
     links:

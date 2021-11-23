@@ -8,6 +8,8 @@ import (
 )
 
 const (
+	flagPort              = "port"
+	flagHost              = "host"
 	flagDBName            = "databaseName"
 	flagDBPort            = "databasePort"
 	flagDBHost            = "databaseHost"
@@ -22,12 +24,12 @@ func main() {
 		Usage: "",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:   "host",
+				Name:   flagHost,
 				EnvVar: "HOST",
 				Value:  "0.0.0.0",
 			},
 			&cli.StringFlag{
-				Name:   "port",
+				Name:   flagPort,
 				EnvVar: "PORT",
 				Value:  "1100",
 			},
