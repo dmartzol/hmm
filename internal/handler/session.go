@@ -33,36 +33,16 @@ func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	var credentials hmm.LoginCredentials
 	err := httpresponse.Unmarshal(r, &credentials)
 	if err != nil {
-		log.Printf("Unmarshal: %+v", err)
+		h.Logger.Errorf("Unmarshal error: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-
-	// fetching account with credentials(errors reurned should be purposedly broad)
-	registered, err := h.db.AccountExists(credentials.Email)
-	if err != nil {
-		log.Printf("%+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
-		return
-	}
-	if !registered {
-		log.Printf("unable to find email '%s' in db", credentials.Email)
-		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
-		return
-	}
-	_, err = h.db.AccountWithCredentials(credentials.Email, credentials.Password)
-	if err != nil {
-		log.Printf("%+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
-		return
-	}
-	credentials.Password = ""
 
 	// create session and cookie
 	// s, err := h.db.CreateSession(a.ID)
 	s, err := h.SessionService.Create(credentials.Email, credentials.Password)
 	if err != nil {
-		log.Printf("%+v", err)
+		h.Logger.Infof("unable to create session: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -78,13 +58,13 @@ func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 func (h Handler) ExpireSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
-		log.Printf("%+v", err)
+		h.Logger.Infof("error fetching cookie: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	session, err := h.db.ExpireSessionFromToken(c.Value)
 	if err != nil {
-		log.Printf("ExpireSession - ERROR expiring session: %+v", err)
+		h.Logger.Infof("unable to expire session: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
