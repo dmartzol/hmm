@@ -35,7 +35,7 @@ func main() {
 			},
 			&cli.BoolTFlag{
 				Name:   flagStructuredLogging,
-				EnvVar: "STRUCTURED_LOGGIN",
+				EnvVar: "STRUCTURED_LOGGING",
 			},
 			&cli.StringFlag{
 				Name:   flagDBName,

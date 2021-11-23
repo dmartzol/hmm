@@ -15,6 +15,7 @@ import (
 func newGatewayServiceRun(c *cli.Context) error {
 	port := c.String(flagPort)
 	host := c.String(flagHost)
+	structuredLogging := c.Bool(flagStructuredLogging)
 
 	dbConfig := postgres.Config{
 		Host:     c.String(flagDBHost),
@@ -28,7 +29,7 @@ func newGatewayServiceRun(c *cli.Context) error {
 		log.Fatal(err)
 	}
 
-	h, err := handler.New(db)
+	h, err := handler.New(structuredLogging, db)
 	if err != nil {
 		log.Fatalf("error starting h: %+v", err)
 	}
@@ -72,6 +73,6 @@ func newGatewayServiceRun(c *cli.Context) error {
 		// Debug: true,
 	})
 
-	log.Print("listening and serving")
+	h.Logger.Infof("listening and serving on %s:%s", host, port)
 	return http.ListenAndServe(host+":"+port, cors.Handler(r))
 }
