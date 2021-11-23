@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/dmartzol/hmm/internal/hmm"
@@ -16,13 +15,13 @@ const (
 func (h Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
-		log.Printf("%+v", err)
+		h.Logger.Infof("unable to fetch cookie: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	s, err := h.db.SessionFromToken(c.Value)
 	if err != nil {
-		log.Printf("%+v", err)
+		h.Logger.Infof("unable to fetch session: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
