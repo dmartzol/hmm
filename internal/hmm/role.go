@@ -1,5 +1,7 @@
 package hmm
 
+type Roles []*Role
+
 type Role struct {
 	Row
 	Name           string
@@ -9,7 +11,8 @@ type Role struct {
 	Permissions []string
 }
 
-type Roles []*Role
+type RoleService interface {
+}
 
 // Populate populates synthetic fields for the role structure
 func (r *Role) Populate() *Role {
