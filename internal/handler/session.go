@@ -15,13 +15,13 @@ const (
 func (h Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
-		h.Logger.Infof("unable to fetch cookie: %+v", err)
+		h.Logger.Errorf("unable to fetch cookie: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	s, err := h.db.SessionFromToken(c.Value)
 	if err != nil {
-		h.Logger.Infof("unable to fetch session: %+v", err)
+		h.Logger.Errorf("unable to fetch session: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
@@ -38,10 +38,9 @@ func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create session and cookie
-	// s, err := h.db.CreateSession(a.ID)
 	s, err := h.SessionService.Create(credentials.Email, credentials.Password)
 	if err != nil {
-		h.Logger.Infof("unable to create session: %+v", err)
+		h.Logger.Errorf("unable to create session: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -57,13 +56,13 @@ func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 func (h Handler) ExpireSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
-		h.Logger.Infof("error fetching cookie: %+v", err)
+		h.Logger.Errorf("error fetching cookie: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	session, err := h.db.ExpireSessionFromToken(c.Value)
 	if err != nil {
-		h.Logger.Infof("unable to expire session: %+v", err)
+		h.Logger.Errorf("unable to expire session: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
