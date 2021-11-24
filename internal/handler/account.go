@@ -194,7 +194,7 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
-	a, err := h.db.Account(requesterID.(int64))
+	a, err := h.AccountService.Account(requesterID.(int64))
 	if err != nil {
 		log.Printf("Account: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
