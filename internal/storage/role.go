@@ -55,3 +55,12 @@ func (rs RoleService) Create(name string) (*hmm.Role, error) {
 	rs.MemCache.Add(newRole)
 	return newRole, nil
 }
+
+func (rs RoleService) Update(id int64, permissionBit int) (*hmm.Role, error) {
+	role, err := rs.DB.UpdateRole(id, permissionBit)
+	if err != nil {
+		return nil, err
+	}
+	rs.MemCache.Add(role)
+	return role, nil
+}

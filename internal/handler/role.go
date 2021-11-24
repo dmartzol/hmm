@@ -104,7 +104,7 @@ func (h Handler) EditRole(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
-	updatedRole, err := h.db.UpdateRole(role.ID, newBit)
+	updatedRole, err := h.RoleService.Update(role.ID, newBit)
 	if err != nil {
 		log.Printf("EditRole UpdateRole ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
