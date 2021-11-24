@@ -88,21 +88,20 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	var req api.RegisterRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
-		log.Printf("JSON: %+v", err)
+		h.Logger.Errorf("unable to unmarshal: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	exists, err := h.db.AccountExists(req.Email)
 	if err != nil {
-		log.Printf("%+v", err)
+		h.Logger.Errorf("unable to check if account exist: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	if exists {
 		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
-		err = fmt.Errorf("email '%s' already registered", req.Email)
-		log.Printf("%+v", err)
+		h.Logger.Errorf("email %q already registered", req.Email)
 		httpresponse.RespondJSONError(w, fmt.Sprintf("account with email '%s' alrady exists", req.Email), http.StatusBadRequest)
 		return
 	}
@@ -119,21 +118,21 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	err = req.Validate()
 	if err != nil {
-		log.Printf("%+v", err)
+		h.Logger.Errorf("error validating: %+v", req.Email)
 		httpresponse.RespondJSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	parsedDOB, err := time.Parse(timeutils.LayoutISODay, req.DOB)
 	if err != nil {
-		log.Printf("%s: %+v", req.DOB, err)
+		h.Logger.Errorf("error parsing: %+v", req.Email)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	code, err := randutil.RandomCode(6)
 	if err != nil {
-		log.Printf("RandomCode: %+v", err)
+		h.Logger.Errorf("error generating random code: %+v", req.Email)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -148,7 +147,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	a, _, err := h.AccountService.Create(&inputAccount, req.Password, code)
 	if err != nil {
-		log.Printf("%+v", err)
+		h.Logger.Errorf("error creating account: %+v", req.Email)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -157,7 +156,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	// create session and cookie
 	s, err := h.SessionService.Create(a.Email, req.Password)
 	if err != nil {
-		log.Printf("%+v", err)
+		h.Logger.Errorf("error creating session: %+v", req.Email)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
