@@ -203,29 +203,29 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	var req hmm.ConfirmEmailRequest
 	err = httpresponse.Unmarshal(r, &req)
 	if err != nil {
-		log.Printf("JSON: %+v", err)
+		h.Logger.Errorf("unable to unmarshal: %v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	c, err := h.db.PendingConfirmationByKey(req.ConfirmationKey)
+	c, err := h.ConfirmationService.PendingConfirmationByKey(req.ConfirmationKey)
 	if err != nil {
-		log.Printf("PendingConfirmationByKey: %+v", err)
+		h.Logger.Errorf("failed to fetch confirmation by key: %v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 	if c.FailedConfirmationsCount >= 3 {
-		log.Printf("FailedConfirmationsCount: %d", c.FailedConfirmationsCount)
+		h.Logger.Errorf("too many attempts to confirm", err)
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
 	// check if user is trying to confirm current email
 	if c.ConfirmationTarget == nil {
-		log.Printf("confirmation target is null for key %s", req.ConfirmationKey)
+		h.Logger.Errorf("confirmation target is null for key %s", req.ConfirmationKey)
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
 	if a.Email != *c.ConfirmationTarget {
-		log.Printf("confirmation target %s does not match account email %s", *c.ConfirmationTarget, a.Email)
+		h.Logger.Errorf("confirmation target %s does not match account email %s", *c.ConfirmationTarget, a.Email)
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
@@ -233,16 +233,16 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	if c.Key != req.ConfirmationKey {
 		_, err := h.db.FailedConfirmationIncrease(c.ID)
 		if err != nil {
-			log.Printf("FailedConfirmationIncrease: %+v", err)
+			h.Logger.Errorf("failed confirmation increase: %v", err)
 		}
-		log.Printf("confirmation target %s does not match account email %s", *c.ConfirmationTarget, a.Email)
+		h.Logger.Errorf("confirmation target %s does not match account email %s", *c.ConfirmationTarget, a.Email)
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
 	// confirmation went OK
 	_, err = h.db.Confirm(c.ID)
 	if err != nil {
-		log.Printf("Confirm: %+v", err)
+		h.Logger.Errorf("failed to confirm: %v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}

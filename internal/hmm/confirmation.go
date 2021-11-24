@@ -20,3 +20,7 @@ type Confirmation struct {
 	ConfirmTime              *time.Time `db:"confirm_time"`
 	ExpireTime               *time.Time `db:"expire_time"`
 }
+
+type ConfirmationService interface {
+	PendingConfirmationByKey(key string) (*Confirmation, error)
+}

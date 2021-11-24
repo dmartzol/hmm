@@ -15,17 +15,19 @@ const (
 
 // API represents something
 type Handler struct {
-	db             *postgres.DB
-	AccountService hmm.AccountService
-	SessionService hmm.SessionService
-	Logger         Logger
+	db                  *postgres.DB
+	AccountService      hmm.AccountService
+	SessionService      hmm.SessionService
+	ConfirmationService hmm.ConfirmationService
+	Logger              Logger
 }
 
 func New(structuredLogging bool, db *postgres.DB) (*Handler, error) {
 	handler := Handler{
-		db:             db,
-		AccountService: storage.NewAccountService(db),
-		SessionService: storage.NewSessionService(db),
+		db:                  db,
+		AccountService:      storage.NewAccountService(db),
+		SessionService:      storage.NewSessionService(db),
+		ConfirmationService: storage.NewConfirmationService(db),
 	}
 	handler.Logger = logger.New(structuredLogging)
 	return &handler, nil
