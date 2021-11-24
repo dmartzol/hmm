@@ -219,7 +219,7 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	}
 	// check if keys match
 	if c.Key != req.ConfirmationKey {
-		_, err := h.db.FailedConfirmationIncrease(c.ID)
+		_, err := h.ConfirmationService.FailedConfirmationIncrease(c.ID)
 		if err != nil {
 			h.Logger.Errorf("failed confirmation increase: %v", err)
 		}

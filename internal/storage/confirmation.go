@@ -39,3 +39,12 @@ func (cs ConfirmationService) Confirm(id int64) (*hmm.Confirmation, error) {
 	cs.MemCache.Add(conf)
 	return conf, nil
 }
+
+func (cs ConfirmationService) FailedConfirmationIncrease(id int64) (*hmm.Confirmation, error) {
+	conf, err := cs.DB.FailedConfirmationIncrease(id)
+	if err != nil {
+		return nil, err
+	}
+	cs.MemCache.Add(conf)
+	return conf, nil
+}

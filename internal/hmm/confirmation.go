@@ -24,4 +24,5 @@ type Confirmation struct {
 type ConfirmationService interface {
 	PendingConfirmationByKey(key string) (*Confirmation, error)
 	Confirm(id int64) (*Confirmation, error)
+	FailedConfirmationIncrease(id int64) (*Confirmation, error)
 }
