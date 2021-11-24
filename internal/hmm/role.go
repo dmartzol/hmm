@@ -17,6 +17,7 @@ type RoleService interface {
 	RolesForAccount(id int64) (Roles, error)
 	Create(name string) (*Role, error)
 	Update(id int64, permissionBit int) (*Role, error)
+	AddRoleToAccount(accountID, roleID int64) (*AccountRole, error)
 }
 
 // Populate populates synthetic fields for the role structure

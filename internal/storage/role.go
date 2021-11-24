@@ -64,3 +64,11 @@ func (rs RoleService) Update(id int64, permissionBit int) (*hmm.Role, error) {
 	rs.MemCache.Add(role)
 	return role, nil
 }
+
+func (rs RoleService) AddRoleToAccount(accountID int64, roleID int64) (*hmm.AccountRole, error) {
+	accountRole, err := rs.DB.AddRoleToAccount(accountID, roleID)
+	if err != nil {
+		return nil, err
+	}
+	return accountRole, nil
+}
