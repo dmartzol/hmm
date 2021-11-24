@@ -30,3 +30,12 @@ func (cs ConfirmationService) PendingConfirmationByKey(key string) (*hmm.Confirm
 	}
 	return conf, nil
 }
+
+func (cs ConfirmationService) Confirm(id int64) (*hmm.Confirmation, error) {
+	conf, err := cs.DB.Confirm(id)
+	if err != nil {
+		return nil, err
+	}
+	cs.MemCache.Add(conf)
+	return conf, nil
+}

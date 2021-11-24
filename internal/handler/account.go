@@ -188,7 +188,6 @@ func (h Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// fetching requester id
 	requesterID := ctx.Value(contextRequesterAccountIDKey)
 	if requesterID == nil {
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
@@ -239,8 +238,7 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
-	// confirmation went OK
-	_, err = h.db.Confirm(c.ID)
+	_, err = h.ConfirmationService.Confirm(c.ID)
 	if err != nil {
 		h.Logger.Errorf("failed to confirm: %v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
