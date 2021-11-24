@@ -16,28 +16,18 @@ func (h Handler) CreateRole(w http.ResponseWriter, r *http.Request) {
 	var req hmm.CreateRoleReq
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
-		log.Printf("CreateRole Unmarshal ERROR: %+v", err)
+		h.Logger.Errorf("unable to unmarshal: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	exists, err := h.db.RoleExists(req.Name)
-	if err != nil {
-		log.Printf("CreateRole RoleExists ERROR: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
-		return
-	}
-	// TODO: Use SQL tx for this
-	if exists {
-		log.Printf("ERROR: Role '%s' already exists", req.Name)
-		httpresponse.RespondJSONError(w, "", http.StatusConflict)
-		return
-	}
+
 	role, err := h.db.CreateRole(req.Name)
 	if err != nil {
-		log.Printf("CreateRole storage.CreateRole ERROR: %+v", err)
+		h.Logger.Errorf("unable to create role: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
+
 	httpresponse.RespondJSON(w, api.RoleView(role, nil))
 }
 

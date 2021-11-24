@@ -261,7 +261,7 @@ func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := h.db.Role(req.RoleID)
+	role, err := h.RoleService.Role(req.RoleID)
 	if err != nil {
 		log.Printf("AddAccountRole ERROR fetching role: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -313,7 +313,7 @@ func (h Handler) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	rs, err := h.db.RolesForAccount(requestedAccountID)
+	rs, err := h.RoleService.RolesForAccount(requestedAccountID)
 	if err != nil {
 		log.Printf("GetAccountRoles RolesForAccount ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

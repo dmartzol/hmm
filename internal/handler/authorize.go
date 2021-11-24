@@ -8,7 +8,7 @@ import (
 )
 
 func (h Handler) AuthorizeAccount(accountID int64, permission hmm.RolePermission) error {
-	roles, err := h.db.RolesForAccount(accountID)
+	roles, err := h.RoleService.RolesForAccount(accountID)
 	if err != nil {
 		log.Printf("AuthorizeAccount Account ERROR: %+v", err)
 		return err
