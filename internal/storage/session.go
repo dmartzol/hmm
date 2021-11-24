@@ -40,3 +40,12 @@ func (ss SessionService) SessionFromToken(token string) (*hmm.Session, error) {
 	ss.MemCache.AddSession(session)
 	return session, nil
 }
+
+func (ss SessionService) ExpireSession(token string) (*hmm.Session, error) {
+	session, err := ss.DB.ExpireSession(token)
+	if err != nil {
+		return nil, err
+	}
+	ss.MemCache.DeleteSession(token)
+	return session, nil
+}

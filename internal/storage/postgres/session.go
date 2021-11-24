@@ -53,8 +53,8 @@ func (db *DB) CreateSession(email, password string) (*hmm.Session, error) {
 	return &s, tx.Commit()
 }
 
-// ExpireSessionFromToken expires the session with the given token
-func (db *DB) ExpireSessionFromToken(token string) (*hmm.Session, error) {
+// ExpireSession expires the session with the given token
+func (db *DB) ExpireSession(token string) (*hmm.Session, error) {
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err

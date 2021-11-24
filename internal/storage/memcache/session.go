@@ -28,3 +28,7 @@ func (m SessionMemcache) SessionFromToken(token string) (*hmm.Session, bool) {
 	}
 	return session, true
 }
+
+func (m SessionMemcache) DeleteSession(token string) {
+	delete(m, token)
+}

@@ -60,7 +60,7 @@ func (h Handler) ExpireSession(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	session, err := h.db.ExpireSessionFromToken(c.Value)
+	session, err := h.SessionService.ExpireSession(c.Value)
 	if err != nil {
 		h.Logger.Errorf("unable to expire session: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
