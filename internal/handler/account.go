@@ -172,7 +172,7 @@ func (h Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	// TODO: create confirmation key in db
 	// TODO: send email with link to reset password
-	httpresponse.RespondText(w, "If the account exists, an email will be sent with recovery details.", http.StatusAccepted)
+	httpresponse.RespondText(w, "not implemented", http.StatusNotImplemented)
 }
 
 func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
