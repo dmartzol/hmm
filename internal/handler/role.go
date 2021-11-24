@@ -21,7 +21,7 @@ func (h Handler) CreateRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := h.db.CreateRole(req.Name)
+	role, err := h.RoleService.Create(req.Name)
 	if err != nil {
 		h.Logger.Errorf("unable to create role: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

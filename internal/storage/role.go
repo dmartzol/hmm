@@ -38,3 +38,12 @@ func (rs RoleService) RolesForAccount(id int64) (hmm.Roles, error) {
 	}
 	return roles, nil
 }
+
+func (rs RoleService) Create(name string) (*hmm.Role, error) {
+	newRole, err := rs.DB.CreateRole(name)
+	if err != nil {
+		return nil, err
+	}
+	rs.MemCache.Add(newRole)
+	return newRole, nil
+}

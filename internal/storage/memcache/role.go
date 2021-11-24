@@ -16,3 +16,7 @@ func (m RoleMemcache) Role(id int64) (*hmm.Role, bool) {
 	}
 	return role, true
 }
+
+func (m RoleMemcache) Add(role *hmm.Role) {
+	m[role.ID] = role
+}
