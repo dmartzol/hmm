@@ -12,6 +12,7 @@ type Role struct {
 }
 
 type RoleService interface {
+	Role(id int64) (*Role, error)
 }
 
 // Populate populates synthetic fields for the role structure

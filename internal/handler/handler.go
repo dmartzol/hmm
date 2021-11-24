@@ -19,6 +19,7 @@ type Handler struct {
 	AccountService      hmm.AccountService
 	SessionService      hmm.SessionService
 	ConfirmationService hmm.ConfirmationService
+	RoleService         hmm.RoleService
 	Logger              Logger
 }
 
@@ -28,6 +29,7 @@ func New(structuredLogging bool, db *postgres.DB) (*Handler, error) {
 		AccountService:      storage.NewAccountService(db),
 		SessionService:      storage.NewSessionService(db),
 		ConfirmationService: storage.NewConfirmationService(db),
+		RoleService:         storage.NewRoleService(db),
 	}
 	handler.Logger = logger.New(structuredLogging)
 	return &handler, nil

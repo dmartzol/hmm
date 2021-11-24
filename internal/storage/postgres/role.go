@@ -24,10 +24,10 @@ func (db *DB) CreateRole(name string) (*hmm.Role, error) {
 	return r.Populate(), nil
 }
 
-func (db *DB) Role(roleID int64) (*hmm.Role, error) {
+func (db *DB) Role(id int64) (*hmm.Role, error) {
 	var r hmm.Role
-	sqlStatement := `select * from roles where id = $1`
-	err := db.Get(&r, sqlStatement, roleID)
+	sqlSelect := `select * from roles where id = $1`
+	err := db.Get(&r, sqlSelect, id)
 	if err != nil {
 		return nil, err
 	}
