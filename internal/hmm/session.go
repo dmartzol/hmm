@@ -8,6 +8,7 @@ type SessionService interface {
 	Create(email, password string) (*Session, error)
 	SessionFromToken(token string) (*Session, error)
 	ExpireSession(token string) (*Session, error)
+	UpdateSession(token string) (*Session, error)
 }
 
 // Session represents an account session

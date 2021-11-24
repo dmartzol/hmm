@@ -24,7 +24,7 @@ func (ss SessionService) Create(email, password string) (*hmm.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	ss.MemCache.AddSession(session)
+	ss.MemCache.Add(session)
 	return session, nil
 }
 
@@ -37,7 +37,7 @@ func (ss SessionService) SessionFromToken(token string) (*hmm.Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	ss.MemCache.AddSession(session)
+	ss.MemCache.Add(session)
 	return session, nil
 }
 
@@ -47,5 +47,14 @@ func (ss SessionService) ExpireSession(token string) (*hmm.Session, error) {
 		return nil, err
 	}
 	ss.MemCache.DeleteSession(token)
+	return session, nil
+}
+
+func (ss SessionService) UpdateSession(token string) (*hmm.Session, error) {
+	session, err := ss.DB.UpdateSession(token)
+	if err != nil {
+		return nil, err
+	}
+	ss.MemCache.Add(session)
 	return session, nil
 }

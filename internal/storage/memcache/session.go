@@ -17,7 +17,7 @@ func (m SessionMemcache) Session(token string) (*hmm.Session, bool) {
 	return session, true
 }
 
-func (m SessionMemcache) AddSession(session *hmm.Session) {
+func (m SessionMemcache) Add(session *hmm.Session) {
 	m[session.Token] = session
 }
 

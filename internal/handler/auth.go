@@ -28,7 +28,7 @@ func (h Handler) AuthMiddleware(next http.Handler) http.Handler {
 			httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 			return
 		}
-		s, err := h.db.UpdateSession(c.Value)
+		s, err := h.SessionService.UpdateSession(c.Value)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				log.Printf("AuthMiddleware ERROR unable to find session %s: %+v", c.Value, err)
