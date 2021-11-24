@@ -32,7 +32,7 @@ func (h Handler) CreateRole(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) GetRoles(w http.ResponseWriter, r *http.Request) {
-	roles, err := h.db.Roles()
+	roles, err := h.RoleService.Roles()
 	if err != nil {
 		log.Printf("GetRoles Roles ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -82,7 +82,7 @@ func (h Handler) EditRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, err := h.db.Role(roleID)
+	role, err := h.RoleService.Role(roleID)
 	if err != nil {
 		log.Printf("EditRole Role ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

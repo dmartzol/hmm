@@ -31,6 +31,14 @@ func (rs RoleService) Role(id int64) (*hmm.Role, error) {
 	return role, nil
 }
 
+func (rs RoleService) Roles() (hmm.Roles, error) {
+	roles, err := rs.DB.Roles()
+	if err != nil {
+		return nil, err
+	}
+	return roles, nil
+}
+
 func (rs RoleService) RolesForAccount(id int64) (hmm.Roles, error) {
 	roles, err := rs.DB.RolesForAccount(id)
 	if err != nil {

@@ -13,6 +13,7 @@ type Role struct {
 
 type RoleService interface {
 	Role(id int64) (*Role, error)
+	Roles() (Roles, error)
 	RolesForAccount(id int64) (Roles, error)
 	Create(name string) (*Role, error)
 }
