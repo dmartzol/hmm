@@ -47,3 +47,11 @@ func (as AccountService) Create(account *hmm.Account, password, confirmationCode
 	as.MemCache.AddAccount(newAccount)
 	return newAccount, confirmation, nil
 }
+
+func (as AccountService) PopulateAccount(account *hmm.Account) *hmm.Account {
+	return as.DB.PopulateAccount(account)
+}
+
+func (as AccountService) PopulateAccounts(accounts hmm.Accounts) hmm.Accounts {
+	return as.DB.PopulateAccounts(accounts)
+}

@@ -34,6 +34,8 @@ type AccountService interface {
 	Create(a *Account, password, confirmationCode string) (*Account, *Confirmation, error)
 	Account(id int64) (*Account, error)
 	Accounts() (Accounts, error)
+	PopulateAccount(a *Account) *Account
+	PopulateAccounts(as Accounts) Accounts
 }
 
 func validEmail(email string) bool {

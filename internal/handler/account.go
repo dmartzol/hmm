@@ -33,7 +33,7 @@ func (h Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.db.PopulateAccounts(accs)
+	h.AccountService.PopulateAccounts(accs)
 
 	httpresponse.RespondJSON(w, api.AccountsView(accs, nil))
 }
@@ -79,7 +79,7 @@ func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	h.db.PopulateAccount(a)
+	h.AccountService.PopulateAccount(a)
 
 	httpresponse.RespondJSON(w, api.AccountView(a, nil))
 }
