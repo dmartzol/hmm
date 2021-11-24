@@ -267,7 +267,7 @@ func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	accRole, err := h.db.AddAccountRole(role.ID, requestedAccountID)
+	accRole, err := h.db.AddRoleToAccount(role.ID, requestedAccountID)
 	if err != nil {
 		log.Printf("AddAccountRole storage.AddAccountRole ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)

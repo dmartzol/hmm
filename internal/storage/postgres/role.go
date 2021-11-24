@@ -23,10 +23,10 @@ func (db *DB) Role(id int64) (*hmm.Role, error) {
 	return r.Populate(), nil
 }
 
-func (db *DB) AddAccountRole(roleID, accountID int64) (*hmm.AccountRole, error) {
+func (db *DB) AddRoleToAccount(roleID, accountID int64) (*hmm.AccountRole, error) {
 	var r hmm.AccountRole
-	sqlStatement := `insert into account_roles (role_id, account_id) values ($1, $2) returning *`
-	err := db.Get(&r, sqlStatement, roleID, accountID)
+	sqlInsert := `insert into account_roles (role_id, account_id) values ($1, $2) returning *`
+	err := db.Get(&r, sqlInsert, roleID, accountID)
 	if err != nil {
 		return nil, err
 	}
