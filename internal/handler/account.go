@@ -93,19 +93,6 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exists, err := h.db.AccountExists(req.Email)
-	if err != nil {
-		h.Logger.Errorf("unable to check if account exist: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
-		return
-	}
-	if exists {
-		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
-		h.Logger.Errorf("email %q already registered", req.Email)
-		httpresponse.RespondJSONError(w, fmt.Sprintf("account with email '%s' alrady exists", req.Email), http.StatusBadRequest)
-		return
-	}
-
 	// normalizing gender
 	if req.Gender != nil {
 		if *req.Gender == "female" {
@@ -147,6 +134,8 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	a, _, err := h.AccountService.Create(&inputAccount, req.Password, code)
 	if err != nil {
+		// TODO: respond with 409 on existing email address
+		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
 		h.Logger.Errorf("error creating account: %+v", req.Email)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return

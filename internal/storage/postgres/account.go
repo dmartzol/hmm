@@ -5,17 +5,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// AccountExists returns true if the provided email exists in the db
-func (db *DB) AccountExists(email string) (bool, error) {
-	var exists bool
-	sqlStatement := `select exists(select 1 from accounts a where a.email = $1)`
-	err := db.Get(&exists, sqlStatement, email)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
-}
-
 // Account fetches an account by id
 func (db *DB) Account(id int64) (*hmm.Account, error) {
 	var a hmm.Account
