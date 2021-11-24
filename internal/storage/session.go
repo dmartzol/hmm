@@ -27,3 +27,16 @@ func (ss SessionService) Create(email, password string) (*hmm.Session, error) {
 	ss.MemCache.AddSession(session)
 	return session, nil
 }
+
+func (ss SessionService) SessionFromToken(token string) (*hmm.Session, error) {
+	session, ok := ss.MemCache.SessionFromToken(token)
+	if ok {
+		return session, nil
+	}
+	session, err := ss.DB.SessionFromToken(token)
+	if err != nil {
+		return nil, err
+	}
+	ss.MemCache.AddSession(session)
+	return session, nil
+}

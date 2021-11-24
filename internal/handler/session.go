@@ -19,7 +19,7 @@ func (h Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	s, err := h.db.SessionFromToken(c.Value)
+	s, err := h.SessionService.SessionFromToken(c.Value)
 	if err != nil {
 		h.Logger.Errorf("unable to fetch session: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
