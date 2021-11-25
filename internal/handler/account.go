@@ -143,7 +143,7 @@ func (h Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	var req hmm.ResetPasswordRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
-		log.Printf("JSON: %+v", err)
+		h.Logger.Errorf("unable to unmarshal: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -156,19 +156,20 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey)
 	if requesterID == nil {
+		h.Logger.Errorf("no requester ID in context")
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 	a, err := h.AccountService.Account(requesterID.(int64))
 	if err != nil {
-		log.Printf("Account: %+v", err)
+		h.Logger.Errorf("unable to fetch account %d: %+v", requesterID.(int64), err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 	var req hmm.ConfirmEmailRequest
 	err = httpresponse.Unmarshal(r, &req)
 	if err != nil {
-		h.Logger.Errorf("unable to unmarshal: %v", err)
+		h.Logger.Errorf("unable to unmarshal: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -204,21 +205,22 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
+
 	_, err = h.ConfirmationService.Confirm(c.ID)
 	if err != nil {
 		h.Logger.Errorf("failed to confirm: %v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Email has been confirmed.")
 }
 
 func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 	var req hmm.AddAccountRoleReq
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
-		log.Printf("AddAccountRole Unmarshal ERROR: %+v", err)
+		h.Logger.Errorf("unable to unmarshal: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -228,28 +230,31 @@ func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 	idString, ok := params[idQueryParameter]
 	if !ok {
 		errMSg := fmt.Sprintf("parameter '%s' not found", idQueryParameter)
+		h.Logger.Errorf(errMSg)
 		httpresponse.RespondJSONError(w, errMSg, http.StatusInternalServerError)
 		return
 	}
 	requestedAccountID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
 		errMsg := fmt.Sprintf("wrong parameter '%s'", idString)
+		h.Logger.Errorf(errMsg)
 		httpresponse.RespondJSONError(w, errMsg, http.StatusBadRequest)
 		return
 	}
 
 	role, err := h.RoleService.Role(req.RoleID)
 	if err != nil {
-		log.Printf("AddAccountRole ERROR fetching role: %+v", err)
+		h.Logger.Errorf("unable to fetch role %d: %+v", req.RoleID, err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	accRole, err := h.RoleService.AddRoleToAccount(role.ID, requestedAccountID)
 	if err != nil {
-		log.Printf("AddAccountRole storage.AddAccountRole ERROR: %+v", err)
+		h.Logger.Errorf("unable to add role %d to account %d: %+v", role.ID, requestedAccountID, err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
+
 	httpresponse.RespondJSON(w, api.AccountRoleView(accRole, nil))
 }
 
@@ -257,34 +262,33 @@ func (h Handler) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 	var req hmm.AddAccountRoleReq
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
-		log.Printf("GetAccountRoles Unmarshal ERROR: %+v", err)
+		h.Logger.Errorf("unable to unmarshal: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
-	// parsing parameters
 	params := mux.Vars(r)
 	idString, ok := params[idQueryParameter]
 	if !ok {
 		errMsg := fmt.Sprintf("parameter '%s' not found", idQueryParameter)
+		h.Logger.Errorf(errMsg)
 		httpresponse.RespondJSONError(w, errMsg, http.StatusBadRequest)
 		return
 	}
 	requestedAccountID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
 		errMsg := fmt.Sprintf("wrong parameter '%s'", idString)
+		h.Logger.Errorf(errMsg)
 		httpresponse.RespondJSONError(w, errMsg, http.StatusBadRequest)
 		return
 	}
 
-	// checking permissions
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
 	if requesterID != requestedAccountID {
 		err := h.AuthorizeAccount(requesterID, hmm.PermissionAccountsView)
 		if err != nil {
-			log.Printf("WARNING: account %d requested to see account %d", requesterID, requestedAccountID)
-			log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
+			h.Logger.Errorf("unable to authorize account %d: %+v", requesterID, err)
 			httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 			return
 		}
@@ -292,9 +296,10 @@ func (h Handler) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 
 	rs, err := h.RoleService.RolesForAccount(requestedAccountID)
 	if err != nil {
-		log.Printf("GetAccountRoles RolesForAccount ERROR: %+v", err)
+		h.Logger.Errorf("unable to fetch roles for account %d: %+v", requestedAccountID, err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
+
 	httpresponse.RespondJSON(w, api.RolesView(rs, nil))
 }
