@@ -19,14 +19,14 @@ func (h Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
 	err := h.AuthorizeAccount(requesterID, hmm.PermissionAccountsView)
 	if err != nil {
-		log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
+		h.Logger.Errorf("unable to authorize account %d: %+v", requesterID, err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 
 	accs, err := h.AccountService.Accounts()
 	if err != nil {
-		log.Printf("accounts: %+v", err)
+		h.Logger.Errorf("unable to fetch accounts: %v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -37,7 +37,6 @@ func (h Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
-	// parsing parameters
 	params := mux.Vars(r)
 	idString, ok := params[idQueryParameter]
 	if !ok {
@@ -47,34 +46,31 @@ func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 
 	accountID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
+		h.Logger.Errorf("unable to parse %q: %v", idString, err)
 		httpresponse.RespondJSONError(w, fmt.Sprintf("wrong parameter '%s'", idString), http.StatusBadRequest)
 		return
 	}
 
-	// checking permissions
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
 	if requesterID != accountID {
 		err := h.AuthorizeAccount(requesterID, hmm.PermissionAccountsView)
 		if err != nil {
-			log.Printf("WARNING: account %d requested to see account %d", requesterID, accountID)
-			log.Printf("GetAccounts AuthorizeAccount ERROR: %+v", err)
+			h.Logger.Errorf("account %d requested to see account %d: %v", requesterID, accountID, err)
 			httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 			return
 		}
 	}
 
 	a, err := h.AccountService.Account(accountID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			log.Printf("account %d not found", accountID)
-			httpresponse.RespondJSONError(w, "", http.StatusNotFound)
-			return
-		} else {
-			log.Printf("could not fetch account %d: %+v", accountID, err)
-			httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
-			return
-		}
+	if err == sql.ErrNoRows {
+		log.Printf("account %d not found", accountID)
+		httpresponse.RespondJSONError(w, "", http.StatusNotFound)
+		return
+	} else if err != nil {
+		log.Printf("could not fetch account %d: %+v", accountID, err)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		return
 	}
 
 	h.AccountService.PopulateAccount(a)
