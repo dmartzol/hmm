@@ -2,6 +2,9 @@ package api
 
 import (
 	"errors"
+	"fmt"
+	"strings"
+	"time"
 
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/dmartzol/hmm/pkg/timeutils"
@@ -64,13 +67,22 @@ type RegisterRequest struct {
 	FirstName   string
 	LastName    string
 	DOB         string
+	DOBTime     time.Time
 	Gender      *string
 	PhoneNumber *string
 	Email       string
 	Password    string
 }
 
-func (r RegisterRequest) Validate() error {
+func (r *RegisterRequest) ValidateAndNormalize() error {
+	err := r.validate()
+	if err != nil {
+		return fmt.Errorf("error validating: %w", err)
+	}
+	return nil
+}
+
+func (r RegisterRequest) validate() error {
 	if r.FirstName == "" {
 		return errors.New("first name is required")
 	}
@@ -83,8 +95,22 @@ func (r RegisterRequest) Validate() error {
 	if len(r.Password) < 6 {
 		return errors.New("password too short")
 	}
-	if r.Gender != nil && *r.Gender != "" && *r.Gender != "M" && *r.Gender != "F" {
-		return errors.New("Gender value not implemented")
+	return nil
+}
+
+func (r *RegisterRequest) normalize() error {
+	r.FirstName = NormalizeName(r.FirstName)
+	r.LastName = NormalizeName(r.LastName)
+	var err error
+	r.DOBTime, err = time.Parse(timeutils.LayoutISODay, r.DOB)
+	if err != nil {
+		return fmt.Errorf("error parsing DOB %q: %w", r.DOB, err)
 	}
 	return nil
+}
+
+func NormalizeName(name string) string {
+	name = strings.TrimSpace(name)
+	name = strings.ToLower(name)
+	return name
 }

@@ -6,13 +6,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/dmartzol/hmm/internal/api"
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 	"github.com/dmartzol/hmm/pkg/randutil"
-	"github.com/dmartzol/hmm/pkg/timeutils"
 	"github.com/gorilla/mux"
 )
 
@@ -103,17 +101,10 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = req.Validate()
+	err = req.ValidateAndNormalize()
 	if err != nil {
 		h.Logger.Errorf("error validating: %+v", req.Email)
 		httpresponse.RespondJSONError(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	parsedDOB, err := time.Parse(timeutils.LayoutISODay, req.DOB)
-	if err != nil {
-		h.Logger.Errorf("error parsing: %+v", req.Email)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
@@ -129,7 +120,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		FirstName:   req.FirstName,
 		LastName:    req.LastName,
 		Gender:      req.Gender,
-		DOB:         parsedDOB,
+		DOB:         req.DOBTime,
 		PhoneNumber: req.PhoneNumber,
 	}
 	a, _, err := h.AccountService.Create(&inputAccount, req.Password, code)
@@ -140,7 +131,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	log.Printf("confirmation key: %s", code)
+	h.Logger.Infof("confirmation key: %s", code)
 
 	// create session and cookie
 	s, err := h.SessionService.Create(a.Email, req.Password)
