@@ -119,7 +119,6 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	h.Logger.Infof("confirmation key: %s", code)
 
-	// create session and cookie
 	s, err := h.SessionService.Create(a.Email, req.Password)
 	if err != nil {
 		h.Logger.Errorf("error creating session: %+v", req.Email)
@@ -160,12 +159,14 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
+
 	a, err := h.AccountService.Account(requesterID.(int64))
 	if err != nil {
 		h.Logger.Errorf("unable to fetch account %d: %+v", requesterID.(int64), err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
+
 	var req hmm.ConfirmEmailRequest
 	err = httpresponse.Unmarshal(r, &req)
 	if err != nil {
@@ -173,29 +174,32 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
+
 	c, err := h.ConfirmationService.PendingConfirmationByKey(req.ConfirmationKey)
 	if err != nil {
 		h.Logger.Errorf("failed to fetch confirmation by key: %v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
+
 	if c.FailedConfirmationsCount >= 3 {
 		h.Logger.Errorf("too many attempts to confirm", err)
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
-	// check if user is trying to confirm current email
+
 	if c.ConfirmationTarget == nil {
 		h.Logger.Errorf("confirmation target is null for key %s", req.ConfirmationKey)
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
+	// check if user is trying to confirm current email
 	if a.Email != *c.ConfirmationTarget {
 		h.Logger.Errorf("confirmation target %s does not match account email %s", *c.ConfirmationTarget, a.Email)
 		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
-	// check if keys match
+
 	if c.Key != req.ConfirmationKey {
 		_, err := h.ConfirmationService.FailedConfirmationIncrease(c.ID)
 		if err != nil {
@@ -225,7 +229,6 @@ func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// parsing parameters
 	params := mux.Vars(r)
 	idString, ok := params[idQueryParameter]
 	if !ok {
@@ -234,6 +237,7 @@ func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, errMSg, http.StatusInternalServerError)
 		return
 	}
+
 	requestedAccountID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
 		errMsg := fmt.Sprintf("wrong parameter '%s'", idString)
