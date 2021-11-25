@@ -106,6 +106,15 @@ func (r *RegisterRequest) normalize() error {
 	if err != nil {
 		return fmt.Errorf("error parsing DOB %q: %w", r.DOB, err)
 	}
+	// normalizing gender
+	if r.Gender != nil {
+		if strings.EqualFold(*r.Gender, "female") {
+			*r.Gender = "F"
+		}
+		if strings.EqualFold(*r.Gender, "male") {
+			*r.Gender = "M"
+		}
+	}
 	return nil
 }
 

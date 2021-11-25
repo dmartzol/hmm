@@ -91,16 +91,6 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// normalizing gender
-	if req.Gender != nil {
-		if *req.Gender == "female" {
-			*req.Gender = "F"
-		}
-		if *req.Gender == "male" {
-			*req.Gender = "M"
-		}
-	}
-
 	err = req.ValidateAndNormalize()
 	if err != nil {
 		h.Logger.Errorf("error validating: %+v", req.Email)
