@@ -110,7 +110,7 @@ func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	code, err := randutil.RandomCode(6)
 	if err != nil {
-		h.Logger.Errorf("error generating random code: %+v", req.Email)
+		h.Logger.Errorf("error generating random code for %q: %+v", req.Email, err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
