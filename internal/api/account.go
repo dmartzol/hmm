@@ -16,9 +16,9 @@ type Account struct {
 	ID                         int64 `json:"ID"`
 	FirstName, LastName, Email string
 	DOB                        string `json:"DateOfBird"`
-	PhoneNumber                string `json:",omitempty"`
-	DoorCode                   string `json:",omitempty"`
-	Gender                     string `json:",omitempty"`
+	PhoneNumber                string
+	DoorCode                   string
+	Gender                     string
 	Active                     bool
 	ConfirmedEmail             bool
 	ConfirmedPhone             bool
