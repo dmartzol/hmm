@@ -9,7 +9,10 @@ COPY ./go.mod ./go.sum ./
 RUN go mod download
 
 # Copy sources to the working directory
-COPY . .
+COPY cmd cmd
+COPY internal internal
+COPY pkg pkg
+COPY migrations migrations
 
 # Build the Go app
 ARG project
