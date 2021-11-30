@@ -24,7 +24,7 @@ func (h Handler) AuthMiddleware(next http.Handler) http.Handler {
 		}
 		c, err := r.Cookie(hmmmCookieName)
 		if err != nil {
-			log.Printf("AuthMiddleware ERROR getting cookie: %+v", err)
+			h.Logger.Errorf("error getting cookie: %v", err)
 			httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
 			return
 		}
