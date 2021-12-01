@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log"
 	"net/http"
 
@@ -22,26 +23,33 @@ func (h Handler) AuthMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
+
 		c, err := r.Cookie(hmmmCookieName)
 		if err != nil {
-			h.Logger.Errorf("error getting cookie: %v", err)
-			httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
+			switch {
+			case errors.Is(err, http.ErrNoCookie):
+				h.Logger.Info("No cookie found in request")
+				httpresponse.RespondJSONError(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			default:
+				h.Logger.Errorf("error getting cookie: %v", err)
+				httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
 			return
 		}
+
 		s, err := h.SessionService.UpdateSession(c.Value)
 		if err != nil {
-			if err == sql.ErrNoRows {
-				log.Printf("AuthMiddleware ERROR unable to find session %s: %+v", c.Value, err)
+			switch {
+			case errors.Is(err, sql.ErrNoRows):
+				h.Logger.Errorf("unable to find session %q: %+v", c.Value, err)
 				httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
-				return
+			case errors.Is(err, postgres.ErrExpiredResource):
+				h.Logger.Errorf("session %q is expired: %+v", c.Value, err)
+				httpresponse.RespondJSONError(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			default:
+				log.Printf("error updating session %q: %+v", c.Value, err)
+				httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 			}
-			if err != postgres.ErrExpiredResource {
-				log.Printf("AuthMiddleware ERROR session %s is expired: %+v", c.Value, err)
-				httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
-				return
-			}
-			log.Printf("AuthMiddleware ERROR for session %s: %+v", c.Value, err)
-			httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 			return
 		}
 
