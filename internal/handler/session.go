@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/dmartzol/hmm/internal/hmm"
+	"github.com/dmartzol/hmm/internal/storage/postgres"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 )
 
@@ -33,17 +35,25 @@ func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	err := httpresponse.Unmarshal(r, &credentials)
 	if err != nil {
 		h.Logger.Errorf("Unmarshal error: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	// create session and cookie
+	// create session
 	s, err := h.SessionService.Create(credentials.Email, credentials.Password)
 	if err != nil {
-		h.Logger.Errorf("unable to create session: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		switch {
+		case errors.Is(err, postgres.ErrInvalidCredentials):
+			h.Logger.Warn("invalid credentials")
+			httpresponse.RespondJSONError(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		default:
+			h.Logger.Errorf("unable to create session: %+v", err)
+			httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
 		return
 	}
+
+	// creating and setting cookie
 	cookie := &http.Cookie{
 		Name:   hmmmCookieName,
 		Value:  s.Token,

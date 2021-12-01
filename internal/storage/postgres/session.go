@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -11,7 +12,8 @@ import (
 )
 
 var (
-	ErrExpiredResource error
+	ErrExpiredResource    error
+	ErrInvalidCredentials = errors.New("invalid credentials")
 )
 
 // SessionFromToken fetches a session by its token
@@ -37,7 +39,7 @@ func (db *DB) CreateSession(email, password string) (*hmm.Session, error) {
 	err = tx.Get(&a, sqlSelect, email, password)
 	if err == sql.ErrNoRows {
 		tx.Rollback()
-		return nil, fmt.Errorf("invalid credentials")
+		return nil, ErrInvalidCredentials
 	} else if err != nil {
 		tx.Rollback()
 		return nil, fmt.Errorf("error fetching account for email %q: %w", email, err)
@@ -48,7 +50,7 @@ func (db *DB) CreateSession(email, password string) (*hmm.Session, error) {
 	err = tx.Get(&s, sqlInsert, a.ID)
 	if err != nil {
 		tx.Rollback()
-		return nil, err
+		return nil, fmt.Errorf("error creating session for account %q: %w", a.ID, err)
 	}
 	return &s, tx.Commit()
 }
