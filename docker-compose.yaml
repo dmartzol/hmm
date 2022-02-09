@@ -1,13 +1,5 @@
 version: "3.8"
 services:
-  dozzle:
-    container_name: dozzle
-    image: amir20/dozzle:latest
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 9999:8080
-
   database:
     container_name: postgres
     image: postgres:13.3
