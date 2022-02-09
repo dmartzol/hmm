@@ -18,6 +18,8 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 
 ## QuickStart
 
+### To run the backend:
+
 ```
 git clone https://github.com/dmartzol/hmm
 cd hmm
@@ -25,6 +27,7 @@ make up
 make migrate.up
 docker compose up --build gateway
 ```
+### Front end is still WIP
 
 ## Credits
 
