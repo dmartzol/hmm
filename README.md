@@ -12,6 +12,17 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 * PostgreSQL performant database
 * Docker Compose for easy bootstrapping
 
+## Requirements
+
+* Docker
+
+## QuickStart
+
+```
+make up
+make migrate.up
+docker compose up --build gateway
+```
 
 ## Credits
 
