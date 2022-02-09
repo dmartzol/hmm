@@ -7,6 +7,8 @@ POSTGRESQL_URL := postgresql://$(POSTGRES_HOST):$(POSTGRES_PORT)/$(DB_NAME)?user
 MIGRATIONS_PATH := migrations
 MIGRATE_VERSION := v4.15.1
 
+.PHONY: up down migrate.up migrate.down
+
 up:
 	go mod tidy
 	go mod download
