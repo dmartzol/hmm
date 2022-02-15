@@ -32,8 +32,6 @@ services:
       - database
     links:
       - database
-    profiles:
-      - gateway
 
 volumes:
   postgres_volume:
