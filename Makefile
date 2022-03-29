@@ -10,7 +10,7 @@ MIGRATE_VERSION := v4.15.1
 .PHONY: up down migrate.up migrate.down
 
 up:
-	docker-compose up --remove-orphans -d --build
+	docker compose up --remove-orphans -d --build
 
 down:
 	docker compose -p hmm down
