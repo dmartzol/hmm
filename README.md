@@ -7,7 +7,7 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 ## Features
 
 * React admin panel to administer resources and sub-resources
-* Management of Sessions, cookies, permissions, email authentication, accounts, ...
+* Management of Sessions, cookies, permissions, email verification, accounts, ...
 * Management of Hackerspace equipment and equipment authorizations
 * PostgreSQL performant database
 * Docker Compose for easy bootstrapping
