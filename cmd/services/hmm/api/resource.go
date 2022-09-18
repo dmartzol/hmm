@@ -1,4 +1,4 @@
-package handler
+package api
 
 import (
 	"github.com/dmartzol/hmm/internal/hmm"
@@ -7,14 +7,7 @@ import (
 	"github.com/dmartzol/hmm/internal/storage/postgres"
 )
 
-const (
-	apiVersionNumber = "0.0.1"
-	hmmmCookieName   = "Hmm-Cookie"
-	idQueryParameter = "id"
-)
-
-// API represents something
-type Handler struct {
+type Resources struct {
 	AccountService      hmm.AccountService
 	SessionService      hmm.SessionService
 	ConfirmationService hmm.ConfirmationService
@@ -22,13 +15,12 @@ type Handler struct {
 	Logger              Logger
 }
 
-func New(structuredLogging bool, db *postgres.DB) (*Handler, error) {
-	handler := Handler{
+func newResources(structuredLogging bool, db *postgres.DB) *Resources {
+	return &Resources{
 		AccountService:      storage.NewAccountService(db),
 		SessionService:      storage.NewSessionService(db),
 		ConfirmationService: storage.NewConfirmationService(db),
 		RoleService:         storage.NewRoleService(db),
+		Logger:              logger.New(structuredLogging),
 	}
-	handler.Logger = logger.New(structuredLogging)
-	return &handler, nil
 }

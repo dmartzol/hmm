@@ -1,4 +1,4 @@
-package handler
+package api
 
 const (
 	contextRequesterAccountIDKey contexttIDType = iota

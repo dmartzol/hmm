@@ -1,4 +1,4 @@
-package handler
+package api
 
 type Logger interface {
 	Info(args ...interface{})

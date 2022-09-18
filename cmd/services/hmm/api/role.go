@@ -1,4 +1,4 @@
-package handler
+package api
 
 import (
 	"fmt"
@@ -6,13 +6,48 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/dmartzol/hmm/internal/api"
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 	"github.com/gorilla/mux"
 )
 
-func (h Handler) CreateRole(w http.ResponseWriter, r *http.Request) {
+type AccountRole struct {
+	Account Account
+	Role    Role
+}
+
+func AccountRoleView(ar *hmm.AccountRole, options map[string]bool) AccountRole {
+	view := AccountRole{}
+	return view
+}
+
+type Role struct {
+	Name          string
+	Permissions   []string
+	PermissionBit int
+}
+
+func RolesView(rs hmm.Roles, options map[string]bool) []Role {
+	var views []Role
+	for _, r := range rs {
+		views = append(views, RoleView(r, options))
+	}
+	return views
+}
+
+func RoleView(r *hmm.Role, options map[string]bool) Role {
+	roleView := Role{
+		Name:          r.Name,
+		PermissionBit: r.PermissionsBit.Int(),
+	}
+	if len(r.Permissions) == 0 {
+		r.Populate()
+	}
+	roleView.Permissions = r.Permissions
+	return roleView
+}
+
+func (h API) CreateRole(w http.ResponseWriter, r *http.Request) {
 	var req hmm.CreateRoleReq
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
@@ -28,17 +63,17 @@ func (h Handler) CreateRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpresponse.RespondJSON(w, api.RoleView(role, nil))
+	httpresponse.RespondJSON(w, RoleView(role, nil))
 }
 
-func (h Handler) GetRoles(w http.ResponseWriter, r *http.Request) {
+func (h API) GetRoles(w http.ResponseWriter, r *http.Request) {
 	roles, err := h.RoleService.Roles()
 	if err != nil {
 		log.Printf("GetRoles Roles ERROR: %+v", err)
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, api.RolesView(roles, nil))
+	httpresponse.RespondJSON(w, RolesView(roles, nil))
 }
 
 func validateEditRole(req hmm.EditRoleReq, targetRole *hmm.Role) error {
@@ -48,7 +83,7 @@ func validateEditRole(req hmm.EditRoleReq, targetRole *hmm.Role) error {
 	return nil
 }
 
-func (h Handler) EditRole(w http.ResponseWriter, r *http.Request) {
+func (h API) EditRole(w http.ResponseWriter, r *http.Request) {
 	// parsing parameters
 	params := mux.Vars(r)
 	idString, ok := params[idQueryParameter]
@@ -110,5 +145,5 @@ func (h Handler) EditRole(w http.ResponseWriter, r *http.Request) {
 		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, api.RoleView(updatedRole, nil))
+	httpresponse.RespondJSON(w, RoleView(updatedRole, nil))
 }

@@ -1,4 +1,4 @@
-package handler
+package api
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 )
 
-func (h Handler) AuthMiddleware(next http.Handler) http.Handler {
+func (h API) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		publicRoutes := map[string]string{
 			"/v1/version":  "GET",

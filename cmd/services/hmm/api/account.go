@@ -1,20 +1,197 @@
-package handler
+package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
-	"github.com/dmartzol/hmm/internal/api"
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 	"github.com/dmartzol/hmm/pkg/randutil"
+	"github.com/dmartzol/hmm/pkg/timeutils"
 	"github.com/gorilla/mux"
 )
 
-func (h Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
+type CreateAccountRequest struct {
+	FirstName   string
+	LastName    string
+	DOB         string
+	DOBTime     time.Time
+	Gender      *string
+	PhoneNumber *string
+	Email       string
+	Password    string
+}
+
+// Account is the restricted response body of hmm.Account
+// see: https://stackoverflow.com/questions/46427723/golang-elegant-way-to-omit-a-json-property-from-being-serialized
+type Account struct {
+	ID                         int64 `json:"ID"`
+	FirstName, LastName, Email string
+	DOB                        string `json:"DateOfBird"`
+	PhoneNumber                string
+	DoorCode                   string
+	Gender                     string
+	Active                     bool
+	ConfirmedEmail             bool
+	ConfirmedPhone             bool
+	FailedLoginsCount          int64
+	Roles                      []Role
+}
+
+func AccountView(a *hmm.Account, options map[string]bool) Account {
+	view := Account{
+		ID:                a.ID,
+		FirstName:         a.FirstName,
+		LastName:          a.LastName,
+		DOB:               a.DOB.Format(timeutils.LayoutISODay),
+		Active:            a.Active,
+		FailedLoginsCount: a.FailedLoginsCount,
+		Email:             a.Email,
+		ConfirmedEmail:    a.ConfirmedEmail,
+		ConfirmedPhone:    a.ConfirmedPhone,
+	}
+	if a.DoorCode != nil && options["door_code"] {
+		view.DoorCode = *a.DoorCode
+	}
+	if a.PhoneNumber != nil && options["phone_number"] {
+		view.PhoneNumber = *a.PhoneNumber
+	}
+	if a.Gender != nil {
+		view.Gender = *a.Gender
+	}
+	if a.Roles != nil {
+		for _, r := range a.Roles {
+			view.Roles = append(view.Roles, RoleView(r, nil))
+		}
+	}
+	return view
+}
+
+func AccountsView(accs hmm.Accounts, options map[string]bool) []Account {
+	var l []Account
+	for _, a := range accs {
+		l = append(l, AccountView(a, options))
+	}
+	return l
+}
+
+func (r *CreateAccountRequest) ValidateAndNormalize() error {
+	err := r.validate()
+	if err != nil {
+		return fmt.Errorf("error validating: %w", err)
+	}
+
+	err = r.normalize()
+	if err != nil {
+		return fmt.Errorf("error normalizing: %w", err)
+	}
+
+	return nil
+}
+
+func (r CreateAccountRequest) validate() error {
+	if r.FirstName == "" {
+		return errors.New("first name is required")
+	}
+	if r.LastName == "" {
+		return errors.New("last name is required")
+	}
+	if r.Email == "" {
+		return errors.New("email is required")
+	}
+	if len(r.Password) < 6 {
+		return errors.New("password too short")
+	}
+	return nil
+}
+
+func (r *CreateAccountRequest) normalize() error {
+	r.FirstName = NormalizeName(r.FirstName)
+	r.LastName = NormalizeName(r.LastName)
+	var err error
+	r.DOBTime, err = time.Parse(timeutils.LayoutISODay, r.DOB)
+	if err != nil {
+		return fmt.Errorf("error parsing DOB %q: %w", r.DOB, err)
+	}
+	// normalizing gender
+	if r.Gender != nil {
+		if strings.EqualFold(*r.Gender, "female") {
+			*r.Gender = "F"
+		}
+		if strings.EqualFold(*r.Gender, "male") {
+			*r.Gender = "M"
+		}
+	}
+	return nil
+}
+
+func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
+	var req CreateAccountRequest
+	err := httpresponse.Unmarshal(r, &req)
+	if err != nil {
+		re.Logger.Errorf("unable to unmarshal: %+v", err)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	err = req.ValidateAndNormalize()
+	if err != nil {
+		re.Logger.Errorf("error validating: %+v", req.Email)
+		httpresponse.RespondJSONError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	code, err := randutil.RandomCode(6)
+	if err != nil {
+		re.Logger.Errorf("error generating random code for %q: %+v", req.Email, err)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	inputAccount := hmm.Account{
+		Email:       req.Email,
+		FirstName:   req.FirstName,
+		LastName:    req.LastName,
+		Gender:      req.Gender,
+		DOB:         req.DOBTime,
+		PhoneNumber: req.PhoneNumber,
+	}
+	a, _, err := re.AccountService.Create(&inputAccount, req.Password, code)
+	if err != nil {
+		// TODO: respond with 409 on existing email address
+		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
+		re.Logger.Errorf("error creating account: %+v", req.Email)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		return
+	}
+	re.Logger.Infof("confirmation key: %s", code)
+
+	s, err := re.SessionService.Create(a.Email, req.Password)
+	if err != nil {
+		re.Logger.Errorf("error creating session: %+v", req.Email)
+		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	cookie := &http.Cookie{
+		Name:   hmmmCookieName,
+		Value:  s.Token,
+		MaxAge: sessionLength,
+	}
+	http.SetCookie(w, cookie)
+
+	// TODO: send confirmation key by email
+
+	httpresponse.RespondJSON(w, AccountView(a, nil))
+}
+
+func (h API) GetAccounts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey).(int64)
 	err := h.AuthorizeAccount(requesterID, hmm.PermissionAccountsView)
@@ -33,10 +210,10 @@ func (h Handler) GetAccounts(w http.ResponseWriter, r *http.Request) {
 
 	h.AccountService.PopulateAccounts(accs)
 
-	httpresponse.RespondJSON(w, api.AccountsView(accs, nil))
+	httpresponse.RespondJSON(w, AccountsView(accs, nil))
 }
 
-func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
+func (h API) GetAccount(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	idString, ok := params[idQueryParameter]
 	if !ok {
@@ -75,70 +252,10 @@ func (h Handler) GetAccount(w http.ResponseWriter, r *http.Request) {
 
 	h.AccountService.PopulateAccount(a)
 
-	httpresponse.RespondJSON(w, api.AccountView(a, nil))
+	httpresponse.RespondJSON(w, AccountView(a, nil))
 }
 
-func (h Handler) CreateAccount(w http.ResponseWriter, r *http.Request) {
-	var req api.RegisterRequest
-	err := httpresponse.Unmarshal(r, &req)
-	if err != nil {
-		h.Logger.Errorf("unable to unmarshal: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	err = req.ValidateAndNormalize()
-	if err != nil {
-		h.Logger.Errorf("error validating: %+v", req.Email)
-		httpresponse.RespondJSONError(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	code, err := randutil.RandomCode(6)
-	if err != nil {
-		h.Logger.Errorf("error generating random code for %q: %+v", req.Email, err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	inputAccount := hmm.Account{
-		Email:       req.Email,
-		FirstName:   req.FirstName,
-		LastName:    req.LastName,
-		Gender:      req.Gender,
-		DOB:         req.DOBTime,
-		PhoneNumber: req.PhoneNumber,
-	}
-	a, _, err := h.AccountService.Create(&inputAccount, req.Password, code)
-	if err != nil {
-		// TODO: respond with 409 on existing email address
-		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
-		h.Logger.Errorf("error creating account: %+v", req.Email)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
-		return
-	}
-	h.Logger.Infof("confirmation key: %s", code)
-
-	s, err := h.SessionService.Create(a.Email, req.Password)
-	if err != nil {
-		h.Logger.Errorf("error creating session: %+v", req.Email)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	cookie := &http.Cookie{
-		Name:   hmmmCookieName,
-		Value:  s.Token,
-		MaxAge: sessionLength,
-	}
-	http.SetCookie(w, cookie)
-
-	// TODO: send confirmation key by email
-
-	httpresponse.RespondJSON(w, api.AccountView(a, nil))
-}
-
-func (h Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+func (h API) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	var req hmm.ResetPasswordRequest
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
@@ -151,7 +268,7 @@ func (h Handler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondText(w, "not implemented", http.StatusNotImplemented)
 }
 
-func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
+func (h API) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	requesterID := ctx.Value(contextRequesterAccountIDKey)
 	if requesterID == nil {
@@ -220,7 +337,7 @@ func (h Handler) ConfirmEmail(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
+func (h API) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 	var req hmm.AddAccountRoleReq
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
@@ -259,10 +376,10 @@ func (h Handler) AddAccountRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpresponse.RespondJSON(w, api.AccountRoleView(accRole, nil))
+	httpresponse.RespondJSON(w, AccountRoleView(accRole, nil))
 }
 
-func (h Handler) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
+func (h API) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 	var req hmm.AddAccountRoleReq
 	err := httpresponse.Unmarshal(r, &req)
 	if err != nil {
@@ -305,5 +422,5 @@ func (h Handler) GetAccountRoles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpresponse.RespondJSON(w, api.RolesView(rs, nil))
+	httpresponse.RespondJSON(w, RolesView(rs, nil))
 }

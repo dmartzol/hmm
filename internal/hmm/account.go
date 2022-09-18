@@ -5,8 +5,6 @@ import (
 	"time"
 )
 
-type Accounts []*Account
-
 // Account represents a user account
 type Account struct {
 	Row
@@ -29,6 +27,8 @@ type Account struct {
 	// fields to populate
 	Roles Roles
 }
+
+type Accounts []*Account
 
 type AccountService interface {
 	Create(a *Account, password, confirmationCode string) (*Account, *Confirmation, error)

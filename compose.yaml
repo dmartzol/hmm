@@ -14,26 +14,24 @@ services:
     volumes:
       - postgres_volume:/var/lib/postgresql/data
 
-  gateway:
-    container_name: gateway
+  hmm:
+    container_name: hmm
     restart: "no"
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        project: gateway
+        project: hmm
         project_path: ./cmd/services
     ports:
       - 1100:1100
-    command: ./gateway
+    command: ./hmm
     environment:
       STRUCTURED_LOGGING: "false"
     depends_on:
       - database
     links:
       - database
-    profiles:
-      - gateway
 
 volumes:
   postgres_volume:

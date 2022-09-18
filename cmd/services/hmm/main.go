@@ -63,7 +63,7 @@ func main() {
 				Value:  "database",
 			},
 		},
-		Action: newGatewayServiceRun,
+		Action: newHmmServiceRun,
 	}
 
 	err := app.Run(os.Args)

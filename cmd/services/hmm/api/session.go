@@ -1,4 +1,4 @@
-package handler
+package api
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ const (
 	sessionLength = 345600
 )
 
-func (h Handler) GetSession(w http.ResponseWriter, r *http.Request) {
+func (h API) GetSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
 		h.Logger.Errorf("unable to fetch cookie: %+v", err)
@@ -30,7 +30,7 @@ func (h Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondJSON(w, s.View(nil))
 }
 
-func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
+func (h API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	var credentials hmm.LoginCredentials
 	err := httpresponse.Unmarshal(r, &credentials)
 	if err != nil {
@@ -63,7 +63,7 @@ func (h Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	httpresponse.RespondJSON(w, s.View(nil))
 }
 
-func (h Handler) ExpireSession(w http.ResponseWriter, r *http.Request) {
+func (h API) ExpireSession(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie(hmmmCookieName)
 	if err != nil {
 		h.Logger.Errorf("error fetching cookie: %+v", err)

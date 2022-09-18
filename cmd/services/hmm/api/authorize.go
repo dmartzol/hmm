@@ -1,4 +1,4 @@
-package handler
+package api
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/dmartzol/hmm/internal/hmm"
 )
 
-func (h Handler) AuthorizeAccount(accountID int64, permission hmm.RolePermission) error {
+func (h API) AuthorizeAccount(accountID int64, permission hmm.RolePermission) error {
 	roles, err := h.RoleService.RolesForAccount(accountID)
 	if err != nil {
 		log.Printf("AuthorizeAccount Account ERROR: %+v", err)
