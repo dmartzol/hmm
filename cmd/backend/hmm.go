@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-func newHmmServiceRun(c *cli.Context) error {
+func newBackendServiceRun(c *cli.Context) error {
 	port := c.String(flagPort)
 	host := c.String(flagHost)
 	structuredLogging := c.Bool(flagStructuredLogging)

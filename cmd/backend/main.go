@@ -20,7 +20,7 @@ const (
 
 func main() {
 	app := &cli.App{
-		Name:  "gateway",
+		Name:  "hmm",
 		Usage: "",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -39,12 +39,12 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:   flagDBName,
-				EnvVar: "PGDATABASE",
+				EnvVar: "POSTGRES_DB",
 				Value:  "hmm-development",
 			},
 			&cli.StringFlag{
 				Name:   flagDBUser,
-				EnvVar: "PGUSER",
+				EnvVar: "POSTGRES_USER",
 				Value:  "user-development",
 			},
 			&cli.StringFlag{
@@ -54,7 +54,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:   flagDBPass,
-				EnvVar: "PGPASSWORD",
+				EnvVar: "POSTGRES_PASSWORD",
 				Value:  "",
 			},
 			&cli.StringFlag{
@@ -63,7 +63,7 @@ func main() {
 				Value:  "database",
 			},
 		},
-		Action: newHmmServiceRun,
+		Action: newBackendServiceRun,
 	}
 
 	err := app.Run(os.Args)
