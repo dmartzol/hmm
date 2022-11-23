@@ -1,37 +1,42 @@
 version: "3.8"
 services:
-  database:
+  db:
     container_name: postgres
-    image: postgres:13.3
+    image: postgres:15.0-alpine 
     restart: always
-    environment:
-      POSTGRES_USER: user-development
-      POSTGRES_HOST_AUTH_METHOD: trust
-      POSTGRES_DB: hmm-development
-      POSTGRES_PASSWORD: password
-    ports:
-      - 5432:5432
+    user: ${POSTGRES_USER}
     volumes:
       - postgres_volume:/var/lib/postgresql/data
-
-  hmm:
-    container_name: hmm
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+  backend:
+    container_name: backend
     restart: "no"
     build:
       context: .
-      dockerfile: Dockerfile
-      args:
-        project: hmm
-        project_path: ./cmd/services
+      dockerfile: cmd/backend/Dockerfile
+      target: builder
     ports:
       - 1100:1100
-    command: ./hmm
     environment:
-      STRUCTURED_LOGGING: "false"
+      PORT: 1100
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
-      - database
-    links:
-      - database
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_volume:
