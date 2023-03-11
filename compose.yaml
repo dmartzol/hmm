@@ -14,24 +14,23 @@ services:
     volumes:
       - postgres_volume:/var/lib/postgresql/data
 
-  hmm:
-    container_name: hmm
+  backend:
+    container_name: backend
     restart: "no"
     build:
       context: .
-      dockerfile: Dockerfile
-      args:
-        project: hmm
-        project_path: ./cmd/services
-    ports:
-      - 1100:1100
-    command: ./hmm
+      dockerfile: cmd/backend/Dockerfile
+      target: prod
     environment:
       STRUCTURED_LOGGING: "false"
     depends_on:
       - database
     links:
       - database
+    ports:
+      - 1100:1100
+    expose:
+      - 1100
 
 volumes:
   postgres_volume:
