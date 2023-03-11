@@ -1,10 +1,10 @@
 package api
 
 import (
+	storage "github.com/dmartzol/hmm/internal/dao"
+	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/dmartzol/hmm/internal/logger"
-	"github.com/dmartzol/hmm/internal/storage"
-	"github.com/dmartzol/hmm/internal/storage/postgres"
 )
 
 type Resources struct {

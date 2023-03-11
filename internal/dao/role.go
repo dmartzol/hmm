@@ -1,9 +1,9 @@
-package storage
+package dao
 
 import (
+	"github.com/dmartzol/hmm/internal/dao/memcache"
+	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
-	"github.com/dmartzol/hmm/internal/storage/memcache"
-	"github.com/dmartzol/hmm/internal/storage/postgres"
 )
 
 type RoleService struct {
