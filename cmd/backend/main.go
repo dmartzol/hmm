@@ -43,11 +43,6 @@ func main() {
 }
 
 func newBackendServiceRun(c *cli.Context) error {
-	host := c.String(flags.HostnameFlagName)
-	port := c.String(flags.PortFlagName)
-
-	structuredLogging := c.Bool(flagStructuredLogging)
-
 	postgresOpts := []postgres.Option{
 		postgres.WithHost(c.String(flags.DatabaseHostnameFlag)),
 		postgres.WithDatabaseName(c.String(flags.DatabaseNameFlag)),
@@ -61,8 +56,12 @@ func newBackendServiceRun(c *cli.Context) error {
 		return fmt.Errorf("unable to initialize database: %w", err)
 	}
 
-	address := host + ":" + port
+	structuredLogging := c.Bool(flagStructuredLogging)
 	restAPI := api.NewAPI(structuredLogging, db)
+
+	host := c.String(flags.HostnameFlagName)
+	port := c.String(flags.PortFlagName)
+	address := host + ":" + port
 	server := &http.Server{
 		Addr:    address,
 		Handler: restAPI,
