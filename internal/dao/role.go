@@ -4,6 +4,7 @@ import (
 	"github.com/dmartzol/hmm/internal/dao/memcache"
 	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
+	"github.com/jmoiron/sqlx"
 )
 
 type RoleService struct {
@@ -11,9 +12,9 @@ type RoleService struct {
 	DB       *postgres.DB
 }
 
-func NewRoleService(db *postgres.DB) *RoleService {
+func NewRoleService(db *sqlx.DB) *RoleService {
 	rs := RoleService{
-		DB:       db,
+		DB:       &postgres.DB{DB: db},
 		MemCache: memcache.NewRoleMemcache(),
 	}
 	return &rs

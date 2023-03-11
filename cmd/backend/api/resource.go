@@ -2,9 +2,9 @@ package api
 
 import (
 	storage "github.com/dmartzol/hmm/internal/dao"
-	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/dmartzol/hmm/internal/logger"
+	"github.com/jmoiron/sqlx"
 )
 
 type Resources struct {
@@ -15,7 +15,7 @@ type Resources struct {
 	Logger              Logger
 }
 
-func newResources(structuredLogging bool, db *postgres.DB) *Resources {
+func newResources(structuredLogging bool, db *sqlx.DB) *Resources {
 	return &Resources{
 		AccountService:      storage.NewAccountService(db),
 		SessionService:      storage.NewSessionService(db),

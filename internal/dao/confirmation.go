@@ -4,6 +4,7 @@ import (
 	"github.com/dmartzol/hmm/internal/dao/memcache"
 	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
+	"github.com/jmoiron/sqlx"
 )
 
 type ConfirmationService struct {
@@ -11,9 +12,9 @@ type ConfirmationService struct {
 	MemCache *memcache.ConfirmationMemcache
 }
 
-func NewConfirmationService(db *postgres.DB) *ConfirmationService {
+func NewConfirmationService(db *sqlx.DB) *ConfirmationService {
 	cs := ConfirmationService{
-		DB:       db,
+		DB:       &postgres.DB{DB: db},
 		MemCache: memcache.NewConfirmationMemcache(),
 	}
 	return &cs

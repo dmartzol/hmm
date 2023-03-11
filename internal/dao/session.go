@@ -4,6 +4,7 @@ import (
 	"github.com/dmartzol/hmm/internal/dao/memcache"
 	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
+	"github.com/jmoiron/sqlx"
 )
 
 type SessionService struct {
@@ -11,9 +12,9 @@ type SessionService struct {
 	DB       *postgres.DB
 }
 
-func NewSessionService(db *postgres.DB) *SessionService {
+func NewSessionService(db *sqlx.DB) *SessionService {
 	ss := SessionService{
-		DB:       db,
+		DB:       &postgres.DB{DB: db},
 		MemCache: memcache.NewSessionMemcache(),
 	}
 	return &ss

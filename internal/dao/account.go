@@ -4,6 +4,7 @@ import (
 	"github.com/dmartzol/hmm/internal/dao/memcache"
 	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
+	"github.com/jmoiron/sqlx"
 )
 
 type AccountService struct {
@@ -11,9 +12,9 @@ type AccountService struct {
 	DB       *postgres.DB
 }
 
-func NewAccountService(db *postgres.DB) *AccountService {
+func NewAccountService(db *sqlx.DB) *AccountService {
 	as := AccountService{
-		DB:       db,
+		DB:       &postgres.DB{DB: db},
 		MemCache: memcache.NewAccountMemcache(),
 	}
 	return &as

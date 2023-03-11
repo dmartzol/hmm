@@ -3,9 +3,9 @@ package api
 import (
 	"net/http"
 
-	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/jmoiron/sqlx"
 )
 
 const (
@@ -19,7 +19,7 @@ type API struct {
 	*Resources
 }
 
-func NewAPI(structuredLogging bool, db *postgres.DB) *API {
+func NewAPI(structuredLogging bool, db *sqlx.DB) *API {
 	resources := newResources(structuredLogging, db)
 	r := chi.NewRouter()
 
