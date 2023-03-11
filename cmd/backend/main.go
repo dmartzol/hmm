@@ -22,10 +22,6 @@ func init() {
 	sdkLogger = logger.New()
 }
 
-const (
-	flagStructuredLogging = "structuredLoggin"
-)
-
 func main() {
 	app := &cli.App{
 		Name:   appName,
