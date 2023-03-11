@@ -56,8 +56,14 @@ func newBackendServiceRun(c *cli.Context) error {
 		return fmt.Errorf("unable to initialize database: %w", err)
 	}
 
-	structuredLogging := c.Bool(flagStructuredLogging)
-	restAPI := api.NewAPI(structuredLogging, db)
+	// Initializes a new logger using provided configuration and options.
+	loggerOpts := []logger.Option{
+		logger.WithColor(),
+		logger.WithEncoding(c.String(flags.LogsFormatFlag)),
+	}
+	sdkLogger = logger.NewWithOptions(loggerOpts...)
+
+	restAPI := api.NewAPI(db, sdkLogger)
 
 	host := c.String(flags.HostnameFlagName)
 	port := c.String(flags.PortFlagName)

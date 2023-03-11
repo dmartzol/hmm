@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 
+	"github.com/dmartzol/go-sdk/logger"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/jmoiron/sqlx"
@@ -19,8 +20,8 @@ type API struct {
 	*Resources
 }
 
-func NewAPI(structuredLogging bool, db *sqlx.DB) *API {
-	resources := newResources(structuredLogging, db)
+func NewAPI(db *sqlx.DB, logger logger.Logger) *API {
+	resources := newResources(db, logger)
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)

@@ -31,7 +31,6 @@ services:
     environment:
       PORT: 1100
       LOGS_FORMAT: console
-      STRUCTURED_LOGGING: "false"
       PGHOST: postgres
       PGNAME: ${POSTGRES_DB}
       PGUSER: ${POSTGRES_USER}
