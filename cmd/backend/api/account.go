@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,6 +13,8 @@ import (
 	"github.com/dmartzol/hmm/pkg/httpresponse"
 	"github.com/dmartzol/hmm/pkg/randutil"
 	"github.com/dmartzol/hmm/pkg/timeutils"
+	"github.com/go-ozzo/ozzo-validation/is"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/gorilla/mux"
 )
 
@@ -95,20 +96,27 @@ func (r *CreateAccountRequest) ValidateAndNormalize() error {
 	return nil
 }
 
-func (r CreateAccountRequest) validate() error {
-	if r.FirstName == "" {
-		return errors.New("first name is required")
-	}
-	if r.LastName == "" {
-		return errors.New("last name is required")
-	}
-	if r.Email == "" {
-		return errors.New("email is required")
-	}
-	if len(r.Password) < 6 {
-		return errors.New("password too short")
-	}
-	return nil
+func (c CreateAccountRequest) validate() error {
+	return validation.ValidateStruct(&c,
+		validation.Field(
+			&c.FirstName,
+			validation.Required,
+		),
+		validation.Field(
+			&c.LastName,
+			validation.Required,
+		),
+		validation.Field(
+			&c.Email,
+			validation.Required,
+			is.Email,
+		),
+		validation.Field(
+			&c.Password,
+			validation.Required,
+			validation.Length(9, 500),
+		),
+	)
 }
 
 func (r *CreateAccountRequest) normalize() error {
