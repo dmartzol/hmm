@@ -96,8 +96,8 @@ func (r *CreateAccountRequest) ValidateAndNormalize() error {
 	return nil
 }
 
-func (c CreateAccountRequest) validate() error {
-	return validation.ValidateStruct(&c,
+func (c *CreateAccountRequest) validate() error {
+	return validation.ValidateStruct(c,
 		validation.Field(
 			&c.FirstName,
 			validation.Required,
@@ -127,7 +127,7 @@ func (r *CreateAccountRequest) normalize() error {
 	if err != nil {
 		return fmt.Errorf("error parsing DOB %q: %w", r.DOB, err)
 	}
-	// normalizing gender
+	// normalizing gender only if it is provided
 	if r.Gender != nil {
 		if strings.EqualFold(*r.Gender, "female") {
 			*r.Gender = "F"
