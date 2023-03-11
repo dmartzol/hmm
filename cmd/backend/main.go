@@ -7,7 +7,7 @@ import (
 
 	"github.com/dmartzol/go-sdk/flags"
 	"github.com/dmartzol/go-sdk/logger"
-	newPostgres "github.com/dmartzol/go-sdk/postgres"
+	"github.com/dmartzol/go-sdk/postgres"
 	"github.com/dmartzol/hmm/cmd/backend/api"
 	"github.com/urfave/cli"
 )
@@ -48,15 +48,15 @@ func newBackendServiceRun(c *cli.Context) error {
 
 	structuredLogging := c.Bool(flagStructuredLogging)
 
-	postgresOpts := []newPostgres.Option{
-		newPostgres.WithHost(c.String(flags.DatabaseHostnameFlag)),
-		newPostgres.WithDatabaseName(c.String(flags.DatabaseNameFlag)),
-		newPostgres.WithCreds(
+	postgresOpts := []postgres.Option{
+		postgres.WithHost(c.String(flags.DatabaseHostnameFlag)),
+		postgres.WithDatabaseName(c.String(flags.DatabaseNameFlag)),
+		postgres.WithCreds(
 			c.String(flags.DatabaseUserFlag),
 			c.String(flags.DatabasePasswordFlag),
 		),
 	}
-	db, err := newPostgres.New(appName, postgresOpts...)
+	db, err := postgres.New(appName, postgresOpts...)
 	if err != nil {
 		return fmt.Errorf("unable to initialize database: %w", err)
 	}
