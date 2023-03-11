@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dmartzol/hmm/cmd/services/hmm/api"
+	"github.com/dmartzol/hmm/cmd/backend/api"
 	"github.com/dmartzol/hmm/internal/storage/postgres"
 	"github.com/urfave/cli"
 )
