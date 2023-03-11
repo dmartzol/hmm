@@ -107,6 +107,11 @@ func (c *CreateAccountRequest) validate() error {
 			validation.Required,
 		),
 		validation.Field(
+			&c.DOB,
+			validation.Required,
+			validation.Date(timeutils.LayoutISODay),
+		),
+		validation.Field(
 			&c.Email,
 			validation.Required,
 			is.Email,
