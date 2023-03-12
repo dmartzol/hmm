@@ -1,5 +1,18 @@
 version: "3.8"
 services:
+
+  proxy:
+    image: nginx:1.23
+    volumes:
+      - type: bind
+        source: ./proxy/nginx.conf
+        target: /etc/nginx/conf.d/default.conf
+        read_only: true
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+
   postgres:
     container_name: postgres
     image: postgres:15.0-alpine 
@@ -90,6 +103,22 @@ services:
       BACKUP_KEEP_WEEKS: 4
       BACKUP_KEEP_MONTHS: 6
       HEALTHCHECK_PORT: 8080
+
+  frontend:
+    container_name: frontend
+    restart: always
+    build:
+      context: frontend
+      target: development
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+    expose:
+      - 3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   postgres_volume:
