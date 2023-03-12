@@ -14,19 +14,3 @@ up:
 
 down:
 	docker compose -p hmm down
-
-migrate.up:
-	docker run -v $(shell pwd)/migrations:/migrations \
-				--network host migrate/migrate:$(MIGRATE_VERSION) \
-				-path="$(MIGRATIONS_PATH)" \
-				-database="$(POSTGRESQL_URL)" \
-				-verbose \
-				up
-
-migrate.down:
-	docker run -v $(shell pwd)/migrations:/migrations \
-				--network host migrate/migrate:$(MIGRATE_VERSION) \
-				-path="$(MIGRATIONS_PATH)" \
-				-database="$(POSTGRESQL_URL)" \
-				-verbose \
-				down 1

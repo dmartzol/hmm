@@ -45,5 +45,25 @@ services:
     expose:
       - 1100
 
+  migrations:
+    container_name: migrations
+    image: migrate/migrate:v4.15.2
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://postgres:5432/${POSTGRES_DB}?user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}&sslmode=disable",
+        "-verbose",
+        "up",
+      ]
+    links:
+      - postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_volume:
