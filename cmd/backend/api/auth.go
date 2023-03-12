@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/dmartzol/hmm/internal/dao/postgres"
-	"github.com/dmartzol/hmm/pkg/httpresponse"
 )
 
 func (h API) AuthMiddleware(next http.Handler) http.Handler {
@@ -29,10 +28,10 @@ func (h API) AuthMiddleware(next http.Handler) http.Handler {
 			switch {
 			case errors.Is(err, http.ErrNoCookie):
 				h.Logger.Info("No cookie found in request")
-				httpresponse.RespondJSONError(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				h.RespondJSONError(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			default:
 				h.Logger.Errorf("error getting cookie: %v", err)
-				httpresponse.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				h.RespondJSONError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			}
 			return
 		}
@@ -42,13 +41,13 @@ func (h API) AuthMiddleware(next http.Handler) http.Handler {
 			switch {
 			case errors.Is(err, sql.ErrNoRows):
 				h.Logger.Errorf("unable to find session %q: %+v", c.Value, err)
-				httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
+				h.RespondJSONError(w, "", http.StatusUnauthorized)
 			case errors.Is(err, postgres.ErrExpiredResource):
 				h.Logger.Errorf("session %q is expired: %+v", c.Value, err)
-				httpresponse.RespondJSONError(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				h.RespondJSONError(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			default:
 				log.Printf("error updating session %q: %+v", c.Value, err)
-				httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+				h.RespondJSONError(w, "", http.StatusInternalServerError)
 			}
 			return
 		}

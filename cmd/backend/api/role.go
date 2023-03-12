@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/dmartzol/hmm/internal/hmm"
-	"github.com/dmartzol/hmm/pkg/httpresponse"
 	"github.com/gorilla/mux"
 )
 
@@ -49,31 +48,31 @@ func RoleView(r *hmm.Role, options map[string]bool) Role {
 
 func (h API) CreateRole(w http.ResponseWriter, r *http.Request) {
 	var req hmm.CreateRoleReq
-	err := httpresponse.Unmarshal(r, &req)
+	err := h.Unmarshal(r, &req)
 	if err != nil {
 		h.Logger.Errorf("unable to unmarshal: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		h.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	role, err := h.RoleService.Create(req.Name)
 	if err != nil {
 		h.Logger.Errorf("unable to create role: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		h.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
-	httpresponse.RespondJSON(w, RoleView(role, nil))
+	h.RespondJSON(w, RoleView(role, nil))
 }
 
 func (h API) GetRoles(w http.ResponseWriter, r *http.Request) {
 	roles, err := h.RoleService.Roles()
 	if err != nil {
 		log.Printf("GetRoles Roles ERROR: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		h.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, RolesView(roles, nil))
+	h.RespondJSON(w, RolesView(roles, nil))
 }
 
 func validateEditRole(req hmm.EditRoleReq, targetRole *hmm.Role) error {
@@ -89,13 +88,13 @@ func (h API) EditRole(w http.ResponseWriter, r *http.Request) {
 	idString, ok := params[idQueryParameter]
 	if !ok {
 		errMsg := fmt.Sprintf("parameter '%s' not found", idQueryParameter)
-		httpresponse.RespondJSONError(w, errMsg, http.StatusBadRequest)
+		h.RespondJSONError(w, errMsg, http.StatusBadRequest)
 		return
 	}
 	roleID, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
 		errMsg := fmt.Sprintf("wrong parameter '%s'", idString)
-		httpresponse.RespondJSONError(w, errMsg, http.StatusBadRequest)
+		h.RespondJSONError(w, errMsg, http.StatusBadRequest)
 		return
 	}
 	// checking permissions
@@ -105,28 +104,28 @@ func (h API) EditRole(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("WARNING: account %d requested to edit role %d", requesterID, roleID)
 		log.Printf("EditRole AuthorizeAccount ERROR: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusUnauthorized)
+		h.RespondJSONError(w, "", http.StatusUnauthorized)
 		return
 	}
 
 	var req hmm.EditRoleReq
-	err = httpresponse.Unmarshal(r, &req)
+	err = h.Unmarshal(r, &req)
 	if err != nil {
 		log.Printf("CreateRole Unmarshal ERROR: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		h.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	role, err := h.RoleService.Role(roleID)
 	if err != nil {
 		log.Printf("EditRole Role ERROR: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		h.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
 	err = validateEditRole(req, role)
 	if err != nil {
 		log.Printf("EditRole validateEditRole ERROR: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
+		h.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
 
@@ -136,14 +135,14 @@ func (h API) EditRole(w http.ResponseWriter, r *http.Request) {
 	}
 	if role.PermissionsBit.Int() == newBit {
 		log.Printf("EditRole ERROR: role already has those permissions")
-		httpresponse.RespondJSONError(w, "", http.StatusBadRequest)
+		h.RespondJSONError(w, "", http.StatusBadRequest)
 		return
 	}
 	updatedRole, err := h.RoleService.Update(role.ID, newBit)
 	if err != nil {
 		log.Printf("EditRole UpdateRole ERROR: %+v", err)
-		httpresponse.RespondJSONError(w, "", http.StatusInternalServerError)
+		h.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	httpresponse.RespondJSON(w, RoleView(updatedRole, nil))
+	h.RespondJSON(w, RoleView(updatedRole, nil))
 }
