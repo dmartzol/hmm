@@ -94,7 +94,7 @@ func (db *DB) UpdateSession(token string) (*hmm.Session, error) {
 	}
 	var session hmm.Session
 	sqlStatement := `select * from sessions where token = $1`
-	tx.Get(&session, sqlStatement, token)
+	err = tx.Get(&session, sqlStatement, token)
 	if err != nil {
 		log.Printf("UpdateSession db - ERROR fetching session from token %s: %+v", token, err)
 		_ = tx.Rollback()
