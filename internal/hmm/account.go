@@ -1,7 +1,6 @@
 package hmm
 
 import (
-	"strings"
 	"time"
 )
 
@@ -36,16 +35,6 @@ type AccountService interface {
 	Accounts() (Accounts, error)
 	PopulateAccount(a *Account) *Account
 	PopulateAccounts(as Accounts) Accounts
-}
-
-func validEmail(email string) bool {
-	if !strings.Contains(email, "@") {
-		return false
-	}
-	if !strings.Contains(email, ".") {
-		return false
-	}
-	return true
 }
 
 type ResetPasswordRequest struct {
