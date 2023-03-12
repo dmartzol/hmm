@@ -38,10 +38,10 @@ func (db *DB) CreateSession(email, password string) (*hmm.Session, error) {
 	sqlSelect := `select * from accounts a where a.email = $1 and a.passhash = crypt($2, a.passhash)`
 	err = tx.Get(&a, sqlSelect, email, password)
 	if err == sql.ErrNoRows {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, ErrInvalidCredentials
 	} else if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, fmt.Errorf("error fetching account for email %q: %w", email, err)
 	}
 
@@ -97,7 +97,7 @@ func (db *DB) UpdateSession(token string) (*hmm.Session, error) {
 	tx.Get(&session, sqlStatement, token)
 	if err != nil {
 		log.Printf("UpdateSession db - ERROR fetching session from token %s: %+v", token, err)
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, err
 	}
 	if session.ExpirationTime.Before(time.Now()) {
