@@ -1,30 +1,23 @@
 package dao
 
 import (
-	"github.com/dmartzol/hmm/internal/dao/memcache"
 	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/jmoiron/sqlx"
 )
 
 type AccountService struct {
-	MemCache *memcache.AccountMemcache
-	DB       *postgres.DB
+	DB *postgres.DB
 }
 
 func NewAccountService(db *sqlx.DB) *AccountService {
 	as := AccountService{
-		DB:       &postgres.DB{DB: db},
-		MemCache: memcache.NewAccountMemcache(),
+		DB: &postgres.DB{DB: db},
 	}
 	return &as
 }
 
 func (as AccountService) Account(id int64) (*hmm.Account, error) {
-	account, ok := as.MemCache.Account(id)
-	if ok {
-		return account, nil
-	}
 	account, err := as.DB.Account(id)
 	if err != nil {
 		return nil, err
@@ -45,7 +38,6 @@ func (as AccountService) Create(account *hmm.Account, password, confirmationCode
 	if err != nil {
 		return nil, nil, err
 	}
-	as.MemCache.AddAccount(newAccount)
 	return newAccount, confirmation, nil
 }
 

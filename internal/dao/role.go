@@ -1,30 +1,23 @@
 package dao
 
 import (
-	"github.com/dmartzol/hmm/internal/dao/memcache"
 	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/jmoiron/sqlx"
 )
 
 type RoleService struct {
-	MemCache *memcache.RoleMemcache
-	DB       *postgres.DB
+	DB *postgres.DB
 }
 
 func NewRoleService(db *sqlx.DB) *RoleService {
 	rs := RoleService{
-		DB:       &postgres.DB{DB: db},
-		MemCache: memcache.NewRoleMemcache(),
+		DB: &postgres.DB{DB: db},
 	}
 	return &rs
 }
 
 func (rs RoleService) Role(id int64) (*hmm.Role, error) {
-	role, ok := rs.MemCache.Role(id)
-	if ok {
-		return role, nil
-	}
 	role, err := rs.DB.Role(id)
 	if err != nil {
 		return nil, err
@@ -53,7 +46,6 @@ func (rs RoleService) Create(name string) (*hmm.Role, error) {
 	if err != nil {
 		return nil, err
 	}
-	rs.MemCache.Add(newRole)
 	return newRole, nil
 }
 
@@ -62,7 +54,6 @@ func (rs RoleService) Update(id int64, permissionBit int) (*hmm.Role, error) {
 	if err != nil {
 		return nil, err
 	}
-	rs.MemCache.Add(role)
 	return role, nil
 }
 
