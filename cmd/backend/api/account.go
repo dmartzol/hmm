@@ -158,7 +158,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	code, err := randomCode(6)
+	confirmationCode, err := randomCode(6)
 	if err != nil {
 		re.Logger.Errorf("error generating random code for %q: %+v", req.Email, err)
 		re.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -173,7 +173,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		DOB:         req.DOBTime,
 		PhoneNumber: req.PhoneNumber,
 	}
-	a, _, err := re.AccountService.Create(&inputAccount, req.Password, code)
+	a, _, err := re.AccountService.Create(&inputAccount, req.Password, confirmationCode)
 	if err != nil {
 		// TODO: respond with 409 on existing email address
 		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
@@ -181,7 +181,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		re.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	re.Logger.Infof("confirmation key: %s", code)
+	re.Logger.Infof("confirmation key: %s", confirmationCode)
 
 	s, err := re.SessionService.Create(a.Email, req.Password)
 	if err != nil {
