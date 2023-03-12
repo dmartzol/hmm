@@ -67,7 +67,7 @@ func (db *DB) UpdateRole(roleID int64, permissionBit int) (*hmm.Role, error) {
 	sqlStatement := `update roles set permission_bit = $1 where id = $2 returning *`
 	err = tx.Get(&r, sqlStatement, permissionBit, roleID)
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, err
 	}
 	return r.Populate(), tx.Commit()

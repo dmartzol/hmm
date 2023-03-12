@@ -49,7 +49,7 @@ func (db *DB) CreateSession(email, password string) (*hmm.Session, error) {
 	sqlInsert := `insert into sessions (account_id) values ($1) returning *`
 	err = tx.Get(&s, sqlInsert, a.ID)
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, fmt.Errorf("error creating session for account %q: %w", a.ID, err)
 	}
 	return &s, tx.Commit()
@@ -65,7 +65,7 @@ func (db *DB) ExpireSession(token string) (*hmm.Session, error) {
 	sqlStatement := `update sessions set expiration_time = current_timestamp where token = $1 returning *`
 	err = tx.Get(&s, sqlStatement, token)
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, err
 	}
 	return &s, tx.Commit()
@@ -108,7 +108,7 @@ func (db *DB) UpdateSession(token string) (*hmm.Session, error) {
 	err = tx.Get(&updatedSession, sqlStatement, token)
 	if err != nil {
 		log.Printf("UpdateSession db - ERROR updating session from token %s: %+v", token, err)
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, err
 	}
 	return &updatedSession, tx.Commit()
