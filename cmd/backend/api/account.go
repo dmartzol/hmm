@@ -125,8 +125,8 @@ func (c *CreateAccountRequest) validate() error {
 }
 
 func (r *CreateAccountRequest) normalize() error {
-	r.FirstName = NormalizeName(r.FirstName)
-	r.LastName = NormalizeName(r.LastName)
+	r.FirstName = normalizeName(r.FirstName)
+	r.LastName = normalizeName(r.LastName)
 	var err error
 	r.DOBTime, err = time.Parse(timeutils.LayoutISODay, r.DOB)
 	if err != nil {
