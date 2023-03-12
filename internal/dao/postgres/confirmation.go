@@ -11,14 +11,14 @@ func (db *DB) CreateConfirmation(accountID int64, t hmm.ConfirmationType) (*hmm.
 	sqlStatement := `update confirmations set expire_time = current_timestamp where confirm_time is null and type = $1 and account_id = $2 returning *`
 	err = tx.Select(&ecc, sqlStatement, t, accountID)
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, err
 	}
 	var cc hmm.Confirmation
 	sqlStatement = `insert into confirmations (type, account_id) values ($1, $2) returning *`
 	err = tx.Get(&cc, sqlStatement, t, accountID)
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, err
 	}
 	return &cc, tx.Commit()

@@ -70,7 +70,7 @@ func (db *DB) CreateAccount(a *hmm.Account, password, confirmationCode string) (
 		password,
 	)
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, nil, err
 	}
 
@@ -86,7 +86,7 @@ func (db *DB) CreateAccount(a *hmm.Account, password, confirmationCode string) (
 	`
 	err = tx.Get(&confirmation, sqlStatement, hmm.ConfirmationTypeEmail, newAccount.ID, confirmationCode, newAccount.Email)
 	if err != nil {
-		tx.Rollback()
+		_ = tx.Rollback()
 		return nil, nil, err
 	}
 
