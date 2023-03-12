@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 )
@@ -14,7 +14,7 @@ type JSONError struct {
 }
 
 func (a Resources) Unmarshal(r *http.Request, iface interface{}) error {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Printf("ReadAll: %+v", err)
 		return err
