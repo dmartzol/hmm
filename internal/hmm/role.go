@@ -40,10 +40,7 @@ func (rs Roles) Populate() Roles {
 
 // HasPermission reports whether a role has the given permission
 func (r Role) HasPermission(permission RolePermission) bool {
-	if (r.PermissionsBit & permission) == permission {
-		return true
-	}
-	return false
+	return (r.PermissionsBit & permission) == permission
 }
 
 type AccountRole struct {
