@@ -31,13 +31,19 @@ func (a Resources) RespondText(w http.ResponseWriter, text string, code int) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
-	fmt.Fprint(w, text)
+	_, err := fmt.Fprint(w, text)
+	if err != nil {
+		a.Logger.Errorf("unable to write response: %v", err)
+	}
 }
 
 func (a Resources) RespondJSON(w http.ResponseWriter, object interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
-	json.NewEncoder(w).Encode(object)
+	err := json.NewEncoder(w).Encode(object)
+	if err != nil {
+		a.Logger.Errorf("unable to write json response: %v", err)
+	}
 }
 
 func (a Resources) RespondJSONError(w http.ResponseWriter, errorMessage string, code int) {
@@ -51,5 +57,8 @@ func (a Resources) RespondJSONError(w http.ResponseWriter, errorMessage string, 
 		Error:      errorMessage,
 		StatusCode: code,
 	}
-	json.NewEncoder(w).Encode(e)
+	err := json.NewEncoder(w).Encode(e)
+	if err != nil {
+		a.Logger.Errorf("unable to write json response error: %v", err)
+	}
 }
