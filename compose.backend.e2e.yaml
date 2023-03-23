@@ -42,49 +42,22 @@ services:
     expose:
       - 1100
 
-  accounts:
-    container_name: accounts
-    restart: "no"
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        project: accounts
-        project_path: ./cmd/services
-    ports:
-      - 1300:1300
-      - 50051:50051
-    command: ./accounts
-    environment:
-      VERBOSE: "true"
-      PGNAME: e2e-db
-      GOAPI_DATABASE_USERNAME: user-development
-      GOAPI_DATABASE_PASSWORD: secret
-      GOAPI_DATABASE_PORT: 5432
-      PGHOST: database
-    depends_on:
-      - database
+  migrations:
+    container_name: migrations
+    image: migrate/migrate:v4.15.2
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://postgres:5432/${POSTGRES_DB}?user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}&sslmode=disable",
+        "-verbose",
+        "up",
+      ]
     links:
-      - database
-
-  sessions:
-    container_name: sessions
-    restart: "no"
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        project: sessions
-        project_path: ./cmd/services
-    ports:
-      - 1200:1200
-    command: ./sessions
-    environment:
-      VERBOSE: "true"
-      PGUSER: user-development
-      PGDATABASE: e2e-db
-      PGHOST: database
+      - postgres
     depends_on:
-      - database
-    links:
-      - database
+      postgres:
+        condition: service_healthy
