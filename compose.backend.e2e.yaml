@@ -1,0 +1,63 @@
+version: "3.8"
+services:
+
+  postgres:
+    container_name: postgres
+    image: postgres:15.0-alpine 
+    restart: always
+    user: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    container_name: backend
+    restart: "no"
+    build:
+      context: .
+      dockerfile: cmd/backend/Dockerfile
+      target: final
+    environment:
+      PORT: 1100
+      LOGS_FORMAT: console
+      PGHOST: postgres
+      PGNAME: ${POSTGRES_DB}
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    links:
+      - postgres
+    ports:
+      - 1100:1100
+    expose:
+      - 1100
+
+  migrations:
+    container_name: migrations
+    image: migrate/migrate:v4.15.2
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://postgres:5432/${POSTGRES_DB}?user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}&sslmode=disable",
+        "-verbose",
+        "up",
+      ]
+    links:
+      - postgres
+    depends_on:
+      postgres:
+        condition: service_healthy

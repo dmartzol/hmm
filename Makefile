@@ -19,3 +19,10 @@ lint-ci:
 	--rm \
 	-t golangci/golangci-lint:v1.50 \
 	golangci-lint run -v --timeout 5m0s ./...
+
+.PHONY: install_deps
+install_deps:
+	go get -u github.com/dmartzol/go-sdk
+	go mod download
+
+-include e2e.mk

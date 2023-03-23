@@ -3,6 +3,7 @@ module github.com/dmartzol/hmm
 go 1.20
 
 require (
+	github.com/dghubble/sling v1.4.1
 	github.com/dmartzol/go-sdk v0.0.0-20230302190356-185ab035a334
 	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/chi/v5 v5.0.8
@@ -17,6 +18,7 @@ require (
 require (
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
