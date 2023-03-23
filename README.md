@@ -6,15 +6,15 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 
 ## Features
 
-* React admin panel to administer resources and sub-resources
-* Management of Sessions, cookies, permissions, email verification, accounts, ...
-* Management of Hackerspace equipment and equipment authorizations
-* PostgreSQL performant database
-* Docker Compose for easy bootstrapping
+- React admin panel to administer resources and sub-resources
+- Management of Sessions, cookies, permissions, email verification, accounts, ...
+- Management of Hackerspace equipment and equipment authorizations
+- PostgreSQL performant database
+- Docker Compose for easy bootstrapping
 
 ## Requirements
 
-* Docker
+- Docker
 
 ## QuickStart
 
@@ -24,8 +24,8 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 git clone https://github.com/dmartzol/hmm
 cd hmm
 make up
-make migrate.up
 ```
+
 ### Front end is still WIP
 
 ## Credits
