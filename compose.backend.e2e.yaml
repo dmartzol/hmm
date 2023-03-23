@@ -1,0 +1,90 @@
+version: "3.8"
+services:
+
+  postgres:
+    container_name: postgres
+    image: postgres:15.0-alpine 
+    restart: always
+    user: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    container_name: backend
+    restart: "no"
+    build:
+      context: .
+      dockerfile: cmd/backend/Dockerfile
+      target: final
+    environment:
+      PORT: 1100
+      LOGS_FORMAT: console
+      PGHOST: postgres
+      PGNAME: ${POSTGRES_DB}
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    links:
+      - postgres
+    ports:
+      - 1100:1100
+    expose:
+      - 1100
+
+  accounts:
+    container_name: accounts
+    restart: "no"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        project: accounts
+        project_path: ./cmd/services
+    ports:
+      - 1300:1300
+      - 50051:50051
+    command: ./accounts
+    environment:
+      VERBOSE: "true"
+      PGNAME: e2e-db
+      GOAPI_DATABASE_USERNAME: user-development
+      GOAPI_DATABASE_PASSWORD: secret
+      GOAPI_DATABASE_PORT: 5432
+      PGHOST: database
+    depends_on:
+      - database
+    links:
+      - database
+
+  sessions:
+    container_name: sessions
+    restart: "no"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        project: sessions
+        project_path: ./cmd/services
+    ports:
+      - 1200:1200
+    command: ./sessions
+    environment:
+      VERBOSE: "true"
+      PGUSER: user-development
+      PGDATABASE: e2e-db
+      PGHOST: database
+    depends_on:
+      - database
+    links:
+      - database
