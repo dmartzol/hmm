@@ -11,22 +11,21 @@ import (
 	"testing"
 
 	"github.com/dghubble/sling"
-	"github.com/dmartzol/hmm/cmd/backend/api"
 )
 
 func TestCreateAccount(t *testing.T) {
-	body := &api.CreateAccountRequest{
-		FirstName: "daniel",
-		LastName:  "Martinez",
-		Email:     "myemail@example.com",
-		DOB:       "1990-01-01",
-		Password:  "password123",
-	}
+	body := strings.NewReader(`{
+		"FirstName": "daniel",
+		"LastName": "Martinez",
+		"Email": "myemail@example.com",
+		"DOB": "1990-01-01",
+		"Password": "password123"
+	}`)
 
 	req, err := sling.New().
 		Base("http://localhost:1100/").
 		Post("accounts").
-		BodyJSON(body).Request()
+		Body(body).Request()
 	if err != nil {
 		t.Fatalf("error creating request: %+v", err)
 	}
