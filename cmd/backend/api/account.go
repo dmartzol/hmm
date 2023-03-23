@@ -177,7 +177,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// TODO: respond with 409 on existing email address
 		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
-		re.Logger.Errorf("error creating account: %+v", req.Email)
+		re.Logger.Errorf("error creating account: %+v", err)
 		re.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
