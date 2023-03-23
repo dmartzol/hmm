@@ -153,7 +153,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	err = req.ValidateAndNormalize()
 	if err != nil {
-		re.Logger.Errorf("error validating: %+v", req.Email)
+		re.Logger.Errorf("error validating payload: %+v", err)
 		re.RespondJSONError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
