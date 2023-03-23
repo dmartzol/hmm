@@ -40,7 +40,7 @@ services:
     build:
       context: .
       dockerfile: cmd/backend/Dockerfile
-      target: prod
+      target: final
     environment:
       PORT: 1100
       LOGS_FORMAT: console

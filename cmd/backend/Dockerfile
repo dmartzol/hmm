@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/go/pkg/mod/cache \
     go build -o backend ./cmd/backend
 
 # Start a new stage from alpine
-FROM alpine:3.17.2 as prod
+FROM alpine:3.17.2 as final
 RUN apk --no-cache add tzdata
 WORKDIR /dist
 # Copy the build artifacts from the previous stage
