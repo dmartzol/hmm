@@ -16,12 +16,6 @@ const (
 	appName = "backend"
 )
 
-var sdkLogger logger.Logger
-
-func init() {
-	sdkLogger = logger.New()
-}
-
 func main() {
 	app := &cli.App{
 		Name:   appName,
@@ -33,7 +27,9 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
+		sdkLogger := logger.New()
 		sdkLogger.Errorf("error running app: %v", err)
+		os.Exit(1)
 	}
 
 }
@@ -57,7 +53,7 @@ func newBackendServiceRun(c *cli.Context) error {
 		logger.WithColor(),
 		logger.WithEncoding(c.String(flags.LogsFormatFlag)),
 	}
-	sdkLogger = logger.NewWithOptions(loggerOpts...)
+	sdkLogger := logger.NewWithOptions(loggerOpts...)
 
 	restAPI := api.NewAPI(db, sdkLogger)
 
