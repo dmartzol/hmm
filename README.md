@@ -4,6 +4,8 @@
 
 Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a Work In Progress project combining a backend writen in Golang and a frotend using React. The goal is to include only functionality, contents are not provided in this project.
 
+### FRONT END IS STILL IN EARLY STAGE AND WIP
+
 ## Features
 
 - React admin panel to administer resources and sub-resources
@@ -14,19 +16,17 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 
 ## Requirements
 
-- Docker
+* Docker
 
 ## QuickStart
 
-### To run the backend:
+### To run everything(but frontend bc WIP):
 
 ```
 git clone https://github.com/dmartzol/hmm
 cd hmm
 make up
 ```
-
-### Front end is still WIP
 
 ## Credits
 
