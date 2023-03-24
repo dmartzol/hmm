@@ -47,6 +47,7 @@ func newBackendServiceRun(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("unable to initialize database: %w", err)
 	}
+	defer db.Close()
 
 	// Initializes a new logger using provided configuration and options.
 	loggerOpts := []logger.Option{
