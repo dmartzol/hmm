@@ -120,5 +120,31 @@ services:
       - ./frontend:/app
       - /app/node_modules
 
+  old_frontend:
+    container_name: old_frontend
+    restart: always
+    build:
+      context: old-frontend
+      target: development
+    ports:
+      - 3002:3000
+    depends_on:
+      - backend
+    expose:
+      - 3002
+
+  web:
+    container_name: web
+    restart: always
+    build:
+      context: web
+      target: development
+    ports:
+      - 3001:3000
+    depends_on:
+      - backend
+    expose:
+      - 3001
+
 volumes:
   postgres_volume:
