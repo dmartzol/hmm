@@ -117,6 +117,8 @@ services:
       - backend
     expose:
       - 3000
+    volumes:
+      - ./frontend/src:/app/src
 
 volumes:
   postgres_volume:
