@@ -7,13 +7,13 @@ function Login() {
       <div className="container px-5 py-24 mx-auto flex flex-wrap items-center">
         <div className="lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0 pr-0">
           <h1 className="title-font font-medium text-3xl text-gray-900">
-            Please, log in to conitnue. If you are a new user,{" "}
+            Please, log in to continue. If you are a new user,{" "}
             <a className="hover:underline text-blue-500" href="/signup">
-              click here
+              sign up
             </a>
             . If you have any questions or need help, please contact us at{" "}
             <a
-              className="border-2 rounded bg-gray-100 text-blue-500"
+              className="text-blue-500 border-b-4 border-blue-400 border-dashed"
               href={"mailto:" + CONTACT_EMAIL}
             >
               {CONTACT_EMAIL}
