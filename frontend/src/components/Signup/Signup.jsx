@@ -2,7 +2,7 @@ import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 
 export default function Signup() {
   return (
-    <div className="container mx-auto px-4">
+    <div className="md:container md:mx-auto md:px-80 sm:px-4">
       <form>
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">
