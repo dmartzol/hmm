@@ -19,8 +19,8 @@ import (
 type CreateAccountRequest struct {
 	FirstName   string
 	LastName    string
-	DOB         string
-	DOBTime     time.Time
+	DOBString   string
+	DOB         time.Time
 	Gender      *string
 	PhoneNumber *string
 	Email       string
@@ -105,7 +105,7 @@ func (c *CreateAccountRequest) validate() error {
 			validation.Required,
 		),
 		validation.Field(
-			&c.DOB,
+			&c.DOBString,
 			validation.Required,
 			validation.Date(timeutils.LayoutISODay),
 		),
@@ -126,9 +126,9 @@ func (r *CreateAccountRequest) normalize() error {
 	r.FirstName = normalizeName(r.FirstName)
 	r.LastName = normalizeName(r.LastName)
 	var err error
-	r.DOBTime, err = time.Parse(timeutils.LayoutISODay, r.DOB)
+	r.DOB, err = time.Parse(timeutils.LayoutISODay, r.DOBString)
 	if err != nil {
-		return fmt.Errorf("error parsing DOB %q: %w", r.DOB, err)
+		return fmt.Errorf("error parsing DOB %q: %w", r.DOBString, err)
 	}
 	// normalizing gender only if it is provided
 	if r.Gender != nil {
@@ -170,7 +170,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		FirstName:   req.FirstName,
 		LastName:    req.LastName,
 		Gender:      req.Gender,
-		DOB:         req.DOBTime,
+		DOB:         req.DOB,
 		PhoneNumber: req.PhoneNumber,
 	}
 	a, _, err := re.AccountService.Create(&inputAccount, req.Password, confirmationCode)
