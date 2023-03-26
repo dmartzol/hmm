@@ -7,7 +7,6 @@ function PageLayout(props) {
     <>
       <NavBar />
       <main>{props.children}</main>
-
       <Footer />
     </>
   );
