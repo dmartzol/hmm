@@ -20,7 +20,7 @@ function Login() {
         </div>
         <div className="lg:w-2/6 md:w-1/2 bg-gray-100 rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0">
           <div className="relative mb-4">
-            <label for="full-name" className="leading-7 text-sm text-gray-600">
+            <label for="email" className="leading-7 text-sm text-gray-600">
               Email
             </label>
             <input
