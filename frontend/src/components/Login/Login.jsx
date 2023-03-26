@@ -1,4 +1,5 @@
 import React from "react";
+import { CONTACT_EMAIL } from "../../config";
 
 function Login() {
   return (
@@ -10,10 +11,12 @@ function Login() {
             <a className="hover:underline text-blue-500" href="/signup">
               click here
             </a>
-            . If you have any questions or need help, please contact us by
-            clicking{" "}
-            <a className="hover:underline text-blue-500" href="/contact">
-              here
+            . If you have any questions or need help, please contact us at{" "}
+            <a
+              className="border-2 rounded bg-gray-100 text-blue-500"
+              href={"mailto:" + CONTACT_EMAIL}
+            >
+              {CONTACT_EMAIL}
             </a>
             .
           </h1>
