@@ -7,8 +7,15 @@ function Login() {
         <div className="lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0 pr-0">
           <h1 className="title-font font-medium text-3xl text-gray-900">
             Please, log in to conitnue. If you are a new user,{" "}
-            <a href="/signup">click here</a>. If you have any questions or need
-            help, please contact us by clicking <a href="/contact">here</a>.
+            <a className="hover:underline text-blue-500" href="/signup">
+              click here
+            </a>
+            . If you have any questions or need help, please contact us by
+            clicking{" "}
+            <a className="hover:underline text-blue-500" href="/contact">
+              here
+            </a>
+            .
           </h1>
         </div>
         <div className="lg:w-2/6 md:w-1/2 bg-gray-100 rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0">
@@ -38,8 +45,10 @@ function Login() {
             Login
           </button>
           <p className="text-xs text-gray-500 mt-3">
-            Forgot your password?
-            <a href="/forgot"> Click here.</a>
+            Forgot your password?{" "}
+            <a className="hover:underline text-blue-500" href="/forgot">
+              Click here.
+            </a>
           </p>
         </div>
       </div>

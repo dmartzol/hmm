@@ -26,10 +26,12 @@ function NavBar() {
           <span className="ml-3 text-xl">Tailblocks</span>
         </a>
         <nav className="md:mr-auto md:ml-4 md:py-1 md:pl-4 md:border-l md:border-gray-400	flex flex-wrap items-center text-base justify-center">
-          <a className="mr-5 hover:text-gray-900">First Link</a>
-          <a className="mr-5 hover:text-gray-900">Second Link</a>
-          <a className="mr-5 hover:text-gray-900">Third Link</a>
-          <a className="mr-5 hover:text-gray-900">Fourth Link</a>
+          <a className="mr-5 hover:text-gray-900" href="/">
+            First Link
+          </a>
+          <a className="mr-5 hover:text-gray-900" href="/">
+            Second Link
+          </a>
         </nav>
       </div>
     </header>
