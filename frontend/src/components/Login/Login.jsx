@@ -1,6 +1,6 @@
 import React from "react";
 
-function EmptyComponent() {
+function Login() {
   return (
     <section class="text-gray-600 body-font">
       <div class="container px-5 py-24 mx-auto flex flex-wrap items-center">
@@ -47,4 +47,4 @@ function EmptyComponent() {
   );
 }
 
-export default EmptyComponent;
+export default Login;
