@@ -23,11 +23,11 @@ function NavBar() {
           <a className="mr-5 hover:text-gray-900" href="/login">
             Login
           </a>
-          <a className="mr-5 hover:text-gray-900" href="/about">
-            About Us
-          </a>
           <a className="mr-5 hover:text-gray-900" href="/signup">
             Register
+          </a>
+          <a className="mr-5 hover:text-gray-900" href="/about">
+            About Us
           </a>
         </nav>
       </div>
