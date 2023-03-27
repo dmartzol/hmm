@@ -2,7 +2,7 @@ package api
 
 import (
 	improvedLogger "github.com/dmartzol/go-sdk/logger"
-	storage "github.com/dmartzol/hmm/internal/dao"
+	"github.com/dmartzol/hmm/internal/dao"
 	"github.com/dmartzol/hmm/internal/hmm"
 	"github.com/jmoiron/sqlx"
 )
@@ -17,10 +17,10 @@ type Resources struct {
 
 func newResources(db *sqlx.DB, loggerr improvedLogger.Logger) *Resources {
 	return &Resources{
-		AccountService:      storage.NewAccountService(db),
-		SessionService:      storage.NewSessionService(db),
-		ConfirmationService: storage.NewConfirmationService(db),
-		RoleService:         storage.NewRoleService(db),
+		AccountService:      dao.NewAccountService(db),
+		SessionService:      dao.NewSessionService(db),
+		ConfirmationService: dao.NewConfirmationService(db),
+		RoleService:         dao.NewRoleService(db),
 		Logger:              loggerr,
 	}
 }
