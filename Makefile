@@ -25,4 +25,12 @@ install_deps:
 	go get -u github.com/dmartzol/go-sdk
 	go mod download
 
+.PHONY: ngrok
+ngrok:
+	docker run \
+	-it \
+	-v ~/.config/ngrok/ngrok.yml:/etc/ngrok.yml \
+	-e NGROK_CONFIG=/etc/ngrok.yml \
+	ngrok/ngrok:latest http host.docker.internal:80
+
 -include e2e.mk
