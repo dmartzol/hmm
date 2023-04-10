@@ -28,6 +28,7 @@ install_deps:
 .PHONY: ngrok
 ngrok:
 	docker run \
+	--rm \
 	-it \
 	-v ~/.config/ngrok/ngrok.yml:/etc/ngrok.yml \
 	-e NGROK_CONFIG=/etc/ngrok.yml \
