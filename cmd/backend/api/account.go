@@ -19,8 +19,8 @@ import (
 type CreateAccountRequest struct {
 	FirstName   string
 	LastName    string
-	DOBString   string
-	DOB         time.Time
+	DOBString   string    `json:"dob"`
+	DOB         time.Time `json:"-"`
 	Gender      *string
 	PhoneNumber *string
 	Email       string
