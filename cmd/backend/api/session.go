@@ -11,6 +11,7 @@ import (
 const (
 	// sessionLength represents the duration(in seconds) a session will be valid for
 	sessionLength = 345600
+	hmmCookieName = "Hmm-Cookie"
 )
 
 func (h API) GetSession(w http.ResponseWriter, r *http.Request) {
