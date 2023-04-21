@@ -182,7 +182,6 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		re.RespondJSONError(w, "", http.StatusInternalServerError)
 		return
 	}
-	re.Logger.Infof("confirmation key: %s", confirmationCode)
 
 	s, err := re.SessionService.Create(a.Email, req.Password)
 	if err != nil {
