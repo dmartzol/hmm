@@ -1,10 +1,8 @@
 package api
 
 import (
-	"crypto/rand"
 	"fmt"
-	"io"
-	"log"
+	"math/rand"
 	"net/http"
 	"strings"
 )
@@ -25,16 +23,16 @@ func normalizeName(name string) string {
 	return name
 }
 
-func randomCode(max int) (string, error) {
-	var table = [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'}
-	b := make([]byte, max)
-	n, err := io.ReadAtLeast(rand.Reader, b, max)
-	if n != max {
-		log.Printf("ReadAtLeast: %+v", err)
-		return "", err
+// RandomConfirmationCode returns a random confirmation code of length l.
+func RandomConfirmationCode(l int) string {
+	b := make([]byte, l)
+	for i := 0; i < l; i++ {
+		b[i] = byte(randomInt(48, 57)) // 48 to 57 is 0 to 9 in ASCII
 	}
-	for i := 0; i < len(b); i++ {
-		b[i] = table[int(b[i])%len(table)]
-	}
-	return string(b), nil
+	return string(b)
+}
+
+// randomInt returns a random integer in the interval [min, max].
+func randomInt(min, max int) int {
+	return min + rand.Intn(max-min) + 1
 }

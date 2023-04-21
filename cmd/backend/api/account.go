@@ -158,13 +158,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	confirmationCode, err := randomCode(6)
-	if err != nil {
-		re.Logger.Errorf("error generating random code for %q: %+v", req.Email, err)
-		re.RespondJSONError(w, "", http.StatusInternalServerError)
-		return
-	}
-
+	confirmationCode := RandomConfirmationCode(6)
 	// we use a hmm.Account here because the db library does not have access to the CreateAccountRequest type
 	inputAccount := hmm.Account{
 		Email:       req.Email,
