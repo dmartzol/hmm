@@ -165,6 +165,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// we use a hmm.Account here because the db library does not have access to the CreateAccountRequest type
 	inputAccount := hmm.Account{
 		Email:       req.Email,
 		FirstName:   req.FirstName,
