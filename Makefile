@@ -1,3 +1,8 @@
+PROJECT_NAME := hmm
+MAKEFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+PROJECT_ROOT_DIR := $(patsubst %/,%,$(dir $(MAKEFILE_PATH)))
+CONTAINER_DIR := /go/src/github.com/dmartzol/$(PROJECT_NAME)
+
 .PHONY: up
 up:
 	docker compose up --remove-orphans -d --build
@@ -6,15 +11,11 @@ up:
 down:
 	docker compose -p hmm down
 
-PROJECT_NAME := hmm
-MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-ROOT := $(patsubst %/,%,$(dir $(MKFILE_PATH)))
-CONTAINER_DIR := /go/src/github.com/dmartzol/$(PROJECT_NAME)
 .PHONY: lint-ci
 lint-ci:
-	echo $(ROOT) && \
+	echo $(PROJECT_ROOT_DIR) && \
 	docker run \
-	-v $(ROOT):$(CONTAINER_DIR) \
+	-v $(PROJECT_ROOT_DIR):$(CONTAINER_DIR) \
 	-w $(CONTAINER_DIR)/ \
 	--rm \
 	-t golangci/golangci-lint:v1.50 \
@@ -33,5 +34,12 @@ ngrok:
 	-v ~/.config/ngrok/ngrok.yml:/etc/ngrok.yml \
 	-e NGROK_CONFIG=/etc/ngrok.yml \
 	ngrok/ngrok:latest http host.docker.internal:80
+
+.PHONY: gitleaks
+gitleaks:
+	docker run \
+		-v $(PROJECT_ROOT_DIR):/path \
+		--rm \
+		zricethezav/gitleaks:latest detect -v --source="/path"
 
 -include e2e.mk
