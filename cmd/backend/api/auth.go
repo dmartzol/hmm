@@ -23,7 +23,7 @@ func (h API) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		c, err := r.Cookie(hmmmCookieName)
+		c, err := r.Cookie(hmmCookieName)
 		if err != nil {
 			switch {
 			case errors.Is(err, http.ErrNoCookie):

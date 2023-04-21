@@ -11,7 +11,7 @@ import (
 
 const (
 	apiVersionNumber = "0.0.1"
-	hmmmCookieName   = "Hmm-Cookie"
+	hmmCookieName    = "Hmm-Cookie"
 	idQueryParameter = "id"
 )
 

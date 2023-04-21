@@ -14,7 +14,7 @@ const (
 )
 
 func (h API) GetSession(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie(hmmmCookieName)
+	c, err := r.Cookie(hmmCookieName)
 	if err != nil {
 		h.Logger.Errorf("unable to fetch cookie: %+v", err)
 		h.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -54,7 +54,7 @@ func (h API) CreateSession(w http.ResponseWriter, r *http.Request) {
 
 	// creating and setting cookie
 	cookie := &http.Cookie{
-		Name:   hmmmCookieName,
+		Name:   hmmCookieName,
 		Value:  s.Token,
 		MaxAge: sessionLength,
 	}
@@ -63,7 +63,7 @@ func (h API) CreateSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h API) ExpireSession(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie(hmmmCookieName)
+	c, err := r.Cookie(hmmCookieName)
 	if err != nil {
 		h.Logger.Errorf("error fetching cookie: %+v", err)
 		h.RespondJSONError(w, "", http.StatusInternalServerError)
@@ -76,7 +76,7 @@ func (h API) ExpireSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c = &http.Cookie{
-		Name:   hmmmCookieName,
+		Name:   hmmCookieName,
 		Value:  "",
 		MaxAge: -1,
 	}

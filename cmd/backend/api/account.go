@@ -191,7 +191,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cookie := &http.Cookie{
-		Name:   hmmmCookieName,
+		Name:   hmmCookieName,
 		Value:  s.Token,
 		MaxAge: sessionLength,
 	}
