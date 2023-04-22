@@ -16,7 +16,7 @@ function Signup() {
       state: yup.string().lowercase(),
       city: yup.string().lowercase(),
       street_address: yup.string().lowercase(),
-      // dob: yup.date(),
+      dob: yup.date(),
       zip: yup
         .number()
         .test(
@@ -111,20 +111,26 @@ function Signup() {
             </h2>
 
             <div className="mt-10 grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-6">
-              <label
-                htmlFor="date-of-birth"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Date of birth
-              </label>
-              <input
-                type="date"
-                id="start"
-                name="dob"
-                min="1900-01-01"
-                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                {...register("dob")}
-              />
+              <div className="sm:col-span-3">
+                <label
+                  htmlFor="date-of-birth"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Date of birth
+                </label>
+                <div className="mt-2">
+                  <input
+                    id="dob"
+                    autoComplete="date-of-birth"
+                    type="date"
+                    name="dob"
+                    min="1900-01-01"
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    {...register("dob")}
+                  />
+                  <p className=" text-red-600 text-sm">{errors.dob?.message}</p>
+                </div>
+              </div>
             </div>
 
             <div className="mt-10 grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-6">
