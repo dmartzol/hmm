@@ -49,6 +49,8 @@ function Signup() {
       console.error(error);
     }
 
+    console.log(data);
+
     // try {
     //   const response = await fetch(`/accounts`, {
     //     method: "POST",
