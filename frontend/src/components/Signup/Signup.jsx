@@ -53,23 +53,21 @@ function Signup() {
       console.error(error);
     }
 
-    console.log(data);
+    try {
+      const response = await fetch(`/accounts`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-    // try {
-    //   const response = await fetch(`/accounts`, {
-    //     method: "POST",
-    //     body: JSON.stringify(data),
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //   });
-
-    //   if (!response.ok) {
-    //     throw new Error("response not ok");
-    //   }
-    // } catch (error) {
-    //   console.error(error);
-    // }
+      if (!response.ok) {
+        throw new Error("response not ok");
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
