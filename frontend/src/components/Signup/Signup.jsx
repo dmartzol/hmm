@@ -10,10 +10,10 @@ function Signup() {
       lastname: yup.string().required(),
       email: yup
         .string()
-        .required("email is required")
-        .email("must be a valid email"),
-      password: yup.string().required().min(8, "must be at least 8 characters"),
-      dob: yup.date().required(),
+        .email("must be a valid email")
+        .required("email is required"),
+      // password: yup.string().min(8, "must be at least 8 characters"),
+      // dob: yup.date(),
       zip: yup
         .number()
         .test(
