@@ -1,5 +1,6 @@
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 function Signup() {
   const formSchema = yup
@@ -9,20 +10,18 @@ function Signup() {
       lastname: yup.string().required(),
       email: yup
         .string()
-        .required("Email is required")
-        .matches(
-          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-          "Invalid email format"
-        ),
-      password: yup.string().required(),
-      dob: yup.string().required(),
+        .required("email is required")
+        .email("must be a valid email"),
+      password: yup.string().required().min(8, "must be at least 8 characters"),
+      dob: yup.date().required(),
       zip: yup
         .number()
         .test(
           "len",
-          "Must be exactly 5 characters",
+          "must be exactly 5 characters",
           (val) => val.toString().length === 5
-        ),
+        )
+        .required(),
     })
     .required();
 
@@ -35,48 +34,39 @@ function Signup() {
       dob: "",
       zip: "",
     },
+    resolver: yupResolver(formSchema),
     mode: "onChange",
   });
 
   async function onSubmit(data) {
-    alert(JSON.stringify(data));
-
-    // Check the schema if form is valid:
-    const isFormValid = await formSchema.isValid(data, {
-      abortEarly: false, // Prevent aborting validation after first error
-    });
-
-    if (isFormValid) {
-      // If form is valid, continue submission.
-      console.log("Form is legit");
-    } else {
-      // If form is not valid, check which fields are incorrect:
-      formSchema.validate(data, { abortEarly: false }).catch((err) => {
-        console.log(err);
-      });
-    }
-
     try {
-      const response = await fetch(`/accounts`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("response not ok");
-      }
+      await formSchema.validate(data, { abortEarly: false });
     } catch (error) {
       console.error(error);
     }
-    console.log(errors);
+
+    alert(JSON.stringify(data));
+
+    // try {
+    //   const response = await fetch(`/accounts`, {
+    //     method: "POST",
+    //     body: JSON.stringify(data),
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //   });
+
+    //   if (!response.ok) {
+    //     throw new Error("response not ok");
+    //   }
+    // } catch (error) {
+    //   console.error(error);
+    // }
   }
 
   return (
     <div className="md:container md:mx-auto md:px-80 sm:px-4">
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
