@@ -46,8 +46,3 @@ func randomStringFromRunes(popuation []rune, l int) string {
 	}
 	return b.String()
 }
-
-// randomInt returns a random integer in the interval [min, max].
-func randomInt(min, max int) int {
-	return min + rand.Intn(max-min) + 1
-}
