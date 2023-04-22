@@ -25,7 +25,11 @@ function Signup() {
     })
     .required();
 
-  const { register, handleSubmit, errors } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
       firstname: "",
       lastname: "",
@@ -88,10 +92,10 @@ function Signup() {
                       placeholder="andrew@example.com"
                       {...register("email")}
                     />
-                    <span className="mt-2 hidden text-sm text-red-500">
-                      Please enter a valid email address
-                    </span>
                   </div>
+                  <p className=" text-red-600 text-sm">
+                    {errors.email?.message}
+                  </p>
                 </div>
               </div>
             </div>
@@ -119,6 +123,9 @@ function Signup() {
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     {...register("firstname")}
                   />
+                  <p className=" text-red-600 text-sm">
+                    {errors.firstname?.message}
+                  </p>
                 </div>
               </div>
 
@@ -138,6 +145,9 @@ function Signup() {
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     {...register("lastname")}
                   />
+                  <p className=" text-red-600 text-sm">
+                    {errors.lastname?.message}
+                  </p>
                 </div>
               </div>
 
@@ -216,6 +226,9 @@ function Signup() {
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     {...register("state")}
                   />
+                  <p className=" text-red-600 text-sm">
+                    {errors.state?.message}
+                  </p>
                 </div>
               </div>
 
@@ -235,6 +248,7 @@ function Signup() {
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     {...register("zip")}
                   />
+                  <p className=" text-red-600 text-sm">{errors.zip?.message}</p>
                 </div>
               </div>
             </div>
