@@ -86,9 +86,7 @@ function Signup() {
                       autoComplete="email"
                       className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                       placeholder="andrew@example.com"
-                      {...register("email", {
-                        required: true,
-                      })}
+                      {...register("email")}
                     />
                     <span className="mt-2 hidden text-sm text-red-500">
                       Please enter a valid email address
@@ -119,10 +117,7 @@ function Signup() {
                     name="first-name"
                     autoComplete="given-name"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("firstname", {
-                      required: true,
-                      maxLength: 80,
-                    })}
+                    {...register("firstname")}
                   />
                 </div>
               </div>
@@ -141,10 +136,7 @@ function Signup() {
                     id="lastname"
                     autoComplete="family-name"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("lastname", {
-                      required: true,
-                      maxLength: 100,
-                    })}
+                    {...register("lastname")}
                   />
                 </div>
               </div>
@@ -184,10 +176,7 @@ function Signup() {
                     name="street-address"
                     autoComplete="street-address"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("street-address", {
-                      required: true,
-                      maxLength: 500,
-                    })}
+                    {...register("street-address")}
                   />
                 </div>
               </div>
@@ -206,10 +195,7 @@ function Signup() {
                     id="city"
                     autoComplete="address-level2"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("city", {
-                      required: true,
-                      maxLength: 80,
-                    })}
+                    {...register("city")}
                   />
                 </div>
               </div>
@@ -228,10 +214,7 @@ function Signup() {
                     id="region"
                     autoComplete="address-level1"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("state", {
-                      required: true,
-                      maxLength: 15,
-                    })}
+                    {...register("state")}
                   />
                 </div>
               </div>
@@ -250,9 +233,7 @@ function Signup() {
                     id="zip"
                     autoComplete="postal-code"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("zip", {
-                      required: true,
-                    })}
+                    {...register("zip")}
                   />
                 </div>
               </div>
