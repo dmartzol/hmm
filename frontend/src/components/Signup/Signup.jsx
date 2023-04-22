@@ -15,7 +15,7 @@ function Signup() {
         .required("email is required"),
       state: yup.string().lowercase(),
       city: yup.string().lowercase(),
-      streetaddress: yup.string().lowercase(),
+      street_address: yup.string().lowercase(),
       // password: yup.string().min(8, "must be at least 8 characters"),
       // dob: yup.date(),
       zip: yup
@@ -41,7 +41,7 @@ function Signup() {
       password: "",
       dob: "",
       zip: "",
-      streetaddress: "",
+      street_address: "",
     },
     resolver: yupResolver(formSchema),
     mode: "onChange",
@@ -191,7 +191,7 @@ function Signup() {
                     name="street-address"
                     autoComplete="street-address"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("streetaddress")}
+                    {...register("street_address")}
                   />
                 </div>
               </div>
