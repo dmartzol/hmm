@@ -10,8 +10,13 @@ function Signup() {
       lastname: yup.string().required(),
       email: yup
         .string()
+        .lowercase()
         .email("must be a valid email")
         .required("email is required"),
+      state: yup.string().lowercase(),
+      city: yup.string().lowercase(),
+      streetaddress1: yup.string().lowercase(),
+      streetaddress2: yup.string().lowercase(),
       // password: yup.string().min(8, "must be at least 8 characters"),
       // dob: yup.date(),
       zip: yup
@@ -37,6 +42,8 @@ function Signup() {
       password: "",
       dob: "",
       zip: "",
+      streetaddress1: "",
+      streetaddress2: "",
     },
     resolver: yupResolver(formSchema),
     mode: "onChange",
@@ -177,7 +184,7 @@ function Signup() {
                   htmlFor="street-address"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
-                  Street address
+                  Street address 1
                 </label>
                 <div className="mt-2">
                   <input
@@ -186,7 +193,26 @@ function Signup() {
                     name="street-address"
                     autoComplete="street-address"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("street-address")}
+                    {...register("streetaddress1")}
+                  />
+                </div>
+              </div>
+
+              <div className="col-span-full">
+                <label
+                  htmlFor="street-address"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Street address 2
+                </label>
+                <div className="mt-2">
+                  <input
+                    id="street-address"
+                    type="text"
+                    name="street-address"
+                    autoComplete="street-address"
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    {...register("streetaddress2")}
                   />
                 </div>
               </div>
