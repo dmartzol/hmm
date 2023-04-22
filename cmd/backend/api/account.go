@@ -106,7 +106,7 @@ func (c *CreateAccountRequest) validate() error {
 		validation.Field(
 			&c.DOBString,
 			validation.Required,
-			validation.Date(timeutils.LayoutISODay),
+			validation.Date(time.RFC3339),
 		),
 		validation.Field(
 			&c.Email,
@@ -120,7 +120,7 @@ func (r *CreateAccountRequest) normalize() error {
 	r.FirstName = normalizeName(r.FirstName)
 	r.LastName = normalizeName(r.LastName)
 	var err error
-	r.DOB, err = time.Parse(timeutils.LayoutISODay, r.DOBString)
+	r.DOB, err = time.Parse(time.RFC3339, r.DOBString)
 	if err != nil {
 		return fmt.Errorf("error parsing DOB %q: %w", r.DOBString, err)
 	}
