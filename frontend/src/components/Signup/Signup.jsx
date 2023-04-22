@@ -7,15 +7,40 @@ function Signup() {
     .shape({
       firstname: yup.string().required(),
       lastname: yup.string().required(),
-      email: yup.string().required(),
+      email: yup
+        .string()
+        .required("Email is required")
+        .matches(
+          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+          "Invalid email format"
+        ),
       password: yup.string().required(),
       dob: yup.string().required(),
+      zip: yup
+        .number()
+        .test(
+          "len",
+          "Must be exactly 5 characters",
+          (val) => val.toString().length === 5
+        ),
     })
     .required();
 
-  const { register, handleSubmit, errors } = useForm();
+  const { register, handleSubmit, errors } = useForm({
+    defaultValues: {
+      firstname: "",
+      lastname: "",
+      email: "",
+      password: "",
+      dob: "",
+      zip: "",
+    },
+    mode: "onChange",
+  });
 
   async function onSubmit(data) {
+    alert(JSON.stringify(data));
+
     // Check the schema if form is valid:
     const isFormValid = await formSchema.isValid(data, {
       abortEarly: false, // Prevent aborting validation after first error
@@ -31,7 +56,6 @@ function Signup() {
       });
     }
 
-    alert(JSON.stringify(data));
     try {
       const response = await fetch(`/accounts`, {
         method: "POST",
@@ -74,8 +98,6 @@ function Signup() {
                       placeholder="andrew@example.com"
                       {...register("email", {
                         required: true,
-                        pattern:
-                          /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
                       })}
                     />
                     <span className="mt-2 hidden text-sm text-red-500">
@@ -107,7 +129,7 @@ function Signup() {
                     name="first-name"
                     autoComplete="given-name"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("firstName", {
+                    {...register("firstname", {
                       required: true,
                       maxLength: 80,
                     })}
@@ -129,7 +151,7 @@ function Signup() {
                     id="lastname"
                     autoComplete="family-name"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("lastName", {
+                    {...register("lastname", {
                       required: true,
                       maxLength: 100,
                     })}
@@ -234,13 +256,12 @@ function Signup() {
                 <div className="mt-2">
                   <input
                     type="text"
-                    name="postal-code"
-                    id="postal-code"
+                    name="zip"
+                    id="zip"
                     autoComplete="postal-code"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                    {...register("postal-code", {
+                    {...register("zip", {
                       required: true,
-                      maxLength: 1,
                     })}
                   />
                 </div>
