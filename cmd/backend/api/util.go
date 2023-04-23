@@ -18,6 +18,8 @@ func (h Resources) NotImplementedHandler(w http.ResponseWriter, r *http.Request)
 	_, _ = w.Write([]byte(`{"message":"not implemented"}`))
 }
 
+// normalizeName normalizes a string by removing leading and trailing white spaces and
+// converting all characters to lowercase.
 func normalizeName(name string) string {
 	name = strings.TrimSpace(name)
 	name = strings.ToLower(name)
