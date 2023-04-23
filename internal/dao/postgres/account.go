@@ -48,15 +48,14 @@ func (db *DB) CreateAccount(a *hmm.Account, password, confirmationCode string) (
 	var newAccount hmm.Account
 	sqlStatement := `
 		INSERT INTO accounts (
-		first_name,
-		last_name,
-		dob,
-		gender,
-		phone_number,
-		email,
-		passhash)
-		values
-		($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8))) returning *
+			first_name,
+			last_name,
+			dob,
+			gender,
+			phone_number,
+			email,
+			passhash
+		) values ($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8))) returning *
 	`
 	err = tx.Get(
 		&newAccount,
@@ -76,13 +75,12 @@ func (db *DB) CreateAccount(a *hmm.Account, password, confirmationCode string) (
 
 	var confirmation hmm.Confirmation
 	sqlStatement = `
-		insert into confirmations (
-		type,
-		account_id,
-		key,
-		confirmation_target)
-		values
-		($1, $2, $3, $4) returning *
+		INSERT INTO confirmations (
+			type,
+			account_id,
+			key,
+			confirmation_target
+		) values ($1, $2, $3, $4) returning *
 	`
 	err = tx.Get(&confirmation, sqlStatement, hmm.ConfirmationTypeEmail, newAccount.ID, confirmationCode, newAccount.Email)
 	if err != nil {
