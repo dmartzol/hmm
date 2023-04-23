@@ -13,6 +13,7 @@ func (h Resources) Version(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(versionStr))
 }
 
+// NotImplementedHandler responds with a 501 status code and a message indicating that the requested functionality has not been implemented.
 func (h Resources) NotImplementedHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 	_, _ = w.Write([]byte(`{"message":"not implemented"}`))
