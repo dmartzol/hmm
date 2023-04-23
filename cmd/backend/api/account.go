@@ -24,6 +24,7 @@ type CreateAccountRequest struct {
 	Gender      *string
 	PhoneNumber *string
 	Email       string
+	Password    string
 }
 
 // Account is the restricted response body of hmm.Account
@@ -113,6 +114,11 @@ func (c *CreateAccountRequest) validate() error {
 			validation.Required,
 			is.Email,
 		),
+		validation.Field(
+			&c.Password,
+			validation.Required,
+			validation.Length(10, 500),
+		),
 	)
 }
 
@@ -154,7 +160,6 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 
 	// generate a random confirmation code and password
 	randomConfirmationCode := RandomConfirmationCode(6)
-	randomPassword := RandomPassword(16)
 
 	// we use a hmm.Account here because the db library does not have access to the CreateAccountRequest type
 	inputAccount := hmm.Account{
@@ -165,7 +170,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		DOB:         req.DOB,
 		PhoneNumber: req.PhoneNumber,
 	}
-	a, _, err := re.AccountService.Create(&inputAccount, randomPassword, randomConfirmationCode)
+	a, _, err := re.AccountService.Create(&inputAccount, req.Password, randomConfirmationCode)
 	if err != nil {
 		// TODO: respond with 409 on existing email address
 		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
@@ -174,7 +179,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := re.SessionService.Create(a.Email, randomPassword)
+	s, err := re.SessionService.Create(a.Email, req.Password)
 	if err != nil {
 		re.Logger.Errorf("error creating session: %+v", req.Email)
 		re.RespondJSONError(w, "", http.StatusInternalServerError)
