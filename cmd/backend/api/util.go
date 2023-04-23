@@ -26,7 +26,7 @@ func normalizeName(name string) string {
 // RandomConfirmationCode returns a random confirmation code of length l.
 func RandomConfirmationCode(l int) string {
 	chars := []rune("0123456789")
-	return randomStringFromRunes(chars, l)
+	return randomSample(chars, l)
 }
 
 func RandomPassword(l int) string {
@@ -35,14 +35,15 @@ func RandomPassword(l int) string {
 	specials := []rune(`!@#$%&*-+=.?`)
 	chars := append(letters, numbers...)
 	chars = append(chars, specials...)
-	return randomStringFromRunes(chars, l)
+	return randomSample(chars, l)
 }
 
-func randomStringFromRunes(popuation []rune, l int) string {
-	var b strings.Builder
-	for i := 0; i < l; i++ {
-		ch := popuation[rand.Intn(len(popuation))]
-		b.WriteRune(ch)
+// randomSample returns a random string of the given length from the given character set.
+func randomSample(charSet []rune, length int) string {
+	var builder strings.Builder
+	for i := 0; i < length; i++ {
+		randomChar := charSet[rand.Intn(len(charSet))]
+		builder.WriteRune(randomChar)
 	}
-	return b.String()
+	return builder.String()
 }
