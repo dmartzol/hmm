@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Version returns the API version.
 func (h Resources) Version(w http.ResponseWriter, r *http.Request) {
 	versionStr := fmt.Sprintf("{\"version\": \"%s\"}", apiVersionNumber)
 	_, _ = w.Write([]byte(versionStr))
@@ -23,22 +24,26 @@ func normalizeName(name string) string {
 	return name
 }
 
-// RandomConfirmationCode returns a random confirmation code of length l.
-func RandomConfirmationCode(l int) string {
+// RandomConfirmationCode generates a random confirmation code of a specified length
+// using digits 0-9.
+func RandomConfirmationCode(length int) string {
 	chars := []rune("0123456789")
-	return randomSample(chars, l)
+	return randomSample(chars, length)
 }
 
-func RandomPassword(l int) string {
+// RandomPassword generates a random password of a specified length using
+// uppercase and lowercase letters, numbers, and special characters.
+func RandomPassword(length int) string {
 	letters := []rune(`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`)
 	numbers := []rune(`0123456789`)
 	specials := []rune(`!@#$%&*-+=.?`)
 	chars := append(letters, numbers...)
 	chars = append(chars, specials...)
-	return randomSample(chars, l)
+	return randomSample(chars, length)
 }
 
-// randomSample returns a random string of the given length from the given character set.
+// randomSample generates a random string of a specified length using characters
+// from a provided character set.
 func randomSample(charSet []rune, length int) string {
 	var builder strings.Builder
 	for i := 0; i < length; i++ {
