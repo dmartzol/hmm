@@ -75,7 +75,7 @@ function Signup() {
   }
 
   return (
-    <div className="md:container md:mx-auto md:px-80 sm:px-4">
+    <div className="lg:container lg:mx-auto lg:px-40 xl:px-80 px-4">
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">
