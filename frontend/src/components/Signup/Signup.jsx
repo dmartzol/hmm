@@ -17,9 +17,9 @@ function Signup() {
         .string()
         .min(10, "password must have at least 10 characters")
         .required(),
-      state: yup.string().lowercase(),
-      city: yup.string().lowercase(),
-      street_address: yup.string().lowercase(),
+      state: yup.string().lowercase().required(),
+      city: yup.string().lowercase().required(),
+      street_address: yup.string().lowercase().required(),
       dob: yup.date(),
       zip: yup
         .number()
@@ -45,6 +45,7 @@ function Signup() {
       dob: "",
       zip: "",
       street_address: "",
+      city: "",
     },
     resolver: yupResolver(formSchema),
     mode: "onChange",
@@ -240,6 +241,9 @@ function Signup() {
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     {...register("street_address")}
                   />
+                  <p className=" text-red-600 text-sm">
+                    {errors.street_address?.message}
+                  </p>
                 </div>
               </div>
 
@@ -259,6 +263,9 @@ function Signup() {
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     {...register("city")}
                   />
+                  <p className=" text-red-600 text-sm">
+                    {errors.city?.message}
+                  </p>
                 </div>
               </div>
 
