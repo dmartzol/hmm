@@ -18,7 +18,7 @@ func TestCreateAccount(t *testing.T) {
 		"FirstName": "daniel",
 		"LastName": "Martinez",
 		"Email": "myemail@example.com",
-		"DOB": "1990-01-01",
+		"DOB": "1990-01-01T00:00:00Z",
 		"Password": "password123"
 	}`)
 

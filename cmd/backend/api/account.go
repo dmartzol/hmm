@@ -107,7 +107,7 @@ func (c *CreateAccountRequest) validate() error {
 		validation.Field(
 			&c.DOBString,
 			validation.Required,
-			validation.Date(timeutils.LayoutISODay),
+			validation.Date(time.RFC3339),
 		),
 		validation.Field(
 			&c.Email,
@@ -117,7 +117,7 @@ func (c *CreateAccountRequest) validate() error {
 		validation.Field(
 			&c.Password,
 			validation.Required,
-			validation.Length(9, 500),
+			validation.Length(10, 500),
 		),
 	)
 }
@@ -126,7 +126,7 @@ func (r *CreateAccountRequest) normalize() error {
 	r.FirstName = normalizeName(r.FirstName)
 	r.LastName = normalizeName(r.LastName)
 	var err error
-	r.DOB, err = time.Parse(timeutils.LayoutISODay, r.DOBString)
+	r.DOB, err = time.Parse(time.RFC3339, r.DOBString)
 	if err != nil {
 		return fmt.Errorf("error parsing DOB %q: %w", r.DOBString, err)
 	}
@@ -158,7 +158,9 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	confirmationCode := RandomConfirmationCode(6)
+	// generate a random confirmation code and password
+	randomConfirmationCode := RandomConfirmationCode(6)
+
 	// we use a hmm.Account here because the db library does not have access to the CreateAccountRequest type
 	inputAccount := hmm.Account{
 		Email:       req.Email,
@@ -168,7 +170,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		DOB:         req.DOB,
 		PhoneNumber: req.PhoneNumber,
 	}
-	a, _, err := re.AccountService.Create(&inputAccount, req.Password, confirmationCode)
+	a, _, err := re.AccountService.Create(&inputAccount, req.Password, randomConfirmationCode)
 	if err != nil {
 		// TODO: respond with 409 on existing email address
 		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered

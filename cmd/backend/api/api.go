@@ -1,7 +1,9 @@
 package api
 
 import (
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/dmartzol/go-sdk/logger"
 	"github.com/go-chi/chi/middleware"
@@ -17,6 +19,10 @@ const (
 type API struct {
 	http.Handler
 	*Resources
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
 
 func NewAPI(db *sqlx.DB, logger logger.Logger) *API {
