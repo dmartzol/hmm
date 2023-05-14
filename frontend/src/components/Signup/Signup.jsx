@@ -1,6 +1,7 @@
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
   const formSchema = yup
@@ -51,6 +52,8 @@ function Signup() {
     mode: "onChange",
   });
 
+  const navigate = useNavigate();
+
   async function onSubmit(data) {
     try {
       await formSchema.validate(data, { abortEarly: false });
@@ -70,6 +73,8 @@ function Signup() {
       if (!response.ok) {
         throw new Error("response not ok");
       }
+
+      navigate("/login");
     } catch (error) {
       console.error(error);
     }
