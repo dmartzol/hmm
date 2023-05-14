@@ -120,6 +120,31 @@ services:
     volumes:
       - ./frontend/src:/app/src
 
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_volume:/prometheus
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    ports:
+      - 3001:3001
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+
 volumes:
   postgres_volume:
   backup_data:
+  prometheus_volume:
