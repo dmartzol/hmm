@@ -1,6 +1,7 @@
 package hmm
 
 import (
+	"context"
 	"time"
 )
 
@@ -30,7 +31,7 @@ type Account struct {
 type Accounts []*Account
 
 type AccountService interface {
-	Create(a *Account, password, confirmationCode string) (*Account, *Confirmation, error)
+	Create(ctx context.Context, a *Account, password, confirmationCode string) (*Account, *Confirmation, error)
 	Account(id int64) (*Account, error)
 	Accounts() (Accounts, error)
 	PopulateAccount(a *Account) *Account

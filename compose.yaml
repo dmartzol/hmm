@@ -1,7 +1,8 @@
 version: "3.8"
 services:
 
-  proxy:
+  nginx:
+    container_name: nginx
     image: nginx:1.23
     volumes:
       - type: bind
@@ -122,7 +123,7 @@ services:
 
   prometheus:
     container_name: prometheus
-    image: prom/prometheus
+    image: prom/prometheus:v2.44.0
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
     ports:
@@ -134,17 +135,32 @@ services:
 
   grafana:
     container_name: grafana
-    image: grafana/grafana
+    image: grafana/grafana:9.5.2
+    # image: grafana/grafana:7.5.7
     ports:
-      - 3001:3001
+      - 3001:3000
+    expose:
+      - 3001
     restart: unless-stopped
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=grafana
     volumes:
       - ./grafana:/etc/grafana/provisioning/datasources
+      - grafana_data:/var/lib/grafana
+
+  loki:
+    container_name: loki
+    image: grafana/loki:2.8.2
+    ports:
+      - 3100:3100
+
+  tempo:
+    container_name: tempo
+    image: grafana/tempo:2.1.1
 
 volumes:
   postgres_volume:
   backup_data:
   prometheus_volume:
+  grafana_data:

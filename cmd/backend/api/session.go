@@ -31,6 +31,8 @@ func (h API) GetSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h API) CreateSession(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var credentials hmm.LoginCredentials
 	err := h.Unmarshal(r, &credentials)
 	if err != nil {
@@ -40,7 +42,7 @@ func (h API) CreateSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create session
-	s, err := h.SessionService.Create(credentials.Email, credentials.Password)
+	s, err := h.SessionService.Create(ctx, credentials.Email, credentials.Password)
 	if err != nil {
 		switch {
 		case errors.Is(err, postgres.ErrInvalidCredentials):

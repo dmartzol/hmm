@@ -1,8 +1,12 @@
 package postgres
 
 import (
-	"github.com/dmartzol/hmm/internal/hmm"
+	"context"
+
 	_ "github.com/lib/pq"
+	"go.opentelemetry.io/otel"
+
+	"github.com/dmartzol/hmm/internal/hmm"
 )
 
 // Account fetches an account by id
@@ -39,7 +43,10 @@ func (db *DB) AccountWithCredentials(email, allegedPassword string) (*hmm.Accoun
 }
 
 // CreateAccount creates a new account in the db and a confirmation code for the new registered email
-func (db *DB) CreateAccount(a *hmm.Account, password, confirmationCode string) (*hmm.Account, *hmm.Confirmation, error) {
+func (db *DB) CreateAccount(ctx context.Context, a *hmm.Account, password, confirmationCode string) (*hmm.Account, *hmm.Confirmation, error) {
+	_, span := otel.Tracer("db").Start(ctx, "CreateAccount")
+	defer span.End()
+
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, nil, err

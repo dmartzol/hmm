@@ -1,9 +1,13 @@
 package dao
 
 import (
+	"context"
+
+	"github.com/jmoiron/sqlx"
+	"go.opentelemetry.io/otel"
+
 	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
-	"github.com/jmoiron/sqlx"
 )
 
 type SessionService struct {
@@ -17,11 +21,15 @@ func NewSessionService(db *sqlx.DB) *SessionService {
 	return &ss
 }
 
-func (ss SessionService) Create(email, password string) (*hmm.Session, error) {
-	session, err := ss.DB.CreateSession(email, password)
+func (ss SessionService) Create(ctx context.Context, email, password string) (*hmm.Session, error) {
+	_, span := otel.Tracer("dao").Start(ctx, "CreateSession")
+	defer span.End()
+
+	session, err := ss.DB.CreateSession(ctx, email, password)
 	if err != nil {
 		return nil, err
 	}
+
 	return session, nil
 }
 

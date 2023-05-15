@@ -1,11 +1,12 @@
 package hmm
 
 import (
+	"context"
 	"time"
 )
 
 type SessionService interface {
-	Create(email, password string) (*Session, error)
+	Create(ctx context.Context, email, password string) (*Session, error)
 	SessionFromToken(token string) (*Session, error)
 	ExpireSession(token string) (*Session, error)
 	UpdateSession(token string) (*Session, error)

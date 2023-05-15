@@ -14,6 +14,7 @@ import (
 	"github.com/go-ozzo/ozzo-validation/is"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/otel"
 )
 
 type CreateAccountRequest struct {
@@ -143,6 +144,10 @@ func (r *CreateAccountRequest) normalize() error {
 }
 
 func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	_, span := otel.Tracer(appName).Start(ctx, "CreateAccount")
+	defer span.End()
+
 	var req CreateAccountRequest
 	err := re.Unmarshal(r, &req)
 	if err != nil {
@@ -170,7 +175,7 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		DOB:         req.DOB,
 		PhoneNumber: req.PhoneNumber,
 	}
-	a, _, err := re.AccountService.Create(&inputAccount, req.Password, randomConfirmationCode)
+	a, _, err := re.AccountService.Create(ctx, &inputAccount, req.Password, randomConfirmationCode)
 	if err != nil {
 		// TODO: respond with 409 on existing email address
 		// see: https://stackoverflow.com/questions/9269040/which-http-response-code-for-this-email-is-already-registered
@@ -179,7 +184,8 @@ func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := re.SessionService.Create(a.Email, req.Password)
+	// create a session for the new account
+	s, err := re.SessionService.Create(ctx, a.Email, req.Password)
 	if err != nil {
 		re.Logger.Errorf("error creating session: %+v", req.Email)
 		re.RespondJSONError(w, "", http.StatusInternalServerError)

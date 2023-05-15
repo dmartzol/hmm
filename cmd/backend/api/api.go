@@ -14,6 +14,7 @@ import (
 const (
 	apiVersionNumber = "0.0.1"
 	idQueryParameter = "id"
+	appName          = "backend_api"
 )
 
 type API struct {
