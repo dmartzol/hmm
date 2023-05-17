@@ -20,13 +20,15 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 
 ## QuickStart
 
-### To run everything(but frontend bc WIP):
+### To run everything:
 
 ```
 git clone https://github.com/dmartzol/hmm
 cd hmm
 make up
 ```
+
+Then visit localhost:80.
 
 ## Credits
 
