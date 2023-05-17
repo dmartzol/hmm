@@ -28,7 +28,7 @@ cd hmm
 make up
 ```
 
-Then visit localhost:80.
+Then visit http://localhost:80.
 
 ## Credits
 
