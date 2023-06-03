@@ -6,7 +6,7 @@ services:
     image: nginx:1.23
     volumes:
       - type: bind
-        source: ./proxy/nginx.conf
+        source: ./config/nginx/nginx.conf
         target: /etc/nginx/conf.d/default.conf
         read_only: true
     ports:
@@ -130,13 +130,12 @@ services:
       - 9090:9090
     restart: unless-stopped
     volumes:
-      - ./prometheus:/etc/prometheus
+      - ./config/prometheus:/etc/prometheus
       - prometheus_volume:/prometheus
 
   grafana:
     container_name: grafana
     image: grafana/grafana:9.5.2
-    # image: grafana/grafana:7.5.7
     ports:
       - 3001:3000
     expose:
@@ -146,7 +145,7 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=grafana
     volumes:
-      - ./grafana:/etc/grafana/provisioning/datasources
+      - ./config/grafana:/etc/grafana/provisioning/datasources
       - grafana_data:/var/lib/grafana
 
   loki:
@@ -158,9 +157,16 @@ services:
   tempo:
     container_name: tempo
     image: grafana/tempo:2.1.1
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./config/tempo/tempo.yaml:/etc/tempo.yaml
+      - tempo_data:/tmp/tempo
+    ports:
+      - "3200"   # tempo
 
 volumes:
   postgres_volume:
   backup_data:
   prometheus_volume:
   grafana_data:
+  tempo_data:
