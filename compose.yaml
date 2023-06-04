@@ -131,7 +131,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./config/prometheus:/etc/prometheus
-      - prometheus_volume:/prometheus
+      - prometheus_data:/prometheus
 
   grafana:
     container_name: grafana
@@ -179,6 +179,6 @@ services:
 volumes:
   postgres_volume:
   backup_data:
-  prometheus_volume:
+  prometheus_data:
   grafana_data:
   tempo_data:
