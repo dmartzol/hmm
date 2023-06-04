@@ -88,7 +88,13 @@ func newBackendServiceRun(c *cli.Context) error {
 
 	provider := metric.NewMeterProvider(metric.WithReader(exporter))
 	meter := provider.Meter("github.com/open-telemetry/opentelemetry-go/example/prometheus")
+	sampleMetrics(ctx, meter)
 
+	restAPI.Logger.Infof("listening and serving on %s", address)
+	return server.ListenAndServe()
+}
+
+func sampleMetrics(ctx context.Context, meter otelmetric.Meter) {
 	opt := otelmetric.WithAttributes(
 		attribute.Key("A").String("B"),
 		attribute.Key("C").String("D"),
@@ -124,7 +130,4 @@ func newBackendServiceRun(c *cli.Context) error {
 	histogram.Record(ctx, 7, opt)
 	histogram.Record(ctx, 101, opt)
 	histogram.Record(ctx, 105, opt)
-
-	restAPI.Logger.Infof("listening and serving on %s", address)
-	return server.ListenAndServe()
 }
