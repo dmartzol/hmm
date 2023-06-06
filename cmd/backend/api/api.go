@@ -30,7 +30,7 @@ func NewAPI(db *sqlx.DB, logger logger.Logger) *API {
 	resources := newResources(db, logger)
 	r := chi.NewRouter()
 
-	r.Use(middleware.RequestID)
+	// r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.URLFormat)

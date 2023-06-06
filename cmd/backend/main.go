@@ -12,12 +12,19 @@ import (
 	"github.com/dmartzol/go-sdk/flags"
 	"github.com/dmartzol/go-sdk/logger"
 	"github.com/dmartzol/go-sdk/postgres"
-	"github.com/dmartzol/hmm/cmd/backend/api"
 	"github.com/urfave/cli"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/dmartzol/hmm/cmd/backend/api"
+
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/prometheus"
+
 	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/trace"
 
 	otelmetric "go.opentelemetry.io/otel/metric"
 )
@@ -78,17 +85,17 @@ func newBackendServiceRun(c *cli.Context) error {
 		Handler: restAPI,
 	}
 
-	// The exporter embeds a default OpenTelemetry Reader and
-	// implements prometheus.Collector, allowing it to be used as
-	// both a Reader and Collector.
-	exporter, err := prometheus.New()
+	// Initializes a new prometheus exporter and registers it as a metrics provider.
+	promExporter, err := prometheus.New()
 	if err != nil {
-		log.Fatal(err)
+		restAPI.Logger.Errorf("failed to initialize prometheus exporter: %v", err)
+		os.Exit(1)
 	}
-
-	provider := metric.NewMeterProvider(metric.WithReader(exporter))
+	provider := metric.NewMeterProvider(metric.WithReader(promExporter))
 	meter := provider.Meter("github.com/open-telemetry/opentelemetry-go/example/prometheus")
 	sampleMetrics(ctx, meter)
+
+	initTraces(ctx)
 
 	restAPI.Logger.Infof("listening and serving on %s", address)
 	return server.ListenAndServe()
@@ -130,4 +137,35 @@ func sampleMetrics(ctx context.Context, meter otelmetric.Meter) {
 	histogram.Record(ctx, 7, opt)
 	histogram.Record(ctx, 101, opt)
 	histogram.Record(ctx, 105, opt)
+}
+
+func initTraces(ctx context.Context) error {
+	// Initializes a new grpc connection to the collector.
+	conn, err := grpc.DialContext(ctx, "otel:4317",
+		// Note the use of insecure transport here. TLS is recommended in production.
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to dial collector: %w", err)
+	}
+
+	// Set up a trace exporter
+	otlpOpts := []otlptracegrpc.Option{
+		otlptracegrpc.WithGRPCConn(conn),
+		otlptracegrpc.WithEndpoint("tempo:4317"),
+		otlptracegrpc.WithInsecure(),
+	}
+	traceExporter, err := otlptracegrpc.New(ctx, otlpOpts...)
+	if err != nil {
+		return fmt.Errorf("failed to create trace exporter: %w", err)
+	}
+
+	// Set up a trace provider
+	tracerProvider := trace.NewTracerProvider(
+		trace.WithBatcher(traceExporter),
+	)
+	otel.SetTracerProvider(tracerProvider)
+
+	return nil
 }
