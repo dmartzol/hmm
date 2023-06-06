@@ -95,7 +95,10 @@ func newBackendServiceRun(c *cli.Context) error {
 	meter := provider.Meter("github.com/open-telemetry/opentelemetry-go/example/prometheus")
 	sampleMetrics(ctx, meter)
 
-	initTraces(ctx)
+	err = initTraces(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to initialize trace collector and exporter: %w", err)
+	}
 
 	restAPI.Logger.Infof("listening and serving on %s", address)
 	return server.ListenAndServe()
