@@ -5,11 +5,15 @@ CONTAINER_DIR := /go/src/github.com/dmartzol/$(PROJECT_NAME)
 
 .PHONY: up
 up:
-	docker compose up --remove-orphans -d --build
+	docker compose up --remove-orphans --detach
 
 .PHONY: down
 down:
 	docker compose -p hmm down
+
+.PHONY: build
+build:
+	docker compose up --remove-orphans --detach --build
 
 .PHONY: lint-ci
 lint-ci:
