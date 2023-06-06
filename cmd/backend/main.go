@@ -22,9 +22,13 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/prometheus"
+	"go.opentelemetry.io/otel/propagation"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	"go.opentelemetry.io/otel/sdk/metric"
-	"go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/resource"
 
 	otelmetric "go.opentelemetry.io/otel/metric"
 )
@@ -95,10 +99,15 @@ func newBackendServiceRun(c *cli.Context) error {
 	meter := provider.Meter("github.com/open-telemetry/opentelemetry-go/example/prometheus")
 	sampleMetrics(ctx, meter)
 
-	err = initTraces(ctx)
+	shutdown, err := initProvider(ctx, appName)
 	if err != nil {
-		return fmt.Errorf("failed to initialize trace collector and exporter: %w", err)
+		return fmt.Errorf("failed to initialize trace provider: %w", err)
 	}
+	defer func() {
+		if err := shutdown(ctx); err != nil {
+			log.Fatal("failed to shutdown TracerProvider: %w", err)
+		}
+	}()
 
 	restAPI.Logger.Infof("listening and serving on %s", address)
 	return server.ListenAndServe()
@@ -142,33 +151,49 @@ func sampleMetrics(ctx context.Context, meter otelmetric.Meter) {
 	histogram.Record(ctx, 105, opt)
 }
 
-func initTraces(ctx context.Context) error {
-	// Initializes a new grpc connection to the collector.
+// Initializes an OTLP exporter, and configures the corresponding trace and
+// metric providers.
+func initProvider(ctx context.Context, serviceName string) (func(context.Context) error, error) {
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			// the service name used to display traces in backends
+			semconv.ServiceName(serviceName),
+		),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create resource: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second)
+	defer cancel()
 	conn, err := grpc.DialContext(ctx, "otel:4317",
 		// Note the use of insecure transport here. TLS is recommended in production.
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to dial collector: %w", err)
+		return nil, fmt.Errorf("failed to create gRPC connection to collector: %w", err)
 	}
 
 	// Set up a trace exporter
-	otlpOpts := []otlptracegrpc.Option{
-		otlptracegrpc.WithGRPCConn(conn),
-		otlptracegrpc.WithEndpoint("tempo:4317"),
-		otlptracegrpc.WithInsecure(),
-	}
-	traceExporter, err := otlptracegrpc.New(ctx, otlpOpts...)
+	traceExporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
 	if err != nil {
-		return fmt.Errorf("failed to create trace exporter: %w", err)
+		return nil, fmt.Errorf("failed to create trace exporter: %w", err)
 	}
 
-	// Set up a trace provider
-	tracerProvider := trace.NewTracerProvider(
-		trace.WithBatcher(traceExporter),
+	// Register the trace exporter with a TracerProvider, using a batch
+	// span processor to aggregate spans before export.
+	bsp := sdktrace.NewBatchSpanProcessor(traceExporter)
+	tracerProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithResource(res),
+		sdktrace.WithSpanProcessor(bsp),
 	)
 	otel.SetTracerProvider(tracerProvider)
 
-	return nil
+	// set global propagator to tracecontext (the default is no-op).
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+
+	// Shutdown will flush any remaining spans and shut down the exporter.
+	return tracerProvider.Shutdown, nil
 }

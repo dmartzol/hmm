@@ -22,7 +22,7 @@ func NewSessionService(db *sqlx.DB) *SessionService {
 }
 
 func (ss SessionService) Create(ctx context.Context, email, password string) (*hmm.Session, error) {
-	_, span := otel.Tracer("dao").Start(ctx, "CreateSession")
+	ctx, span := otel.Tracer("dao").Start(ctx, "CreateSession")
 	defer span.End()
 
 	session, err := ss.DB.CreateSession(ctx, email, password)
