@@ -25,7 +25,7 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 ```
 git clone https://github.com/dmartzol/hmm
 cd hmm
-make up
+make build
 ```
 
 Then visit http://localhost:80.
