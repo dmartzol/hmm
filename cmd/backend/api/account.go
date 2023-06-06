@@ -145,7 +145,7 @@ func (r *CreateAccountRequest) normalize() error {
 
 func (re Resources) CreateAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	ctx, span := otel.Tracer(appName).Start(ctx, "CreateAccount")
+	ctx, span := otel.Tracer(appName).Start(ctx, "Resources.CreateAccount")
 	defer span.End()
 
 	var req CreateAccountRequest

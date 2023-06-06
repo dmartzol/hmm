@@ -38,7 +38,7 @@ func (as AccountService) Accounts() (hmm.Accounts, error) {
 }
 
 func (as AccountService) Create(ctx context.Context, account *hmm.Account, password, confirmationCode string) (*hmm.Account, *hmm.Confirmation, error) {
-	ctx, span := otel.Tracer("dao").Start(ctx, "Create")
+	ctx, span := otel.Tracer("dao").Start(ctx, "AccountService.Create")
 	defer span.End()
 
 	newAccount, confirmation, err := as.DB.CreateAccount(ctx, account, password, confirmationCode)

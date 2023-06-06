@@ -32,7 +32,7 @@ func (db *DB) SessionFromToken(token string) (*hmm.Session, error) {
 
 // CreateSession creates a new session
 func (db *DB) CreateSession(ctx context.Context, email, password string) (*hmm.Session, error) {
-	_, span := otel.Tracer("db").Start(ctx, "CreateSession")
+	_, span := otel.Tracer("db").Start(ctx, "DB.CreateSession")
 	defer span.End()
 
 	tx, err := db.Beginx()

@@ -44,7 +44,7 @@ func (db *DB) AccountWithCredentials(email, allegedPassword string) (*hmm.Accoun
 
 // CreateAccount creates a new account in the db and a confirmation code for the new registered email
 func (db *DB) CreateAccount(ctx context.Context, a *hmm.Account, password, confirmationCode string) (*hmm.Account, *hmm.Confirmation, error) {
-	_, span := otel.Tracer("db").Start(ctx, "CreateAccount")
+	_, span := otel.Tracer("db").Start(ctx, "DB.CreateAccount")
 	defer span.End()
 
 	tx, err := db.Beginx()
