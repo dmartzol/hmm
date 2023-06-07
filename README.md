@@ -13,6 +13,7 @@ Fictional project to manage memberships for Makerspaces/Hackerspaces. This is a 
 - Management of Hackerspace equipment and equipment authorizations
 - PostgreSQL performant database
 - Docker Compose for easy bootstrapping
+- Telemetry and traces with Prometheus, Grafana and Tempo.
 
 ## Requirements
 
@@ -34,4 +35,6 @@ make up
 [![PostgreSQL](https://www.vectorlogo.zone/logos/postgresql/postgresql-ar21.svg)](https://www.postgresql.org/ "PostgreSQL")
 [![React](https://www.vectorlogo.zone/logos/reactjs/reactjs-ar21.svg)](https://reactjs.org/ "React")
 [![Docker](https://www.vectorlogo.zone/logos/docker/docker-ar21.svg)](https://www.docker.com/ "Docker")
+[![Grafana](https://www.vectorlogo.zone/logos/grafana/grafana-ar21.svg)](https://grafana.com/ "Grafana")
+[![Prometheus](https://www.vectorlogo.zone/logos/prometheusio/prometheusio-ar21.svg)](https://prometheus.io/ "Prometheus")
 [![VectorLogoZone](https://www.vectorlogo.zone/logos/vectorlogozone/vectorlogozone-ar21.svg)](https://www.vectorlogo.zone/ "VectorLogoZone")
