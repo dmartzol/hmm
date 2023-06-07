@@ -1,9 +1,13 @@
 package dao
 
 import (
+	"context"
+
+	"github.com/jmoiron/sqlx"
+	"go.opentelemetry.io/otel"
+
 	"github.com/dmartzol/hmm/internal/dao/postgres"
 	"github.com/dmartzol/hmm/internal/hmm"
-	"github.com/jmoiron/sqlx"
 )
 
 type AccountService struct {
@@ -33,11 +37,15 @@ func (as AccountService) Accounts() (hmm.Accounts, error) {
 	return accs, nil
 }
 
-func (as AccountService) Create(account *hmm.Account, password, confirmationCode string) (*hmm.Account, *hmm.Confirmation, error) {
-	newAccount, confirmation, err := as.DB.CreateAccount(account, password, confirmationCode)
+func (as AccountService) Create(ctx context.Context, account *hmm.Account, password, confirmationCode string) (*hmm.Account, *hmm.Confirmation, error) {
+	ctx, span := otel.Tracer("dao").Start(ctx, "AccountService.Create")
+	defer span.End()
+
+	newAccount, confirmation, err := as.DB.CreateAccount(ctx, account, password, confirmationCode)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	return newAccount, confirmation, nil
 }
 

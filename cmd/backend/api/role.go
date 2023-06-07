@@ -77,7 +77,7 @@ func (h API) GetRoles(w http.ResponseWriter, r *http.Request) {
 
 func validateEditRole(req hmm.EditRoleReq, targetRole *hmm.Role) error {
 	if req.Name == nil && len(req.Permissions) == 0 {
-		return fmt.Errorf("No updates found")
+		return fmt.Errorf("no updates found")
 	}
 	return nil
 }

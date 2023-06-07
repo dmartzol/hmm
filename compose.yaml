@@ -1,11 +1,12 @@
 version: "3.8"
 services:
 
-  proxy:
+  nginx:
+    container_name: nginx
     image: nginx:1.23
     volumes:
       - type: bind
-        source: ./proxy/nginx.conf
+        source: ./config/nginx/nginx.conf
         target: /etc/nginx/conf.d/default.conf
         read_only: true
     ports:
@@ -120,6 +121,64 @@ services:
     volumes:
       - ./frontend/src:/app/src
 
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.44.0
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:9.5.2
+    ports:
+      - 3001:3000
+    expose:
+      - 3001
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grafana
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+    volumes:
+      - ./config/grafana:/etc/grafana/provisioning/datasources
+      - grafana_data:/var/lib/grafana
+
+  loki:
+    container_name: loki
+    image: grafana/loki:2.8.2
+    ports:
+      - 3100:3100
+
+  otel:
+    container_name: otel
+    image: otel/opentelemetry-collector:0.61.0
+    command: [ "--config=/etc/otel-collector.yaml" ]
+    volumes:
+      - ./config/otel-collector/otel-collector.yaml:/etc/otel-collector.yaml
+
+  tempo:
+    container_name: tempo
+    image: grafana/tempo:2.1.1
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./config/tempo/tempo.yaml:/etc/tempo.yaml
+      - tempo_data:/tmp/tempo
+    ports:
+      - "3200"   # tempo
+      - "4317"  # otlp grpc
+
 volumes:
   postgres_volume:
   backup_data:
+  prometheus_data:
+  grafana_data:
+  tempo_data:

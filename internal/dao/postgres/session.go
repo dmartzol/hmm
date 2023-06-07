@@ -1,14 +1,17 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/dmartzol/hmm/internal/hmm"
 	_ "github.com/lib/pq"
+	"go.opentelemetry.io/otel"
+
+	"github.com/dmartzol/hmm/internal/hmm"
 )
 
 var (
@@ -28,7 +31,10 @@ func (db *DB) SessionFromToken(token string) (*hmm.Session, error) {
 }
 
 // CreateSession creates a new session
-func (db *DB) CreateSession(email, password string) (*hmm.Session, error) {
+func (db *DB) CreateSession(ctx context.Context, email, password string) (*hmm.Session, error) {
+	_, span := otel.Tracer("db").Start(ctx, "DB.CreateSession")
+	defer span.End()
+
 	tx, err := db.Beginx()
 	if err != nil {
 		return nil, err
